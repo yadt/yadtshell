@@ -16,6 +16,8 @@ before_script:
     - sudo apt-get install rpm
     - sudo apt-get install python-rpm
 script: "pyb"
+after_script
+    - cat target/reports/integrationtests/*.err
 notifications:
 email:
     - michael.gruber@immobilienscout24.de
