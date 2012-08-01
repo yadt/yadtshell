@@ -1,0 +1,18 @@
+language: python
+python:
+    - "2.6"
+    - "2.7"
+before_script:
+    - sudo apt-get install python-coverage
+    - sudo apt-get install pychecker
+    - sudo apt-get install pymetrics
+    - sudo apt-get install python-setuptools
+    - sudo apt-get install pylint
+    - sudo easy_install http://python-builder.googlecode.com/files/python-builder-0.6.3.tar.gz
+    - sudo apt-get install python-yaml
+    - sudo pip python-twisted>=12
+script: "pyb"
+notifications:
+email:
+    - michael.gruber@immobilienscout24.de
+    - arne.hilmann@immobilienscout24.de
