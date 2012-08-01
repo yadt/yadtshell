@@ -1,0 +1,47 @@
+#!/bin/bash
+set -u -e -E -C -o pipefail
+
+TARGETS=${*:-*}
+LOCK_FILE=/var/lock/yadt/$(basename $0 .sh)
+SYNC_CALL=$(dirname $(readlink -e $0))/sync_logs_of_target.py
+
+LOG_DIR=$(sed -n "/^LOG_DIR_PREFIX/{s/^.*=\s*//;s/'//g;s_/\$__;p}" /etc/yadtshell/loggingconf.py)
+LOG_DIR=$LOG_DIR/$(date +%Y-%m-%d)
+NOW=$(date +%Y-%m-%d--%H-%M-%S)
+HOST=$(hostname -s)
+USERNAME=$(whoami)
+
+mkdir -p $LOG_DIR
+LOG_FILE=$LOG_DIR/yadtshell.$HOST.$NOW.$USERNAME.000.$HOST.log
+
+exec 3>&1 4>&2 1>$LOG_FILE 2>&1
+
+echo "starting on $NOW"
+echo "pid: $$"
+echo "command line: $*"
+
+if ! echo $$ > $LOCK_FILE; then
+    echo "cannot acquire lock: pid of lock holder is $(cat $LOCK_FILE), aborting here" >&2
+    exit 1
+fi
+
+cleanup(){
+    echo releasing lock $LOCK_FILE
+    rm -f $LOCK_FILE
+    echo finished after $SECONDS seconds.
+    echo
+}
+trap cleanup EXIT
+
+for thisFILE in $TARGETS; do
+    [[ -d $thisFILE ]] || continue
+    [[ -e $thisFILE/target ]] || continue
+    (
+        echo "processing $thisFILE"
+        cd $thisFILE
+        if ! $SYNC_CALL; then
+            echo "problems while syncing $thisFILE, continuing"
+        fi
+    )
+done
+

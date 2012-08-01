@@ -1,0 +1,15 @@
+#!/bin/bash
+
+[[ -e /etc/bashrc ]] && source /etc/bashrc
+[[ -e ~/.bashrc ]] && source ~/.bashrc
+
+source /usr/bin/yadtshell-activate
+
+TARGETS_DIR=/etc/yadtshell/targets
+
+if [[ -d $TARGETS_DIR ]]; then
+    echo "changing to $TARGETS_DIR"
+    cd $TARGETS_DIR
+fi
+
+return 0

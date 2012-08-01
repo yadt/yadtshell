@@ -1,0 +1,67 @@
+#!/bin/bash
+
+export COMP_WORDBREAKS='"@><=;|&( '"'"  # ":" dropped
+
+YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact"
+
+get_yadtshell_dir() {
+    echo $HOME/.yadtshell/tmp$(pwd)
+}
+
+_yadtshellCompletion() {
+    local CURRENT CMD
+    COMPREPLY=()
+    CMD=$(basename "${COMP_WORDS[0]}")
+    CURRENT="${COMP_WORDS[COMP_CWORD]}"
+
+    YADTSHELL_DIR=$(get_yadtshell_dir)
+    ARTEFACTS_FILE=$YADTSHELL_DIR/artefacts
+    SERVICES_FILE=$YADTSHELL_DIR/services
+    HOSTS_FILE=$YADTSHELL_DIR/hosts
+    NR_WORDS=$COMP_CWORD
+    if [[ $CMD == "yadtshell" ]]; then
+        NR_WORDS=$(($NR_WORDS - 1))
+        CMD=${COMP_WORDS[1]}
+    fi
+    if [[ $NR_WORDS < 1 ]]; then
+        COMPREPLY=( $(compgen -W "$YADTSHELL_CMDS" -- ${CURRENT}) )
+    elif [[ $CMD == "lock" || $CMD == "unlock" || $CMD == "update" ]]; then
+        COMPREPLY=( $(compgen -W "$(cat $HOSTS_FILE 2> /dev/null)" -- ${CURRENT}) )
+    elif [[ $CMD == "updateartefact" ]]; then
+        COMPREPLY=( $(compgen -W "$(cat $ARTEFACTS_FILE 2> /dev/null)" -- ${CURRENT}) )
+    else
+        COMPREPLY=( $(compgen -W "$(cat $SERVICES_FILE 2> /dev/null)" -- ${CURRENT}) )
+    fi
+    return 0
+} 
+
+complete -o default -F _yadtshellCompletion yadtshell $YADTSHELL_CMDS
+
+for thisCMD in $YADTSHELL_CMDS; do
+    eval "alias $thisCMD=\"yadtshell $thisCMD\""
+done
+
+
+
+if ! grep -q hosts_condensed <<< ${PS1:-}; then
+    export PS1_ORIG="${PS1:-}"
+    export PS1='\n\e[1myadt | \W\e[m      target hosts: \e[1m$(if diff -q target $(get_yadtshell_dir)/target > /dev/null 2>&1; then cat $(get_yadtshell_dir)/hosts_condensed 2> /dev/null; else echo *unknown, call "status" first*; fi)\e[m\n\u@\h \w \$ '
+    echo
+    echo "starting yadt session"
+fi
+
+
+deactivate() {
+    export PS1="$PS1_ORIG"
+    unset PS1_ORIG
+
+    for thisCMD in $YADTSHELL_CMDS; do
+        unalias $thisCMD
+    done
+
+    complete -r yadtshell $YADTSHELL_CMDS
+
+    return 0
+}
+
+return 0
