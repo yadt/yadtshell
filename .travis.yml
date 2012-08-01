@@ -10,7 +10,7 @@ before_script:
     - sudo apt-get install pylint
     - sudo easy_install http://python-builder.googlecode.com/files/python-builder-0.6.3.tar.gz
     - sudo apt-get install python-yaml
-    - sudo pip install python-twisted>=12
+    - sudo apt-get install python-twisted>=12
 script: "pyb"
 notifications:
 email:
