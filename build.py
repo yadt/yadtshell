@@ -54,6 +54,7 @@ def set_properties (project):
     
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
+    project.set_property('integration_test_print_err', True)
 
     project.get_property('distutils_commands').append('bdist_rpm')    
     project.set_property('copy_resources_target', '$dir_dist')
