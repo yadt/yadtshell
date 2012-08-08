@@ -29,9 +29,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as fixture:
             fixture.expect('ssh', ['it01.test.domain'], '/usr/bin/yadt-status') \
                    .then_write(yadt_status_mock.output('it01.test.domain'))
-            fixture.expect('ssh', ['-O', 'check', 'it01.test.domain'], None) \
+            fixture.expect('ssh', ['-O', 'check', 'it01.test.domain']) \
                    .then_return(0)
-            fixture.expect('ssh', ['-O', 'exit', 'it01.test.domain'], None) \
+            fixture.expect('ssh', ['-O', 'exit', 'it01.test.domain']) \
                    .then_return(0)
         
         actual_return_code = self.execute_command('yadtshell status -v')
@@ -42,7 +42,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         
         with self.verify() as verifier:
             verifier.verify('ssh', ['it01.test.domain'], '/usr/bin/yadt-status')
-            verifier.verify('ssh', ['-O', 'check', 'it01.test.domain'], None)
+            verifier.verify('ssh', ['-O', 'check', 'it01.test.domain'])
             verifier.verify('ssh', ['-O', 'exit', 'it01.test.domain'], None)
 
         
