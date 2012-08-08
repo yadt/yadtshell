@@ -21,6 +21,7 @@ import integrationtest_support
 
 import yadt_status_mock
 
+
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         self.prepare_integration_test('updateartefact')
@@ -37,13 +38,13 @@ class Test (integrationtest_support.IntegrationTestSupport):
                    .then_return(0)
         
         status_return_code = self.execute_command('yadtshell status -v')
-        self.assertEquals(0, status_return_code)
-        
         update_return_code = self.execute_command('yadtshell updateartefact artefact://it01/yit-config-it01 -v')
-        self.assertEquals(0, update_return_code)
         
         with self.verify() as verifier:
+            self.assertEquals(0, status_return_code)
             verifier.verify('ssh', ['it01.test.domain'], '/usr/bin/yadt-status')
+            
+            self.assertEquals(0, update_return_code)
             verifier.verify('ssh', ['-O', 'check', 'it01.test.domain'])
             verifier.verify('ssh', ['-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain'], 'updateartefact')
             verifier.verify('ssh', ['-O', 'exit', 'it01.test.domain'])
