@@ -43,7 +43,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.verify() as verifier:
             verifier.verify('ssh', ['it01.test.domain'], '/usr/bin/yadt-status')
             verifier.verify('ssh', ['-O', 'check', 'it01.test.domain'])
-            verifier.verify('ssh', ['-O', 'exit', 'it01.test.domain'], None)
+            verifier.verify('ssh', ['-O', 'exit', 'it01.test.domain'])
 
         
 if __name__ == '__main__':
