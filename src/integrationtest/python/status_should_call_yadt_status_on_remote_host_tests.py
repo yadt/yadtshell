@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber, Udo Juettner'
+__author__ = 'Alexander Metzner, Michael Gruber, Udo Juettner'
 
 import unittest
 import integrationtest_support
