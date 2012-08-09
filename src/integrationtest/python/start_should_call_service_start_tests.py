@@ -24,7 +24,7 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('start')
+        self.prepare_integration_test('start_should_call_service_start')
         self.write_target_file('it01.domain')
 
         with self.fixture() as fixture:

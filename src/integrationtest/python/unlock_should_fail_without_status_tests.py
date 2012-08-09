@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Alexander Metzner, Michael Gruber, Udo Juettner'
+__author__ = 'Michael Gruber'
 
 import unittest
 import integrationtest_support
@@ -24,19 +24,12 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('status_should_call_yadt_status_on_remote_host')
-        self.write_target_file('it01.test.domain')
+        self.prepare_integration_test('unlock_should_fail_without_status')
+        self.write_target_file('it01.domain')
 
-        with self.fixture() as fixture:
-            fixture.expect('ssh', ['it01.test.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_answer.stdout('it01.test.domain'))
-        
-        actual_return_code = self.execute_command('yadtshell status -v')
-        
-        self.assertEquals(0, actual_return_code)
-        
-        with self.verify() as verifier:
-            verifier.verify('ssh', ['it01.test.domain'], '/usr/bin/yadt-status')
+        actual_return_code = self.execute_command('yadtshell unlock host://it01 -v')
+
+        self.assertEquals(1, actual_return_code)
 
 
 if __name__ == '__main__':

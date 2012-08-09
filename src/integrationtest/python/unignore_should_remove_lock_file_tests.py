@@ -24,7 +24,7 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('unignore')
+        self.prepare_integration_test('unignore_should_remove_lock_file')
         self.write_target_file('it01.domain')
 
         with self.fixture() as fixture:
