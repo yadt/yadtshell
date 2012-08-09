@@ -17,12 +17,12 @@
 from pythonbuilder.core import use_plugin, init, Author
 
 use_plugin('python.core')
-use_plugin('python.unittest')
+#use_plugin('python.unittest')
 use_plugin('python.integrationtest')
-use_plugin('python.coverage')
-use_plugin('python.pychecker')
-use_plugin('python.pymetrics')
-use_plugin('python.pylint')
+#use_plugin('python.coverage')
+#use_plugin('python.pychecker')
+#use_plugin('python.pymetrics')
+#use_plugin('python.pylint')
 use_plugin('python.distutils')
 use_plugin('python.pydev')
 
@@ -45,7 +45,7 @@ summary  = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url      = 'https://github.com/yadt/yadtshell'
 version  = '1.3.11'
 
-default_task = ['analyze', 'publish']
+default_task = ['publish']
 
 @init
 def set_properties (project):
