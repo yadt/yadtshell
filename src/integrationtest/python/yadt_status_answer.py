@@ -39,11 +39,11 @@ defaults:
 services:
 - frontend-service:
     needs_services: [backend-service]
-    state: 0
+    state: $frontend_service_state
     service_artefact: yit-frontend-service
     toplevel_artefacts: [yit-config-$host]
 - backend-service:
-    state: 0
+    state: $backend_service_state
     service_artefact: yit-backend-service
     toplevel_artefacts: [yit-config-$host]
 artefact_names_handled_by_yadt:
