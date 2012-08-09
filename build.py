@@ -38,11 +38,12 @@ description = """YADT - an Augmented Deployment Tool - The Shell Part
 
 for more documentation, visit http://code.google.com/p/yadt/wiki/YadtCommands
 """
-license = 'GNU GPL v3'
+
+license  = 'GNU GPL v3'
 requires = 'PyYAML python-twisted python-hostexpand'
-summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
-url = 'http://code.google.com/p/yadt'
-version = '1.3.11'
+summary  = 'YADT - an Augmented Deployment Tool - The Shell Part'
+url      = 'https://github.com/yadt/yadtshell'
+version  = '1.3.11'
 
 default_task = ['analyze', 'publish']
 
