@@ -19,7 +19,7 @@ __author__ = 'Michael Gruber'
 import unittest
 import integrationtest_support
 
-import yadt_status_mock
+import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
@@ -29,7 +29,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.fixture() as fixture:
             fixture.expect('ssh', ['it01.test.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_mock.output('it01.test.domain'))
+                   .then_write(yadt_status_answer.stdout('it01.test.domain'))
             fixture.expect('ssh', ['-O', 'check', 'it01.test.domain']) \
                    .then_return(0)
             fixture.expect('ssh', ['-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain'], 'updateartefact') \

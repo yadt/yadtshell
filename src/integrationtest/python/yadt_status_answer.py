@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Alexander Metzner'
+__author__ = 'Alexander Metzner, Michael Gruber'
 
 
 import datetime
@@ -67,12 +67,15 @@ query_time: 1
 """)
 
 
-def output (host):
+def stdout (host, frontend_service_state=0, backend_service_state=0):
+    date = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y")
     
     placeholders = {
-        'date': datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y"), 
-        'host': host[0:host.index('.')], 
-        'host_fqdn': host, 
-        'timestamp': int(time.time())}
+        'backend_service_state'  : backend_service_state,
+        'date'                   : date,
+        'frontend_service_state' : frontend_service_state,
+        'host'                   : host[0:host.index('.')], 
+        'host_fqdn'              : host, 
+        'timestamp'              : int(time.time())}
     
     return STATUS_TEMPLATE.substitute(placeholders)
