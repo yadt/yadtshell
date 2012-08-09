@@ -24,7 +24,7 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('unignore')
+        self.prepare_integration_test('lock')
         self.write_target_file('it01.domain')
 
         with self.fixture() as fixture:
@@ -32,24 +32,21 @@ class Test (integrationtest_support.IntegrationTestSupport):
                    .then_write(yadt_status_answer.stdout('it01.domain'))
             fixture.expect('ssh', ['it01.domain', '-O', 'check']) \
                    .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service'], 'unignore') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service'], 'unignore') \
+            fixture.expect('ssh', ['it01.domain', '-s', 'None'], 'lock') \
                    .then_return(0)
             fixture.expect('ssh', ['it01.domain', '-O', 'exit']) \
                    .then_return(0)
 
-        status_return_code   = self.execute_command('yadtshell status -v')
-        unignore_return_code = self.execute_command('yadtshell unignore service://* -v')
+        status_return_code = self.execute_command('yadtshell status -v')
+        lock_return_code   = self.execute_command('yadtshell lock host://it01 -m "locking" -v')
 
         with self.verify() as verifier:
             self.assertEquals(0, status_return_code)
             verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
             
-            self.assertEquals(0, unignore_return_code)
+            self.assertEquals(0, lock_return_code)
             verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service'], 'unignore')
-            verifier.verify('ssh', ['it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service'], 'unignore')
+            verifier.verify('ssh', ['it01.domain', '-s', 'None'], 'lock')
             verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
 
 
