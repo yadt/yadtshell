@@ -36,6 +36,8 @@ age_of_cached_structure: 1
 defaults:
   YADT_EXITCODE_HOST_LOCKED: 150
   YADT_EXITCODE_SERVICE_IGNORED: 151
+  YADT_LOCK_DIR: /var/lock/yadt
+
 services:
 - frontend-service:
     needs_services: [backend-service]
