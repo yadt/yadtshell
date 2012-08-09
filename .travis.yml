@@ -19,6 +19,6 @@ before_script:
     - sudo chmod 777 /var/log/yadtshell
 script: "pyb"
 notifications:
-email:
+  email:
     - michael.gruber@immobilienscout24.de
     - arne.hilmann@immobilienscout24.de
