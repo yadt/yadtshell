@@ -26,9 +26,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         self.write_target_file('it01.test.domain')
 
-        with self.fixture() as fixture:
-            fixture.expect('ssh', ['it01.test.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_answer.stdout('it01.test.domain'))
+        with self.fixture() as when:
+            when.calling('ssh').with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it01.test.domain'))
         
         actual_return_code = self.execute_command('yadtshell status -v')
         

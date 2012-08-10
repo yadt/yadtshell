@@ -26,17 +26,17 @@ class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         self.write_target_file('it01.domain')
 
-        with self.fixture() as fixture:
-            fixture.expect('ssh', ['it01.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_answer.stdout('it01.domain'))
-            fixture.expect('ssh', ['it01.domain', '-O', 'check']) \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service'], 'unignore') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service'], 'unignore') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-O', 'exit']) \
-                   .then_return(0)
+        with self.fixture() as when:
+            when.calling('ssh').with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'check') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service').and_input('unignore') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service').and_input('unignore') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'exit') \
+                .then_return(0)
 
         status_return_code   = self.execute_command('yadtshell status -v')
         unignore_return_code = self.execute_command('yadtshell unignore service://* -v')

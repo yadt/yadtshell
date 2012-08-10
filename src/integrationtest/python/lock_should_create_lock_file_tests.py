@@ -26,15 +26,15 @@ class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         self.write_target_file('it01.domain')
 
-        with self.fixture() as fixture:
-            fixture.expect('ssh', ['it01.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_answer.stdout('it01.domain'))
-            fixture.expect('ssh', ['it01.domain', '-O', 'check']) \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-s', 'None'], 'lock') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-O', 'exit']) \
-                   .then_return(0)
+        with self.fixture() as when:
+            when.calling('ssh').with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'check') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-s', 'None').and_input('lock') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'exit') \
+                .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
         lock_return_code   = self.execute_command('yadtshell lock host://it01 -m "locking" -v')

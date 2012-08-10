@@ -26,21 +26,21 @@ class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         self.write_target_file('it01.domain')
 
-        with self.fixture() as fixture:
-            fixture.expect('ssh', ['it01.domain'], '/usr/bin/yadt-status') \
-                   .then_write(yadt_status_answer.stdout('it01.domain'))
-            fixture.expect('ssh', ['it01.domain', '-O', 'check']) \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', 'sudo /sbin/service backend-service start'], 'start') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', 'sudo /sbin/service backend-service status'], 'status') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', 'sudo /sbin/service frontend-service start'], 'start') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', 'sudo /sbin/service frontend-service status'], 'status') \
-                   .then_return(0)
-            fixture.expect('ssh', ['it01.domain', '-O', 'exit']) \
-                   .then_return(0)
+        with self.fixture() as when:
+            when.calling('ssh').with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'check') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', 'sudo /sbin/service frontend-service start').and_input('start') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
+                .then_return(0)
+            when.calling('ssh').with_arguments('it01.domain', '-O', 'exit') \
+                .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
         start_return_code  = self.execute_command('yadtshell start service://* -v')
