@@ -39,14 +39,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
         status_return_code = self.execute_command('yadtshell status -v')
         update_return_code = self.execute_command('yadtshell updateartefact artefact://it01/yit-config-it01 -v')
         
-        with self.verify() as verifier:
+        with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verifier.verify('ssh', ['it01.test.domain'], '/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status')
             
             self.assertEquals(0, update_return_code)
-            verifier.verify('ssh', ['-O', 'check', 'it01.test.domain'])
-            verifier.verify('ssh', ['-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain'], 'updateartefact')
-            verifier.verify('ssh', ['-O', 'exit', 'it01.test.domain'])
+            verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.test.domain')
+            verify.called('ssh').at_least_with_arguments('-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain').and_input('updateartefact')
+            verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.test.domain')
 
         
 if __name__ == '__main__':

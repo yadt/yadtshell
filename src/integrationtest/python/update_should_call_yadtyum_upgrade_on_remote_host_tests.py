@@ -50,16 +50,16 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         self.assertEquals(0, actual_return_code)
 
-        with self.verify() as verifier:
-            verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
-            verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service backend-service start'], 'start')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service backend-service status'], 'status')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service start'], 'start')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service status'], 'status')
-            verifier.verify('ssh', ['it01.domain', 'sudo /usr/bin/yadt-yum upgrade'], 'update')
-            verifier.verify('ssh', ['it01.domain', '/usr/bin/yadt-status-host'], 'probe')
-            verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
+        with self.verify() as verify:
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service start').and_input('start')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /usr/bin/yadt-yum upgrade').and_input('update')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '/usr/bin/yadt-status-host').and_input('probe')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':

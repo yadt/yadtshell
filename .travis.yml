@@ -10,7 +10,7 @@ before_script:
     - sudo apt-get install pylint
     - sudo easy_install https://github.com/downloads/pybuilder/pybuilder/pybuilder-0.6.4.tar.gz 
     - sudo easy_install https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz
-    - sudo easy_install https://github.com/downloads/yadt/shtub/shtub-0.2.4.tar.gz
+    - sudo easy_install https://github.com/downloads/yadt/shtub/shtub-0.2.6.tar.gz
     - sudo apt-get install python-yaml
     - sudo apt-get install python-twisted
     - sudo apt-get install rpm

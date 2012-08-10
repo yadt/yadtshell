@@ -39,14 +39,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
         status_return_code = self.execute_command('yadtshell status -v')
         lock_return_code   = self.execute_command('yadtshell lock host://it01 -m "locking" -v')
 
-        with self.verify() as verifier:
+        with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             
             self.assertEquals(0, lock_return_code)
-            verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', '-s', 'None'], 'lock')
-            verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'None').and_input('lock')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':

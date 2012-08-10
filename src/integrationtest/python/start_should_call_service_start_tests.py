@@ -50,12 +50,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
             
             self.assertEquals(0, start_return_code)
-            verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service backend-service start'], 'start')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service backend-service status'], 'status')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service start'], 'start')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service status'], 'status')
-            verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
+            verifier.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service start').and_input('start')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':

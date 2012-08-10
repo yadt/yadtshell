@@ -41,15 +41,15 @@ class Test (integrationtest_support.IntegrationTestSupport):
         status_return_code = self.execute_command('yadtshell status -v')
         stop_return_code   = self.execute_command('yadtshell stop service://* -v')
 
-        with self.verify() as verifier:
+        with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             
             self.assertEquals(1, stop_return_code)
-            verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service stop'], 'stop')
-            verifier.verify('ssh', ['it01.domain', 'sudo /sbin/service frontend-service status'], 'status')
-            verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':

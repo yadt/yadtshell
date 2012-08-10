@@ -41,15 +41,15 @@ class Test (integrationtest_support.IntegrationTestSupport):
         status_return_code   = self.execute_command('yadtshell status -v')
         unignore_return_code = self.execute_command('yadtshell unignore service://* -v')
 
-        with self.verify() as verifier:
+        with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             
             self.assertEquals(0, unignore_return_code)
-            verifier.verify('ssh', ['it01.domain', '-O', 'check'])
-            verifier.verify('ssh', ['it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service'], 'unignore')
-            verifier.verify('ssh', ['it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service'], 'unignore')
-            verifier.verify('ssh', ['it01.domain', '-O', 'exit'])
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service').and_input('unignore')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service').and_input('unignore')
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':
