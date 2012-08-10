@@ -24,7 +24,6 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('updateartefact_should_run_through_without_arguments')
         self.write_target_file('it01.test.domain')
 
         with self.fixture() as fixture:

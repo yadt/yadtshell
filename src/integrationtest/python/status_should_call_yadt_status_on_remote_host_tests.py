@@ -24,7 +24,6 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('status_should_call_yadt_status_on_remote_host')
         self.write_target_file('it01.test.domain')
 
         with self.fixture() as fixture:

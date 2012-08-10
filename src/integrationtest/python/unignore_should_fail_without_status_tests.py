@@ -24,7 +24,6 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.prepare_integration_test('unignore_should_fail_without_status')
         self.write_target_file('it01.domain')
 
         actual_return_code = self.execute_command('yadtshell unignore service://* -v')
