@@ -28,3 +28,11 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# Idea files
+.idea
+*.iml
+
+# Virtual env
+ve*
+
