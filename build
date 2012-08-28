@@ -2,4 +2,7 @@
 
 pyb --debug
 cat target/reports/integrationtests/*.err
+echo "list of files in target:"
+ls target
+
 cat target/integrationtests/*/test-execution/*
