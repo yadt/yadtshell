@@ -78,6 +78,8 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
             path += pathsep + '/bin'
             path += pathsep + '/usr/bin'
             path += pathsep + '/usr/local/bin'
+            path += pathsep + '/home/travis/virtualenv/python2.6/bin'
+            path += pathsep + '/home/travis/virtualenv/python2.7/bin'
         return path
 
 
