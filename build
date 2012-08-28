@@ -3,4 +3,4 @@
 pyb --debug
 cat target/reports/integrationtests/*.err
 cat target/integrationtests/*/test-execution/*
-ls /home/travis/builds/yadt/yadtshell/target/integrationtests/update_should_quit_when_starting_of_service_fails/test-execution/stubs
+ls -al /home/travis/builds/yadt/yadtshell/target/integrationtests/update_should_quit_when_starting_of_service_fails/test-execution/stubs
