@@ -21,7 +21,6 @@ use_plugin('python.core')
 use_plugin('python.integrationtest')
 #use_plugin('python.coverage')
 #use_plugin('python.pychecker')
-#use_plugin('python.pymetrics')
 #use_plugin('python.pylint')
 use_plugin('python.distutils')
 use_plugin('python.pydev')
@@ -39,11 +38,11 @@ description = """YADT - an Augmented Deployment Tool - The Shell Part
 for more documentation, visit http://code.google.com/p/yadt/wiki/YadtCommands
 """
 
-license  = 'GNU GPL v3'
+license = 'GNU GPL v3'
 requires = 'PyYAML python-twisted python-hostexpand'
-summary  = 'YADT - an Augmented Deployment Tool - The Shell Part'
-url      = 'https://github.com/yadt/yadtshell'
-version  = '1.3.11'
+summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
+url = 'https://github.com/yadt/yadtshell'
+version = '1.3.11'
 
 default_task = ['publish']
 
@@ -52,12 +51,12 @@ def set_properties (project):
     project.depends_on('hostexpand')
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
-    
+
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
     project.set_property('integration_test_print_err', True)
 
-    project.get_property('distutils_commands').append('bdist_rpm')    
+    project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').append('setup.cfg')
     project.get_property('filter_resources_glob').append('**/yadtshell/__init__.py')

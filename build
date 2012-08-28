@@ -2,3 +2,4 @@
 
 pyb --debug
 cat target/reports/integrationtests/*.err
+cat target/integrationtests/*/test-execution/*
