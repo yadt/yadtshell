@@ -8,7 +8,7 @@ install:
   - sudo mkdir /var/log/yadtshell
   - sudo chmod 777 /var/log/yadtshell
   - pip install -r requirements.txt --use-mirrors
-script: "pyb --debug"
+script: "./build"
 notifications:
   email:
     - michael.gruber@immobilienscout24.de

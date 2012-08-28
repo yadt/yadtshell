@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+pyb --debug
+cat target/reports/integrationtests/*.err
