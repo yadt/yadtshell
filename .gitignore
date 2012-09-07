@@ -36,3 +36,5 @@ pip-log.txt
 # Virtual env
 ve*
 
+.*~
+.*.swp
