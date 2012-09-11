@@ -11,4 +11,4 @@ script: "pyb --debug"
 notifications:
   email:
     - arne.hilmann@immobilienscout24.de
-
+    - michael.gruber@immobilienscout24.de

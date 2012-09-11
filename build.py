@@ -19,6 +19,8 @@ from pythonbuilder.core import use_plugin, init, Author
 use_plugin('python.core')
 #use_plugin('python.unittest')
 use_plugin('python.integrationtest')
+use_plugin('python.install_dependencies')
+
 #use_plugin('python.coverage')
 #use_plugin('python.pychecker')
 #use_plugin('python.pylint')
@@ -44,13 +46,16 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.3.11'
 
-default_task = ['publish']
+default_task = ['install_dependencies', 'publish']
 
 @init
 def set_properties (project):
     project.depends_on('hostexpand')
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
+
+    project.build_depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
+    project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.7.tar.gz')
 
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
