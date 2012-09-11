@@ -1,5 +1,0 @@
-pybuilder
-coverage
-Twisted
-https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz
-https://github.com/downloads/yadt/shtub/shtub-0.2.7.tar.gz

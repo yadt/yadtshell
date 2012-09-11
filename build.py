@@ -31,7 +31,7 @@ use_plugin('copy_resources')
 use_plugin('filter_resources')
 
 
-authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
+authors     = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
 description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts
 - updates artefacts in a safe manner
@@ -41,9 +41,8 @@ for more documentation, visit http://code.google.com/p/yadt/wiki/YadtCommands
 """
 
 license = 'GNU GPL v3'
-requires = 'PyYAML python-twisted python-hostexpand'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
-url = 'https://github.com/yadt/yadtshell'
+url     = 'https://github.com/yadt/yadtshell'
 version = '1.3.11'
 
 default_task = ['install_dependencies', 'publish']
@@ -54,6 +53,7 @@ def set_properties (project):
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
 
+    project.build_depends_on('coverage')
     project.build_depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
     project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.7.tar.gz')
 

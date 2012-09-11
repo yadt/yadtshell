@@ -3,10 +3,11 @@ python:
   - "2.6"
   - "2.7"
 before_script: 
-  - sudo apt-get install pychecker pylint pep8 python-yaml rpm python-rpm
+  - sudo apt-get install pychecker pylint pep8 rpm python-rpm
   - sudo mkdir /var/log/yadtshell
   - sudo chmod 777 /var/log/yadtshell
-  - pip install -r requirements.txt --use-mirrors
+install:
+  - pip install pybuilder
 script: "pyb --debug"
 notifications:
   email:
