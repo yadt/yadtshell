@@ -49,12 +49,11 @@ default_task = ['install_dependencies', 'publish']
 
 @init
 def set_properties (project):
-    project.depends_on('hostexpand')
+    project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
 
     project.build_depends_on('coverage')
-    project.build_depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
     project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.7.tar.gz')
 
     project.set_property('coverage_break_build', False)
