@@ -54,7 +54,7 @@ def set_properties (project):
     project.depends_on('PyYAML')
 
     project.build_depends_on('coverage')
-    project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.8.tar.gz')
+    project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.9.tar.gz')
 
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
