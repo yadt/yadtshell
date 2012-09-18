@@ -8,7 +8,8 @@ before_script:
   - sudo chmod 777 /var/log/yadtshell
 install:
   - pip install pybuilder
-script: "pyb --debug"
+  - pyb --debug install_dependencies
+script: "pyb --debug publish"
 notifications:
   email:
     - arne.hilmann@immobilienscout24.de

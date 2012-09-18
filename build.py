@@ -48,24 +48,13 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url     = 'https://github.com/yadt/yadtshell'
 version = '1.3.12-%s' % os.environ.get('BUILD_NUMBER', 0)
 
-default_task = ['install_dependencies', 'publish']
+default_task = ['publish']
 
 @init
 def set_properties (project):
-    try:
-        import hostexpand
-    except:
-        project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
-
-    try:
-        import twisted
-    except:
-        project.depends_on('Twisted')
-
-    try:
-        import yaml
-    except:
-        project.depends_on('PyYAML')
+    project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
+    project.depends_on('Twisted')
+    project.depends_on('PyYAML')
 
     project.build_depends_on('coverage')
     project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.9.tar.gz')
@@ -74,7 +63,6 @@ def set_properties (project):
     project.set_property('pychecker_break_build', False)
     project.set_property('integration_test_print_err', True)
 
-    project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').append('setup.cfg')
     project.get_property('filter_resources_glob').append('**/yadtshell/__init__.py')
