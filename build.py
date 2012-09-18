@@ -14,6 +14,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from pythonbuilder.core import use_plugin, init, Author
 
 use_plugin('python.core')
@@ -40,18 +42,30 @@ description = """YADT - an Augmented Deployment Tool - The Shell Part
 for more documentation, visit http://code.google.com/p/yadt/wiki/YadtCommands
 """
 
+name    = 'yadtshell'
 license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url     = 'https://github.com/yadt/yadtshell'
-version = '1.3.11'
+version = '1.3.12-%s' % os.environ.get('BUILD_NUMBER', 0)
 
 default_task = ['install_dependencies', 'publish']
 
 @init
 def set_properties (project):
-    project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
-    project.depends_on('Twisted')
-    project.depends_on('PyYAML')
+    try:
+        import hostexpand
+    except:
+        project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
+
+    try:
+        import twisted
+    except:
+        project.depends_on('Twisted')
+
+    try:
+        import yaml
+    except:
+        project.depends_on('PyYAML')
 
     project.build_depends_on('coverage')
     project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.9.tar.gz')

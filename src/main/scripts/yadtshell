@@ -109,6 +109,7 @@ elif cmd == 'dump':
     yadtshell.dump(args, **vars(opts))
     sys.exit(0)
 elif cmd == 'update':
+    #deferred = yadtshell.status(use_cache_only=True)
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.update.compare_versions, 
