@@ -28,6 +28,7 @@ use_plugin('python.install_dependencies')
 #use_plugin('python.pylint')
 use_plugin('python.distutils')
 use_plugin('python.pydev')
+use_plugin('analysis')
 
 use_plugin('copy_resources')
 use_plugin('filter_resources')
@@ -47,7 +48,7 @@ license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url     = 'https://github.com/yadt/yadtshell'
 version = '1.3.12-%s' % os.environ.get('BUILD_NUMBER', 0)
-
+ 
 default_task = ['publish']
 
 @init
