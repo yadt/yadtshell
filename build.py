@@ -46,7 +46,7 @@ default_task = ['publish']
 
 @init
 def set_properties (project):
-    project.depends_on('hostexpand', url='https://github.com/downloads/yadt/hostexpand/hostexpand-1.0.1.tar.gz')
+    project.depends_on('hostexpand')
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
 
