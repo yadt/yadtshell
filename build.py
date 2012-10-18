@@ -77,4 +77,4 @@ def set_properties_for_teamcity_builds (project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['install_build_dependencies', 'publish']
-
+    project.depends_on('hostexpand')
