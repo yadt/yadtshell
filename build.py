@@ -33,7 +33,7 @@ description = '''YADT - an Augmented Deployment Tool - The Shell Part
 - updates artefacts in a safe manner
 - issues multiple commands in parallel on severall hosts
 
-for more documentation, visit http://code.google.com/p/yadt/wiki/YadtCommands
+for more documentation, visit http://www.yadt-project.org/
 '''
 
 name    = 'yadtshell'
@@ -78,4 +78,3 @@ def set_properties_for_teamcity_builds (project):
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['install_build_dependencies', 'publish']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
-    project.set_property('install_dependencies_use_mirrors', False)
