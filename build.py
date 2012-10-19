@@ -50,7 +50,7 @@ def set_properties (project):
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
 
-    project.build_depends_on('shtub', url='https://github.com/downloads/yadt/shtub/shtub-0.2.9.tar.gz')
+    project.build_depends_on('shtub')
 
     project.set_property('integration_test_print_err', True)
 
