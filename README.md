@@ -1,4 +1,4 @@
-# YADTSHELL [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell)
+# [YADTSHELL](http://yadt-project.org) [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell)
 
 ## Installation with pip
 It is considered good practice to install all packages available via pip & easy_install in a
