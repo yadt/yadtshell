@@ -4,10 +4,10 @@
 It is considered good practice to install all packages available via pip & easy_install in a
 [virtual environment](http://pypi.python.org/pypi/virtualenv) so that your development dependencies are isolated from the system-wide dependencies.
 ```bash
-# create a virtual environment for building
+# create a virtual environment for installation
 virtualenv ve
 # activate the virtual environment
 source ve/bin/activate
-# install the yadtshell from PyPi
+# install the yadtshell from the PyPi cheeseshop
 pip install yadtshell
 ```
