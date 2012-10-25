@@ -262,7 +262,9 @@ class DummyBroadcaster(object):
         pass
 
 try:
+    sys.path.append("/etc/yadtbroadcast-client/")
     import broadcasterconf
+    sys.path.pop()
     ybc = broadcasterconf.create(TARGET_SETTINGS['name'])
 except Exception, e:
     logger.warn('no broadcaster config found')
