@@ -407,7 +407,7 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
             result = f.read()
             f.close()
         except IOError, e:
-            self.logger.warning(str(e))
+            logger.warning(str(e))
         host = yaml.load(result)
         components[host.uri] = host
         reactor.callLater(.1, d.callback, host)
