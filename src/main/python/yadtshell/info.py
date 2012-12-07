@@ -183,20 +183,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
 
     info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
 
-    icons = {
-        'NA': '.',
-        'UP': '|',
-        'DOWN': 'O',
-        'UNKNOWN': '?',
-        'UP_IGNORED': 'i',
-        'DOWN_IGNORED': 'o',
-        'UNKNOWN_IGNORED': '?',
-        'NOT_LOCKED': '|',
-        'LOCKED_BY_ME': 'l',
-        'LOCKED_BY_OTHER': 'L',
-        'UPTODATE': '|',
-        'UPDATE_NEEDED': 'u',
-    }
+    icons = get_icons()
     separator = ''
     if 'maxcols' in info_view_settings:
         separator = '  '
@@ -207,18 +194,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         for icon, string in icons.iteritems():
             icons[icon] = ' %s ' % string
     if 'color' in info_view_settings:
-        icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
-        icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
-        icons['UNKNOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['UNKNOWN'])
-        icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
-        icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
-        icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
-        icons['NOT_LOCKED'] = icons['UP']
-        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
-        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
-        icons['UPTODATE'] = icons['UP']
-        icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
-
+        icons = colorize(icons)
     if 'maxcols' in info_view_settings:
         print '  %s' % separator.join(['%-9s' % host.host for host in hosts])
     elif '3cols' in info_view_settings:
@@ -278,7 +254,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
             suffix = ''
             if getattr(service, 'is_frontservice', False):
                 suffix = '(frontservice)'
-        print '  %s  %s%s' % (separator.join(s), name, suffix)
+        print '  %s  service %s %s' % (separator.join(s), name, suffix)
     s = []
     for host in hosts:
         if host.is_uptodate():
@@ -287,7 +263,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
             s.append(icons['UPDATE_NEEDED'])
         else:
             s.append(icons['NA'])
-    print '  %s  %s' % (separator.join(s), 'updates')
+    print '  %s  %s' % (separator.join(s), 'host uptodate')
     s = []
     for host in hosts:
         if host.is_locked_by_other:
@@ -298,18 +274,15 @@ def _render_services_matrix(components, hosts, enable_legend=False):
             s.append(icons['UNKNOWN'])
         else:
             s.append(icons['NOT_LOCKED'])
-    print '  %s  %s' % (separator.join(s), 'host')
+    print '  %s  %s' % (separator.join(s), 'host access')
     print
 
     if enable_legend:
         render_legend()
 
 
-def render_legend():
-
-    info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
-
-    icons = {
+def get_icons():
+    return {
         'NA': ' ',
         'UP': '|',
         'DOWN': 'O',
@@ -322,30 +295,30 @@ def render_legend():
         'UPTODATE': '|',
         'UPDATE_NEEDED': 'u',
     }
-    if 'maxcols' in info_view_settings:
-        for icon, string in icons.iteritems():
-            icons[icon] = '    %s    ' % string
-    elif '3cols' in info_view_settings:
-        for icon, string in icons.iteritems():
-            icons[icon] = ' %s ' % string
-    if 'color' in info_view_settings:
-        icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
-        icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
-        icons['UNKNOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['UNKNOWN'])
-        icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
-        icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
-        icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
-        icons['NOT_LOCKED'] = icons['UP']
-        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
-        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
-        icons['UPTODATE'] = icons['UP']
-        icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
 
-    stripped_icons = {}
-    for icon, string in icons.iteritems():
-        stripped_icons[icon] = string.replace(' ', '')
-    print 'legend: %(UP)s up|uptodate|accessible  %(DOWN)s service down  %(UNKNOWN)s service unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s service ignored (up/down/unknown)' % stripped_icons
-    print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % stripped_icons
+def colorize(icons):
+    icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
+    icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
+    icons['UNKNOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['UNKNOWN'])
+    icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
+    icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
+    icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
+    icons['NOT_LOCKED'] = icons['UP']
+    icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
+    icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+    icons['UPTODATE'] = icons['UP']
+    icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
+    return icons
+
+def render_legend():
+    info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
+
+    icons = get_icons()
+    if 'color' in info_view_settings:
+        icons = colorize(icons)
+
+    print 'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' % icons
+    print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % icons
     print
 
 

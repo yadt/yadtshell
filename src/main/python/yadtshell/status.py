@@ -61,8 +61,6 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
     
-    names = hosts   # TODO refactor: bad naming scheme
-
     components = yadtshell.components.ComponentDict()
 
 
@@ -419,11 +417,11 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
     pi = yadtshell.twisted.ProgressIndicator()
 
     deferreds = []
-    for name in names:
+    for host in hosts:
         if  use_cache_only:
-            deferred = restore_cached_state(name)
+            deferred = restore_cached_state(host)
         else:
-            deferred = query_status(name, pi)
+            deferred = query_status(host, pi)
             deferred.addErrback(report_connection_error)
             deferred.addCallback(create_host)
 
