@@ -15,11 +15,11 @@ def _show_host_locking(host):
         lock_owner = host.lockstate.get("owner", "Unknown")
         reason = host.lockstate.get("message", "--- no message given ---")
         if host.is_locked_by_me:
-            print yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}')
+            print yadtshell.settings.term.render('${BG_YELLOW}${WHITE}${BOLD}')
             print('%10s is locked by me' % host.host)
             print yadtshell.settings.term.render('%10s %s ${NORMAL}' % ('reason:', reason))
         elif host.is_locked_by_other:
-            print yadtshell.settings.term.render('${BG_YELLOW}${WHITE}${BOLD}')
+            print yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}')
             print('%10s is locked by %s' % (host.host, lock_owner))
             print yadtshell.settings.term.render('%10s %s ${NORMAL}' % ('reason:', reason))
 
@@ -191,9 +191,10 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         'UP_IGNORED': 'i',
         'DOWN_IGNORED': 'o',
         'UNKNOWN_IGNORED': '?',
+        'NOT_LOCKED': '|',
         'LOCKED_BY_ME': 'l',
         'LOCKED_BY_OTHER': 'L',
-        'UPTODATE': ' ',
+        'UPTODATE': '|',
         'UPDATE_NEEDED': 'u',
     }
     separator = ''
@@ -212,8 +213,10 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
         icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
         icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
-        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_GREEN}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
-        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+        icons['NOT_LOCKED'] = icons['UP']
+        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
+        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+        icons['UPTODATE'] = icons['UP']
         icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
 
     if 'maxcols' in info_view_settings:
@@ -278,17 +281,6 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         print '  %s  %s%s' % (separator.join(s), name, suffix)
     s = []
     for host in hosts:
-        if host.is_locked_by_other:
-            s.append(icons['LOCKED_BY_OTHER'])
-        elif host.is_locked_by_me:
-            s.append(icons['LOCKED_BY_ME'])
-        elif host.is_unknown():
-            s.append(icons['UNKNOWN'])
-        else:
-            s.append(icons['NA'])
-    print '  %s  %s' % (separator.join(s), 'host lock')
-    s = []
-    for host in hosts:
         if host.is_uptodate():
             s.append(icons['UPTODATE'])
         elif host.is_update_needed():
@@ -296,6 +288,17 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         else:
             s.append(icons['NA'])
     print '  %s  %s' % (separator.join(s), 'updates')
+    s = []
+    for host in hosts:
+        if host.is_locked_by_other:
+            s.append(icons['LOCKED_BY_OTHER'])
+        elif host.is_locked_by_me:
+            s.append(icons['LOCKED_BY_ME'])
+        elif host.is_unknown():
+            s.append(icons['UNKNOWN'])
+        else:
+            s.append(icons['NOT_LOCKED'])
+    print '  %s  %s' % (separator.join(s), 'host')
     print
 
     if enable_legend:
@@ -316,16 +319,13 @@ def render_legend():
         'UNKNOWN_IGNORED': '?',
         'LOCKED_BY_ME': 'l',
         'LOCKED_BY_OTHER': 'L',
-        'UPTODATE': ' ',
+        'UPTODATE': '|',
         'UPDATE_NEEDED': 'u',
     }
-    separator = ''
     if 'maxcols' in info_view_settings:
-        separator = '  '
         for icon, string in icons.iteritems():
             icons[icon] = '    %s    ' % string
     elif '3cols' in info_view_settings:
-        separator = ' '
         for icon, string in icons.iteritems():
             icons[icon] = ' %s ' % string
     if 'color' in info_view_settings:
@@ -335,15 +335,17 @@ def render_legend():
         icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
         icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
         icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
-        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_GREEN}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
-        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+        icons['NOT_LOCKED'] = icons['UP']
+        icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
+        icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+        icons['UPTODATE'] = icons['UP']
         icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
 
     stripped_icons = {}
     for icon, string in icons.iteritems():
         stripped_icons[icon] = string.replace(' ', '')
-    print 'legend services: %(UP)s%(DOWN)s%(UNKNOWN)s up/down/unknown %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored up/down/unknown' % stripped_icons
-    print '   legend hosts: %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % stripped_icons
+    print 'legend: %(UP)s up|uptodate|accessible  %(DOWN)s service down  %(UNKNOWN)s service unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s service ignored (up/down/unknown)' % stripped_icons
+    print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % stripped_icons
     print
 
 

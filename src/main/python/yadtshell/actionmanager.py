@@ -23,7 +23,7 @@ class ActionManager(object):
             self.fun = fun
             self.action = action
             self.path = path
-            
+
     def __init__(self):
         self.logger = logging.getLogger('actionmanager')
         self.finish_fun = self.log_host_finished

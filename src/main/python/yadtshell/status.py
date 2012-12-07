@@ -394,6 +394,7 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
     def notify_collector(ignored):
         global local_service_collector
         if local_service_collector:
+            logger.debug("collected services: %s " % ", ".join(local_service_collector.services))
             return local_service_collector.notify()
 
     def restore_cached_state(component):

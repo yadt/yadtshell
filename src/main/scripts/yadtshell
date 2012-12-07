@@ -63,6 +63,8 @@ observer.start()
 import yadtshell
 logger = logging.getLogger('yadtshell')
 
+logging.getLogger("twisted").setLevel(logging.WARN)
+logging.getLogger("broadcaster").setLevel(logging.WARN)
 
 
 if opts.verbose:
