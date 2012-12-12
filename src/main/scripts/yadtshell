@@ -141,7 +141,7 @@ def publish_result():
         state = 'failed'
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state=state)
     logger.debug('waiting for outstanding events to be delivered')
-    return deferLater(reactor, 0.5, observer.stop)
+    return deferLater(reactor, 2, observer.stop)
 
 def publish_start():
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state='started')
