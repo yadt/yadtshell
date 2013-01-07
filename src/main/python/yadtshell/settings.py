@@ -20,8 +20,6 @@ import yadtshell.helper  # TODO refactor imports
 sys.path.append('/etc/yadtshell')
 
 USER_INFO = get_user_info()
-global TARGET_SETTINGS
-TARGET_SETTINGS = None
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
 OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))   # TODO rename to TMP_DIR?
@@ -44,6 +42,32 @@ try:
 except Exception, e:
     root_logger.debug(e)
     LOG_DIR_PREFIX = '/var/log/yadtshell'
+
+
+class DummyBroadcaster(object):
+    def addOnSessionOpenHandler(self, *args, **kwargs):
+        pass
+
+    def sendServiceChange(self, data):
+        pass
+
+    def sendFullUpdate(self, data):
+        pass
+
+    def connect(self):
+        pass
+
+    def publish_cmd(self, *args, **kwargs):
+        pass
+
+try:
+    sys.path.append("/etc/yadtbroadcast-client/")
+    import broadcasterconf
+    sys.path.pop()
+
+except Exception, e:
+    logger.warn('no broadcaster config found')
+    logger.warn(e)
 
 
 def load_settings():
@@ -80,6 +104,12 @@ def load_settings():
     settings_file.close()
 
     TARGET_SETTINGS.setdefault('name', os.path.basename(os.getcwd()))
+
+    global ybc
+    #if broadcasterconf:
+    #    ybc = broadcasterconf.create(TARGET_SETTINGS['name'])
+    #else:
+    ybc = DummyBroadcaster()
 
     LOG_DIR = os.path.join(LOG_DIR_PREFIX, TODAY)
     try:
@@ -231,30 +261,3 @@ STATE_DESCRIPTIONS = {
     DOWN: DOWN,
     UNKNOWN: UNKNOWN,
 }
-
-
-class DummyBroadcaster(object):
-    def addOnSessionOpenHandler(self, *args, **kwargs):
-        pass
-
-    def sendServiceChange(self, data):
-        pass
-
-    def sendFullUpdate(self, data):
-        pass
-
-    def connect(self):
-        pass
-
-    def publish_cmd(self, *args, **kwargs):
-        pass
-
-try:
-    sys.path.append("/etc/yadtbroadcast-client/")
-    import broadcasterconf
-    sys.path.pop()
-    ybc = broadcasterconf.create(TARGET_SETTINGS['name'])
-except Exception, e:
-    logger.warn('no broadcaster config found')
-    logger.warn(e)
-    ybc = DummyBroadcaster()
