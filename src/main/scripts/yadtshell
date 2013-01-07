@@ -61,10 +61,9 @@ observer = log.PythonLoggingObserver()
 observer.start()
 
 import yadtshell
+yadtshell.settings.load_settings()
 logger = logging.getLogger('yadtshell')
 
-logging.getLogger("twisted").setLevel(logging.WARN)
-logging.getLogger("broadcaster").setLevel(logging.WARN)
 
 
 if opts.verbose:
@@ -103,6 +102,7 @@ def createDeferredFromPlan(plan):
 
 deferred = None
 if cmd == 'status':
+
     deferred = yadtshell.status(hosts=args, **vars(opts))
 elif cmd == 'info':
     yadtshell.info(**vars(opts))
@@ -141,7 +141,7 @@ def publish_result():
         state = 'failed'
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state=state)
     logger.debug('waiting for outstanding events to be delivered')
-    return deferLater(reactor, 2, observer.stop)
+    return deferLater(reactor, 0.5, observer.stop)
 
 def publish_start():
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state='started')

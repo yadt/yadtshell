@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import yadtshell.settings
+import yadtshell.components
 import yadtshell.constants
 import yadtshell.util
 import yadtshell.metalogic
