@@ -20,7 +20,7 @@ import yadtshell.helper  # TODO refactor imports
 sys.path.append('/etc/yadtshell')
 
 USER_INFO = get_user_info()
-
+TARGET_SETTINGS = None
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
 OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))   # TODO rename to TMP_DIR?
