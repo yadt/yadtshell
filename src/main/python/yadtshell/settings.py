@@ -20,6 +20,7 @@ import yadtshell.helper  # TODO refactor imports
 sys.path.append('/etc/yadtshell')
 
 USER_INFO = get_user_info()
+global TARGET_SETTINGS
 TARGET_SETTINGS = None
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
