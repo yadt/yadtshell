@@ -60,11 +60,13 @@ class DummyBroadcaster(object):
     def publish_cmd(self, *args, **kwargs):
         pass
 
+broadcasterconf_imported = False
+
 try:
     sys.path.append("/etc/yadtbroadcast-client/")
     import broadcasterconf
     sys.path.pop()
-
+    broadcasterconf_imported = True
 except Exception, e:
     logger.warn('no broadcaster config found')
     logger.warn(e)
@@ -106,10 +108,10 @@ def load_settings():
     TARGET_SETTINGS.setdefault('name', os.path.basename(os.getcwd()))
 
     global ybc
-    #if broadcasterconf:
-    #    ybc = broadcasterconf.create(TARGET_SETTINGS['name'])
-    #else:
-    ybc = DummyBroadcaster()
+    if broadcasterconf_imported:
+        ybc = broadcasterconf.create(TARGET_SETTINGS['name'])
+    else:
+        ybc = DummyBroadcaster()
 
     LOG_DIR = os.path.join(LOG_DIR_PREFIX, TODAY)
     try:
