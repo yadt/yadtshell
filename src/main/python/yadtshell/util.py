@@ -3,7 +3,6 @@
 from time import localtime, strftime
 import os.path
 import logging
-import pickle
 import pwd
 import socket
 import threading
@@ -17,23 +16,23 @@ import yadtshell.components
 
 logger = logging.getLogger('util')
 
+try:
+    import cPickle as pickle
+    logger.debug("using C implementation of pickle")
+except ImportError:
+    import pickle
+    logger.debug("using default pickle")
 
 def determine_loc_type(s):
     return {"host": s, "loc": s[0:3], "type": s[3:6], "loctype": s[0:6], "nr": s[6:8]}
 
 def store(o, filename):
-    f = open(filename, "w")
-    try:
+    with open(filename, "w") as f:
         pickle.dump(o, f)
-    finally:
-        f.close()
 
 def restore(filename):
-    f = open(filename)
-    try:
+    with open(filename) as f:
         return pickle.load(f)
-    finally:
-        f.close()
 
 def store2(data, filename):
     f = open(filename, 'w')

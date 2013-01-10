@@ -10,10 +10,11 @@ import logging
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
 logger = logging.getLogger('twisted')
 
-class SshFailure(failure.Failure): pass
+
+class SshFailure(failure.Failure):
+    pass
 
 
 class ProgressIndicator(object):
@@ -26,33 +27,22 @@ class ProgressIndicator(object):
         self.logger = logging.getLogger('progress')
 
     def update(self, observable, newvalue=None):
-#        for o in self.observables:
-#            print '%s %s %s' % (self.progress.get(o), self._render_value(self.progress.get(o)), o)
-#        print
+        observable = "justone"
         if isinstance(observable, list):
             observable = ' '.join(map(str, observable))
         if observable not in self.observables:
             self.observables.append(observable)
         if newvalue:
-            self.progress[observable] = newvalue
             self.finished.add(observable)
         else:
             value = self.progress.setdefault(observable, 0)
             if isinstance(value, int):
                 self.progress[observable] = int(value) + 1
         self._update()
-        
+
     def finish(self):
         if len(self.progress):
             self.logger.info(self._render_compressed())
-#        for o in self.observables:
-#            print '%s %s %s' % (self.progress.get(o), self._render_value(self.progress.get(o)), o)
-#        print
-#
-#        for o in self.observables:
-#            p = self.progress[o]
-#            if isinstance(p, int):
-#                print '%s %s' % (p, o)
 
     def _render_value(self, value):
         if not value:
@@ -60,7 +50,7 @@ class ProgressIndicator(object):
         if type(value) is int:
             return self.rendered[value % len(self.rendered)]
         return value
-    
+
     def _render_compressed(self):
         rendered = [self._render_value(self.progress.get(o)) for o in self.observables]
         finished = [r for r in rendered if r not in self.rendered]
@@ -75,7 +65,8 @@ class ProgressIndicator(object):
             else:
                 rendered = [self._render_value(self.progress.get(o)) for o in self.observables]
                 sys.stderr.write('\rprogress: ' + ''.join([str(o) for o in rendered]) + '\r')
-            
+
+
 class YadtProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG, err_log_level=logging.WARN, log_prefix=''):
         self.component = component
@@ -87,11 +78,11 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.logger = logging.getLogger(log_prefix)
         self.out_log_level = out_log_level
         self.err_log_level = err_log_level
-        
+
     def connectionMade(self):
         self.logger.debug("starting query: %s" % self.cmd)
         self.transport.write(self.cmd)
-        self.transport.closeStdin() # tell them we're done
+        self.transport.closeStdin()  # tell them we're done
         if self.pi:
             self.pi.update((self.cmd, self.component))
 
@@ -134,10 +125,11 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
             reason.value.orig_protocol = self
             self.deferred.errback(reason.value)
 
+
 def stop_yadt(args=None):
     if reactor.running:
-        #reactor.callLater(1, reactor.stop)
         reactor.stop()
+
 
 def stop_and_return(return_code):
     if type(return_code) == int:
@@ -151,10 +143,10 @@ def stop_and_return(return_code):
         reactor.return_code = 0
     stop_yadt()
 
+
 def report_error(failure, line_fun=None, include_stacktrace=True):
-    if line_fun == None:
+    if line_fun is None:
         def line_fun(line):
-            #print line
             logger.debug(line)
     if isinstance(failure, SshFailure):
         return failure
@@ -171,4 +163,3 @@ def report_error(failure, line_fun=None, include_stacktrace=True):
 def trace(arg, args='argh'):
     print 'trace: ' + args
     return arg
-

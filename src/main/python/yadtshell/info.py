@@ -4,7 +4,6 @@ import logging
 import time
 
 import hostexpand
-
 import yadtshell
 
 logger = logging.getLogger('info')
@@ -23,8 +22,11 @@ def _show_host_locking(host):
             print('%10s is locked by %s' % (host.host, lock_owner))
             print yadtshell.settings.term.render('%10s %s ${NORMAL}' % ('reason:', reason))
 
-def info(logLevel=None, full=False, **kwargs):
-    components = yadtshell.util.restore_current_state()
+
+def info(logLevel=None, full=False, components=None, **kwargs):
+    if not components:
+        logger.debug("loading current state")
+        components = yadtshell.util.restore_current_state()
 
     result = []
     for component in components.values():
@@ -36,28 +38,27 @@ def info(logLevel=None, full=False, **kwargs):
     print
     print 'target status'
 
-    artefacts = {}  # TODO refactor: needed anywhere else?
     hosts = sorted([c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
     for host in hosts:
         _show_host_locking(host)
 
-        host_artefacts = artefacts.setdefault(host.host, {})    
+        host_artefacts = {}
         for current_artefact in [
             c for c in components.values() if c.host == host.hostname and c.revision == yadtshell.settings.CURRENT
         ]:
             artefact = host_artefacts.setdefault(current_artefact.name, {})
             artefact[yadtshell.settings.CURRENT] = current_artefact
-            next_artefact = components.get(yadtshell.uri.change_version(current_artefact.uri, 'next')) 
+            next_artefact = components.get(yadtshell.uri.change_version(current_artefact.uri, 'next'))
             if next_artefact:
                 artefact[yadtshell.settings.NEXT] = next_artefact
         for artefact in sorted(host_artefacts.keys()):
             variants = host_artefacts[artefact]
             current_version = variants[yadtshell.settings.CURRENT].version
             if full:
-                print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version) 
+                print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version)
             if yadtshell.settings.NEXT in variants:
                 if not full:
-                    print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version) 
+                    print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version)
                 next_version = components[variants[yadtshell.settings.NEXT]].version
                 nd_display = []
                 for i in range(len(next_version)):
@@ -104,6 +105,7 @@ def info(logLevel=None, full=False, **kwargs):
         render_services_matrix(components)
     else:
         print 'services'
+
         def extract_name(s):
             return s.rsplit('/', 1)[1]
         ranks = {}
@@ -123,14 +125,12 @@ def info(logLevel=None, full=False, **kwargs):
         print
         print 'hosts'
         for c in sorted(
-            [c for c in condensed if c[0].startswith(yadtshell.settings.HOST)] 
+            [c for c in condensed if c[0].startswith(yadtshell.settings.HOST)]
         ):
             print yadtshell.util.render_component_state(c[0], c[1])
 
     now = time.time()
     max_age = now - yadtshell.util.get_mtime_of_current_state()
-    #for host in [c for c in components.values() if c.type == yadtshell.settings.HOST and not yadtshell.util.not_up(c.state)]:
-        #max_age = max(max_age, now - int(host.epoch))
     if max_age > 120:
         max_age = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}  %.0f  ${NORMAL}' % max_age)
     elif max_age > 60:
@@ -152,6 +152,7 @@ def render_services_matrix(components=None, **kwargs):
     for hosts in yadtshell.settings.TARGET_SETTINGS['original_hosts']:
         _render_services_matrix(components, he.expand(hosts), *kwargs)
     render_legend()
+
 
 def _render_services_matrix(components, hosts, enable_legend=False):
     host_components = set()
@@ -229,6 +230,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
                 line.append(name[i])
             print '  %s' % ''.join(line)
     print
+
     for name in sorted(ranks, key=lambda x: ranks[x]):
         s = []
         for host in hosts:
@@ -296,6 +298,7 @@ def get_icons():
         'UPDATE_NEEDED': 'u',
     }
 
+
 def colorize(icons):
     icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
     icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
@@ -309,6 +312,7 @@ def colorize(icons):
     icons['UPTODATE'] = icons['UP']
     icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
     return icons
+
 
 def render_legend():
     info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
@@ -335,4 +339,3 @@ if __name__ == "__main__":
         render_services_matrix(enable_legend=False)
     else:
         info(**vars(opts))
-
