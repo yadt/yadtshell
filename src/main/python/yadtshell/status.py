@@ -322,14 +322,15 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
             hosts = []
             for hostname in he.expand(grouped_hosts):
                 services = []
-                host = components['host://%s' % hostname]   # TODO use Uri method here
+                host = components['host://%s' % hostname]
                 for service in getattr(host, 'defined_services', []):
                     services.append({
                         'uri': service.uri,
                         'name': service.name,
                         'state': service.state
                         })
-                    artefacts = []
+
+                artefacts = []
                 for artefact in sorted(getattr(host, 'handled_artefacts', [])):
                     name, version = artefact.split('/')
                     artefacts.append({
@@ -337,12 +338,13 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
                         'name': name,
                         'current': version
                         })
-                    host = {
-                            'name': hostname,
-                            'services': services,
-                            'artefacts': artefacts
-                            }
-                    hosts.append(host)
+
+                host = {
+                        'name': hostname,
+                        'services': services,
+                        'artefacts': artefacts
+                        }
+                hosts.append(host)
             groups.append(hosts)
         yadtshell.settings.ybc.sendFullUpdate(groups)
 
