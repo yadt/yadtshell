@@ -29,22 +29,16 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.test.domain'))
-            when.calling('ssh').with_arguments('-O', 'check', 'it01.test.domain') \
-                .then_return(0)
-            when.calling('ssh').with_arguments('-O', 'exit', 'it01.test.domain') \
-                .then_return(0)
-        
+
         status_return_code = self.execute_command('yadtshell status -v')
         update_return_code = self.execute_command('yadtshell updateartefact -v')
-        
+
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
             verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status')
-            
-            self.assertEquals(0, update_return_code)
-            verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.test.domain')
-            verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.test.domain')
 
-        
+            self.assertEquals(0, update_return_code)
+
+
 if __name__ == '__main__':
     unittest.main()
