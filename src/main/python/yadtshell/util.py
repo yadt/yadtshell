@@ -225,7 +225,8 @@ def stop_ssh_multiplexed(ignored, hosts=None):
 
 
 ## {{{ http://code.activestate.com/recipes/483752/ (r1)
-class TimeoutError(Exception): pass
+class TimeoutError(Exception):
+    pass
 
 def timelimit(timeout):
     def internal(function):
