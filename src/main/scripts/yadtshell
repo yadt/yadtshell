@@ -109,7 +109,6 @@ def createDeferredFromPlan(plan):
     return am.action(flavor=cmd, **vars(opts))
 
 
-
 deferred = None
 if cmd == 'status':
 
