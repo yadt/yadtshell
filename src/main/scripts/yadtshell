@@ -101,6 +101,7 @@ def create_simple_plan(cmd, component_names):
     yadtshell.util.dump_action_plan(cmd, plan)
     return plan
 
+
 def createDeferredFromPlan(plan):
     plan = yadtshell.metalogic.apply_instructions(plan, opts.parallel)
     yadtshell.util.dump_action_plan(cmd, plan)
