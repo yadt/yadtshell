@@ -92,8 +92,10 @@ class TerminalController:
         assumed to be a dumb terminal (i.e., have no capabilities).
         """
         # Curses isn't available on all platforms
-        try: import curses
-        except: return
+        try:
+            import curses
+        except:
+            return
 
         # If the stream isn't a tty, then assume it has no capabilities.
         try: 
@@ -104,8 +106,10 @@ class TerminalController:
 
         # Check the terminal type.  If we fail, then assume that the
         # terminal has no capabilities.
-        try: curses.setupterm()
-        except: return
+        try:
+            curses.setupterm()
+        except:
+            return
 
         # Look up numeric capabilities.
         self.COLS = curses.tigetnum('cols')
@@ -154,5 +158,7 @@ class TerminalController:
 
     def _render_sub(self, match):
         s = match.group()
-        if s == '$$': return s
-        else: return getattr(self, s[2:-1])
+        if s == '$$':
+            return s
+        else:
+            return getattr(self, s[2:-1])
