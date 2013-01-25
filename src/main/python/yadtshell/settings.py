@@ -44,35 +44,41 @@ except Exception, e:
     LOG_DIR_PREFIX = '/var/log/yadtshell'
 
 
-class DummyBroadcaster(object):
-    def addOnSessionOpenHandler(self, *args, **kwargs):
-        pass
+def initialize_broadcast_client():
+    global DummyBroadcaster, broadcasterconf_imported, broadcasterconf, e
 
-    def sendServiceChange(self, data):
-        pass
+    class DummyBroadcaster(object):
+        def addOnSessionOpenHandler(self, *args, **kwargs):
+            pass
 
-    def sendFullUpdate(self, data):
-        pass
+        def sendServiceChange(self, data):
+            pass
 
-    def connect(self):
-        pass
+        def sendFullUpdate(self, data):
+            pass
 
-    def publish_cmd(self, *args, **kwargs):
-        pass
+        def connect(self):
+            pass
 
-broadcasterconf_imported = False
+        def publish_cmd(self, *args, **kwargs):
+            pass
 
-try:
-    sys.path.append("/etc/yadtbroadcast-client/")
-    import broadcasterconf
-    sys.path.pop()
-    broadcasterconf_imported = True
-except Exception, e:
-    logger.warn('no broadcaster config found')
-    logger.warn(e)
+    broadcasterconf_imported = False
+    try:
+        sys.path.append("/etc/yadtbroadcast-client/")
+        import broadcasterconf
+
+        sys.path.pop()
+        broadcasterconf_imported = True
+    except Exception, e:
+        logger.warn('no broadcaster config found')
+        logger.warn(e)
+
 
 
 def load_settings():
+
+    initialize_broadcast_client()
 
     os.umask(2)
 

@@ -13,8 +13,6 @@ cmd = None
 if len(sys.argv) > 1:
     cmd = sys.argv[1]
 
-logger = logging.getLogger('yadtshell')
-
 from optparse import OptionParser, OptionGroup
 parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...]')
 
@@ -59,18 +57,23 @@ opts, args = parser.parse_args()
 args = args[1:]
 component_names = args
 
-CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT = ['start', 'stop', 'ignore', 'unignore',
-                                            'lock', 'unlock', 'updateartefact']
-
-if cmd in CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT and not component_names:
-    logger.warning('%s needs at least one component' % cmd)
-    parser.print_help()
-    sys.exit(0)
-
 observer = log.PythonLoggingObserver()
 observer.start()
 
 import yadtshell
+logger = logging.getLogger('yadtshell')
+
+def _do_nothing_when_command_requires_component_and_no_component_was_specified():
+
+    CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT = ['start', 'stop', 'ignore', 'unignore',
+                                                'lock', 'unlock', 'updateartefact']
+    if cmd in CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT and not component_names:
+        logger.warning('%s does nothing without at least one component URI, did you forget to specify one?' % cmd)
+        parser.print_help()
+        sys.exit(0)
+
+_do_nothing_when_command_requires_component_and_no_component_was_specified()
+
 yadtshell.settings.load_settings()
 
 logging.getLogger("twisted").setLevel(logging.WARN)
