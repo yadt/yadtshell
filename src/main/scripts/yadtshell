@@ -13,6 +13,8 @@ cmd = None
 if len(sys.argv) > 1:
     cmd = sys.argv[1]
 
+logger = logging.getLogger('yadtshell')
+
 from optparse import OptionParser, OptionGroup
 parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...]')
 
@@ -55,15 +57,21 @@ if not cmd:
 opts, args = parser.parse_args()
 
 args = args[1:]
+component_names = args
 
+CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT = ['start', 'stop', 'ignore', 'unignore',
+                                            'lock', 'unlock', 'updateartefact']
+
+if cmd in CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT and not component_names:
+    logger.warning('%s needs at least one component' % cmd)
+    parser.print_help()
+    sys.exit(0)
 
 observer = log.PythonLoggingObserver()
 observer.start()
 
 import yadtshell
 yadtshell.settings.load_settings()
-logger = logging.getLogger('yadtshell')
-
 
 
 if opts.verbose:
@@ -72,7 +80,6 @@ if opts.verbose:
 if opts.dryrun:
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()
 
-component_names = args
 if component_names:
     components = yadtshell.util.restore_current_state()
     component_names = yadtshell.helper.expand_hosts(component_names)
