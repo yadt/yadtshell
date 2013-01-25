@@ -73,6 +73,8 @@ observer.start()
 import yadtshell
 yadtshell.settings.load_settings()
 
+logging.getLogger("twisted").setLevel(logging.WARN)
+logging.getLogger("broadcaster").setLevel(logging.WARN)
 
 if opts.verbose:
     yadtshell.settings.ch.setLevel(logging.DEBUG)
@@ -121,7 +123,7 @@ elif cmd == 'update':
     #deferred = yadtshell.status(use_cache_only=True)
     deferred = yadtshell.status()
     deferred.addCallback(
-        yadtshell.update.compare_versions, 
+        yadtshell.update.compare_versions,
         args,
         **vars(opts)
     )
@@ -148,7 +150,7 @@ def publish_result():
         state = 'failed'
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state=state)
     logger.debug('waiting for outstanding events to be delivered')
-    return deferLater(reactor, 0.5, observer.stop)
+    return deferLater(reactor, 2, observer.stop)
 
 def publish_start():
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state='started')
