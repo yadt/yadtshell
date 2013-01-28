@@ -42,3 +42,8 @@ ve*
 
 # sublime project files
 yadtshell.sublime*
+.ropeproject
+.codeintel
+
+# sonar analysis
+.sonar
