@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 import os.path
-import pprint
 import sys
 import logging
 import time
@@ -15,14 +14,14 @@ import hostexpand.HostExpander
 
 import yadtshell.TerminalController
 from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info, create_log_filename
-import yadtshell.helper  # TODO refactor imports
+import yadtshell.helper
 
 sys.path.append('/etc/yadtshell')
 
 USER_INFO = get_user_info()
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
-OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))   # TODO rename to TMP_DIR?
+OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
@@ -166,8 +165,6 @@ def load_settings():
     TARGET_SETTINGS['original_hosts'] = TARGET_SETTINGS['hosts']
     TARGET_SETTINGS['hosts'] = he.expand(TARGET_SETTINGS['hosts'])
 
-    CENTRAL_LOG_SITE = TARGET_SETTINGS.get('central_log_site')
-
     OUT_TARGET_FILE = os.path.join(OUT_DIR, TARGET_SETTINGS_FILE)
     try:
         changed = not filecmp.cmp(TARGET_SETTINGS_FILE, OUT_TARGET_FILE)
@@ -201,8 +198,6 @@ def load_settings():
             ', '.join(TARGET_SETTINGS['hosts']),
         )
 
-    pp = pprint.PrettyPrinter(indent=4)
-
     identity = TARGET_SETTINGS.get('identity')
     login = TARGET_SETTINGS.get('login')
     credentials = ''
@@ -221,7 +216,7 @@ def load_settings():
     global SSH
     SSH = 'ssh -o ControlPath=%s -A %s -T -o ConnectTimeout=4 -o BatchMode=yes -o CheckHostIP=no -o StrictHostKeyChecking=no' % (SSH_CONTROL_PATH, credentials)
 
-# TODO move constants to constants
+
 HOST = "host"
 SERVICE = "service"
 ARTEFACT = "artefact"
@@ -258,7 +253,6 @@ FINISH = 'finish'
 
 MISSING = 'missing'
 EMPTY = ''
-
 
 STATE_DESCRIPTIONS = {
     0: UP,
