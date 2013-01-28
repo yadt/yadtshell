@@ -39,3 +39,6 @@ ve*
 .*~
 *~
 .*.swp
+
+# sublime project files
+yadtshell.sublime*
