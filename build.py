@@ -1,5 +1,5 @@
 #   YADT - an Augmented Deployment Tool
-#   Copyright (C) 2010-2012  Immobilien Scout GmbH
+#   Copyright (C) 2010-2013  Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ from pythonbuilder.core import use_plugin, init, Author
 use_plugin('python.core')
 use_plugin('python.integrationtest')
 use_plugin('python.install_dependencies')
+use_plugin('python.unittest')
 
 use_plugin('python.distutils')
 use_plugin('python.pydev')
@@ -41,7 +42,7 @@ license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.4'
- 
+
 default_task = ['publish']
 
 @init
@@ -51,6 +52,7 @@ def set_properties (project):
     project.depends_on('PyYAML')
 
     project.build_depends_on('shtub')
+    project.build_depends_on('mockito')
 
     project.set_property('integration_test_print_err', True)
 
@@ -71,7 +73,7 @@ def set_properties (project):
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration'
     ])
-    
+
 @init(environments='teamcity')
 def set_properties_for_teamcity_builds (project):
     import os

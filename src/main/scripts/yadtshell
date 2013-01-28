@@ -5,8 +5,7 @@ import logging
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-
-COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
+from yadtshell.commandline import ensure_command_has_required_arguments
 
 reactor.return_code = 127
 
@@ -64,15 +63,7 @@ observer.start()
 import yadtshell
 logger = logging.getLogger('yadtshell')
 
-
-def _ensure_command_has_required_arguments(command, arguments):
-
-    if command in COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI and not arguments:
-        logger.warning('%s does nothing without at least one component URI, did you forget to specify one?' % command)
-        parser.print_help()
-        sys.exit(0)
-
-_ensure_command_has_required_arguments(cmd, component_names)
+ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
 
 yadtshell.settings.load_settings()
 
