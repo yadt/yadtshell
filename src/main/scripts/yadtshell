@@ -6,6 +6,7 @@ from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
 
+COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
 
 reactor.return_code = 127
 
@@ -63,16 +64,15 @@ observer.start()
 import yadtshell
 logger = logging.getLogger('yadtshell')
 
-def _do_nothing_when_command_requires_component_and_no_component_was_specified():
 
-    CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT = ['start', 'stop', 'ignore', 'unignore',
-                                                'lock', 'unlock', 'updateartefact']
-    if cmd in CMDS_THAT_REQUIRE_AT_LEAST_ONE_COMPONENT and not component_names:
-        logger.warning('%s does nothing without at least one component URI, did you forget to specify one?' % cmd)
+def _ensure_command_has_required_arguments(command, arguments):
+
+    if command in COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI and not arguments:
+        logger.warning('%s does nothing without at least one component URI, did you forget to specify one?' % command)
         parser.print_help()
         sys.exit(0)
 
-_do_nothing_when_command_requires_component_and_no_component_was_specified()
+_ensure_command_has_required_arguments(cmd, component_names)
 
 yadtshell.settings.load_settings()
 
@@ -89,6 +89,7 @@ if component_names:
     components = yadtshell.util.restore_current_state()
     component_names = yadtshell.helper.expand_hosts(component_names)
     component_names = yadtshell.helper.glob_hosts(components, component_names)
+
 
 def create_simple_plan(cmd, component_names):
     action_set = set()
@@ -154,6 +155,7 @@ def publish_result():
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state=state)
     logger.debug('waiting for outstanding events to be delivered')
     return deferLater(reactor, 2, observer.stop)
+
 
 def publish_start():
     yadtshell.settings.ybc.publish_cmd(cmd=cmd, state='started')
