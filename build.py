@@ -28,18 +28,18 @@ use_plugin('filter_resources')
 
 
 authors     = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
-description = '''YADT - an Augmented Deployment Tool - The Shell Part
+description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts
 - updates artefacts in a safe manner
 - issues multiple commands in parallel on severall hosts
 
 for more documentation, visit http://www.yadt-project.org/
-'''
+"""
 
-name    = 'yadtshell'
+name = 'yadtshell'
 license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
-url     = 'https://github.com/yadt/yadtshell'
+url = 'https://github.com/yadt/yadtshell'
 version = '1.4'
  
 default_task = ['publish']
