@@ -8,7 +8,6 @@ import time
 import filecmp
 import shutil
 import re
-
 import yaml
 
 import hostexpand.HostExpander
@@ -67,13 +66,11 @@ def initialize_broadcast_client():
     try:
         sys.path.append("/etc/yadtbroadcast-client/")
         import broadcasterconf
-
         sys.path.pop()
         broadcasterconf_imported = True
     except Exception, e:
         logger.warn('no broadcaster config found')
         logger.warn(e)
-
 
 
 def load_settings():
