@@ -30,6 +30,6 @@ LOGGER = logging.getLogger()
 
 def ensure_command_has_required_arguments(command, arguments, show_help_callback):
     if command in COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI and not arguments:
-        LOGGER.warning('Command "{0}" requirest at least one component uri!'.format(command))
+        LOGGER.warning('Command "{0}" requires at least one component uri!'.format(command))
         show_help_callback()
         sys.exit(EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
