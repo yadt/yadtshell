@@ -9,7 +9,7 @@ class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
 
     def setUp(self):
         self._show_help_callback_has_been_called = False
-        when(yadtshell.commandline.LOGGER).warning(any_value).thenReturn(None)
+        when(yadtshell.commandline.LOGGER).error(any_value).thenReturn(None)
 
     def tearDown(self):
         unstub()
