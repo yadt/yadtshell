@@ -9,7 +9,7 @@ class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
     def tearDown(self):
         unstub()
 
-    def test_start_command_without_arguments_should_exit_with_code_0(self):
+    def test_should_exit_with_errir_code_1_when_executing_start_command_without_arguments(self):
         when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
         fake_show_help_function = lambda: None
 
