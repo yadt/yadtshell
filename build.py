@@ -28,7 +28,7 @@ use_plugin('copy_resources')
 use_plugin('filter_resources')
 
 
-authors     = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
+authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
 description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts
 - updates artefacts in a safe manner
@@ -45,8 +45,9 @@ version = '1.4.1'
 
 default_task = ['publish']
 
+
 @init
-def set_properties (project):
+def set_properties(project):
     project.depends_on('hostexpand')
     project.depends_on('Twisted')
     project.depends_on('PyYAML')
@@ -74,8 +75,9 @@ def set_properties (project):
         'Topic :: System :: Systems Administration'
     ])
 
+
 @init(environments='teamcity')
-def set_properties_for_teamcity_builds (project):
+def set_properties_for_teamcity_builds(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['install_build_dependencies', 'publish']
