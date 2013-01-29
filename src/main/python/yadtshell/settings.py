@@ -41,12 +41,11 @@ OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
-sf = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s', '%Y%m%d-%H%M%S')
-mf = logging.Formatter('%(levelname)8s %(name)25s  %(message)s', '%Y%m%d-%H%M%S')
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-ch.setFormatter(mf)
-root_logger.addHandler(ch)
+message_formatter = logging.Formatter('%(levelname)8s %(name)25s  %(message)s', '%Y%m%d-%H%M%S')
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(message_formatter)
+root_logger.addHandler(console_handler)
 
 logger = logging.getLogger('settings')
 
@@ -160,10 +159,11 @@ def load_settings():
         tag=tag
     )
 
-    ih = logging.FileHandler(log_file)
-    ih.setLevel(logging.DEBUG)
-    ih.setFormatter(sf)
-    root_logger.addHandler(ih)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s', '%Y%m%d-%H%M%S')
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
 
     logger.debug(yaml.dump(USER_INFO, default_flow_style=False))
     logger.debug(' '.join(sys.argv))
