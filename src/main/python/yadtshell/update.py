@@ -53,7 +53,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         hosts_with_update = [h for h in hosts_with_update if h.uri in handled_hosts]
         logger.debug('Handling hosts with new artefacts: %s' % ', '.join(h.uri for h in hosts_with_update))
     else:
-        logger.info('No hosts to update.')
+        logger.info('No hosts with pending updates.')
 
     next_artefacts = set([artefact.uri
         for artefact in components.values()
