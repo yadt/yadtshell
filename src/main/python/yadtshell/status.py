@@ -78,7 +78,7 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
             except OSError, e:
                 logger.warning('cannot remove %s:\n    %s' % (state_file, e))
 
-    logger.info('starting remote queries')
+    logger.debug('starting remote queries')
 
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
@@ -288,7 +288,7 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
             raise Exception('errors occured during status')
 
     def build_unified_dependencies_tree(ignored):
-        logger.info('building unified dependencies tree')
+        logger.debug('building unified dependencies tree')
 
         for component in components.values():
             component.logger = None

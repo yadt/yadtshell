@@ -36,7 +36,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         logger.info('handling ' + ', '.join(handled_hosts))
     else:
         handled_hosts = [h.uri for h in all_hosts]
-        logger.info('updating all hosts')
+        logger.info('Updating all hosts.')
 
     # create the base rules for starting all services
     all_services = set([s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
@@ -45,11 +45,15 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 #    for action in start_plan.actions:
 #        host_uri = components[action.uri].host_uri
 #        action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
-    
+
     hosts_with_update = [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED]
-    logger.info('new artefacts found for %s' % ', '.join(h.uri for h in hosts_with_update))
-    hosts_with_update = [h for h in hosts_with_update if h.uri in handled_hosts]
-    logger.info('handling hosts with new artefacts: %s' % ', '.join(h.uri for h in hosts_with_update))
+    if hosts_with_update:
+        logger.debug('New artefacts found for %s' % ', '.join(h.uri for h in hosts_with_update))
+
+        hosts_with_update = [h for h in hosts_with_update if h.uri in handled_hosts]
+        logger.debug('Handling hosts with new artefacts: %s' % ', '.join(h.uri for h in hosts_with_update))
+    else:
+        logger.info('No hosts to update.')
 
     next_artefacts = set([artefact.uri
         for artefact in components.values()
@@ -57,11 +61,11 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                 and artefact.revision == yadtshell.settings.NEXT
                 and artefact.host_uri in handled_hosts
     ])
-    
+
     if not next_artefacts:
         yadtshell.util.dump_action_plan('update', start_plan)
         return 'update'
-    
+
     current_artefacts = [components.get(yadtshell.uri.change_version(next_artefact, 'current'))
         for next_artefact in next_artefacts
     ]
@@ -84,7 +88,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         stopped_services.add(action.uri)
         #host_uri = components[action.uri].host_uri
         #action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPDATE_NEEDED))
-    
+
     for action in start_plan.actions:
         if action.uri in stopped_services:
             host_uri = components[action.uri].host_uri
@@ -103,20 +107,20 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     all_actions = set(start_plan.actions) | set(stop_plan.actions) | update_actions
     all_plan = yadtshell.actions.ActionPlan('all', all_actions)
     all_plan = yadtshell.metalogic.chop_minimal_related_chunks(all_plan)
-    
+
     update_chunks = set()
     for chunk in all_plan.actions:
         all_chunk_cmds = set(a.cmd for a in chunk.actions)
         if yadtshell.settings.UPDATE in all_chunk_cmds:
             update_chunks.add(chunk)
             continue
-    
+
     prestart_chunks = set()
     for chunk in all_plan.actions:
         if chunk in update_chunks:
             continue
         prestart_chunks.add(chunk)
-        
+
     plan = yadtshell.actions.ActionPlan('update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks), yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)], nr_workers=1)
     plan = yadtshell.metalogic.apply_instructions(plan, parallel)
     yadtshell.util.dump_action_plan('update', plan)
