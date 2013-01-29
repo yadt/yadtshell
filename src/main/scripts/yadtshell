@@ -22,20 +22,21 @@ import logging
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-from yadtshell.commandline import ensure_command_has_required_arguments
+from yadtshell.commandline import EXIT_CODE_MISSING_COMMAND, ensure_command_has_required_arguments
+from optparse import OptionParser, OptionGroup
+
 
 reactor.return_code = 127
 
-cmd = None
-if len(sys.argv) > 1:
-    cmd = sys.argv[1]
-
-from optparse import OptionParser, OptionGroup
 parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...]')
-
-# global stuff
 parser.add_option('-n', '--dryrun', action='store_true', dest='dryrun', default=False, help='does nothing')
 parser.add_option('-v', '', action='store_true', dest='verbose', default=False, help='verbose output')
+
+if len(sys.argv) < 2:
+    parser.print_help()
+    sys.exit(EXIT_CODE_MISSING_COMMAND)
+
+cmd = sys.argv[1]
 
 # status stuff
 if cmd in ['status']:
@@ -63,10 +64,6 @@ if cmd in ['dump']:
 # info stuff
 if cmd in ['info']:
     parser.add_option('', '--full', action='store_true', dest='full', default=False, help='shows all artefacts')
-
-if not cmd:
-    parser.print_help()
-    sys.exit(1)
 
 
 opts, args = parser.parse_args()
@@ -132,7 +129,6 @@ elif cmd == 'dump':
     yadtshell.dump(args, **vars(opts))
     sys.exit(0)
 elif cmd == 'update':
-    #deferred = yadtshell.status(use_cache_only=True)
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.update.compare_versions,

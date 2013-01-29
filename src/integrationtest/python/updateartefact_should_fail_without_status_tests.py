@@ -27,9 +27,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.test.domain')
 
         actual_return_code = self.execute_command('yadtshell updateartefact artefact://it01/yit-config-it01 -v')
-        
+
         self.assertEquals(1, actual_return_code)
 
-        
+
 if __name__ == '__main__':
     unittest.main()

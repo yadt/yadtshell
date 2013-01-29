@@ -24,7 +24,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         actual_return_code = self.execute_command('yadtshell ignore -v')
 
-        self.assertEquals(1, actual_return_code)
+        self.assertEquals(11, actual_return_code)
 
 
 if __name__ == '__main__':
