@@ -23,6 +23,7 @@ import yadtshell
 import sys
 
 COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
+
 EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT = 1
 
 LOGGER = logging.getLogger()

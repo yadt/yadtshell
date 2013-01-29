@@ -122,8 +122,8 @@ def createDeferredFromPlan(plan):
 
 
 deferred = None
-if cmd == 'status':
 
+if cmd == 'status':
     deferred = yadtshell.status(hosts=args, **vars(opts))
 elif cmd == 'info':
     yadtshell.info(**vars(opts))
