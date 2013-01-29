@@ -41,7 +41,7 @@ OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
-message_formatter = logging.Formatter('%(levelname)8s %(name)25s  %(message)s', '%Y%m%d-%H%M%S')
+message_formatter = logging.Formatter('%(levelname)8s %(message)s')
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(message_formatter)
