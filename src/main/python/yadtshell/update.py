@@ -33,10 +33,10 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     if hosts:
         handled_hosts = yadtshell.helper.expand_hosts(hosts)
         handled_hosts = yadtshell.helper.glob_hosts(components, handled_hosts)
-        logger.info('handling ' + ', '.join(handled_hosts))
+        logger.debug('User requested update for ' + ', '.join(handled_hosts))
     else:
         handled_hosts = [h.uri for h in all_hosts]
-        logger.info('Updating all hosts.')
+        logger.debug('User requested update for all hosts.')
 
     # create the base rules for starting all services
     all_services = set([s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
@@ -75,7 +75,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     logger.debug('current_artefacts: ' + ', '.join(current_artefacts))
 
     diff = next_artefacts | current_artefacts
-    logger.info('diff: ' + ', '.join(diff))
+    logger.debug('diff: ' + ', '.join(diff))
 
     if not diff:
         yadtshell.util.dump_action_plan('update', start_plan)

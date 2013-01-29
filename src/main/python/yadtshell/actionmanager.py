@@ -43,8 +43,7 @@ class ActionManager(object):
     def __init__(self):
         self.logger = logging.getLogger('actionmanager')
         self.finish_fun = self.log_host_finished
-        self.logger.info('log prefix: %s' % os.path.basename(yadtshell.settings.log_file))
-#        self.broadcaster = broadcaster.Broadcaster()
+        self.logger.info('log file: %s' % yadtshell.settings.log_file)
 
     def get_state_info(self, action):
         component = self.components[action.uri]
@@ -64,7 +63,7 @@ class ActionManager(object):
             component.state = yadtshell.constants.HOST_STATE_DESCRIPTIONS.get(result, result)
             self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
             self.pi.update(('status', component), '%s' % result)
-            return 
+            return
         if isinstance(component, yadtshell.components.Host):
             deferred = self.issue_command(component, 'probe')
             deferred.addBoth(store_host_exit_code)
@@ -82,7 +81,7 @@ class ActionManager(object):
             yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}])
             self.logger.debug("storing new state for %s: %s" % (component.uri, component.state))
             self.orig_components[component.uri].state = component.state
-            return 
+            return
         if isinstance(component, yadtshell.components.Service):
             status_cmd = 'status'
             if hasattr(component, 'immediate_status'):
@@ -101,7 +100,7 @@ class ActionManager(object):
         return ignored
 
     def handle_action(self, protocol=None, plan=None, path=None):
-        action = plan   # TODO yukk
+        action = plan
         self.logger.debug('executing action %s' % action)
         cmd, uri, _, _, target_state = self.get_state_info(action)
         action.state = yadtshell.actions.State.RUNNING
@@ -113,7 +112,7 @@ class ActionManager(object):
             if self.finish_fun:
                 self.finish_fun(action)
             return defer.succeed(None)
-        
+
         if self.dryrun:
             if action.attr:
                 self.logger.debug('        dryrun %(cmd)s, setting %(attr)s to %(target_value)s on %(uri)s' % vars(action))
@@ -124,24 +123,24 @@ class ActionManager(object):
             deferred = defer.Deferred()
             reactor.callLater(0, deferred.callback, None)
             return deferred
-        
+
             ## deferred dryrun
             #reactor.callLater(.5, setattr, component, action.attr, action.target_value)
             #deferred = defer.Deferred()
             #reactor.callLater(1, deferred.callback, None)
             #return deferred
-            
+
         if cmd == yadtshell.constants.PROBE:
             deferred = self.probe(component)
             deferred.addCallback(self.set_probed_state, component)
         out_log_level = logging.DEBUG
-        
+
         if cmd in [yadtshell.settings.UPDATE, yadtshell.constants.UPDATEARTEFACT]:
             out_log_level = logging.INFO
-        
+
         if out_log_level == logging.INFO:
             self.logger.info('-' * 20 + ' verbatim stdout of %s follows this line ' % cmd + '-' * 20)
-            
+
         if not deferred:
             deferred = self.issue_command(component, cmd, target_state, out_log_level=out_log_level, args=getattr(action,'args', []), kwargs=getattr(action, 'kwargs', {}))
         if out_log_level == logging.INFO:
@@ -151,22 +150,22 @@ class ActionManager(object):
         deferred.addBoth(self.mark_action_as_finished, action)
         deferred.addErrback(yadtshell.twisted.report_error, self.logger.error)
         return deferred
-        
+
     def mark_end_of_verbatim_stdout(self, ignored):
         self.logger.info('-' * 20 + ' end of verbatim stdout ' + '-' * 20)
         return ignored
-    
+
     def handle_ignored_or_locked(self, failure, cmd, component, target_state):
         exitCode = getattr(failure.value, 'exitCode', None)
         if exitCode == 151:   # TODO use constant here
             self.logger.info('%s is ignored, assuming successfull %s' % (component.uri, cmd))
             component.state = target_state
             self.pi.update((cmd, component), 'i')
-            return 
+            return
         if exitCode == 150:   # TODO use constant here
             self.logger.critical('%s %s failed, because %s is locked' % (cmd, component.uri, component.host_uri))
         return failure
-    
+
     def handle_output(self, ignored, cmd, component, target_state=None, tries=0):
         if target_state:
             if component.state == target_state:
@@ -189,7 +188,7 @@ class ActionManager(object):
                     '%s could not reach target state %s, is still %s' % (component.uri, target_state, component.state), 1)
         return ignored
 
-    
+
     def issue_command(self, component, cmd, target_state=None, args=[], kwargs={}, out_log_level=logging.DEBUG, err_log_level=logging.WARN):
         cmdline = None
         try:
@@ -225,7 +224,7 @@ class ActionManager(object):
         p = yadtshell.twisted.YadtProcessProtocol(component, cmd, self.pi, out_log_level=out_log_level, err_log_level=err_log_level, log_prefix=re.sub('^.*://', '', component.uri))
         p.target_state = target_state
         p.state = yadtshell.settings.UNKNOWN
-        
+
         #if self.pi:
             #self.pi.observables.append(p)
         p.deferred = defer.Deferred()
@@ -238,7 +237,7 @@ class ActionManager(object):
         self.logger.info(yadtshell.settings.term.render('    ${BOLD}%(uri)s finished successfully${NORMAL}' % vars(action)))
 
 
-    def next_with_preconditions(self, queue): 
+    def next_with_preconditions(self, queue):
         for task in queue:
             action = task.action
             if not isinstance(action, yadtshell.actions.ActionPlan):
@@ -261,12 +260,9 @@ class ActionManager(object):
             return 1
 
     def report_plan_finished(self, result, plan, plan_name):
-        #log_level = logging.DEBUG
-        #if plan.nr_workers == 1:
-        log_level = logging.INFO
-        self.logger.log(log_level, '%s finished' % plan_name)
+        self.logger.debug('%s finished' % plan_name)
         return result
-    
+
     def handle(self, plan, path=[]):
         queue = []
         if isinstance(plan, yadtshell.actions.Action):
@@ -275,27 +271,27 @@ class ActionManager(object):
             queue.append(yadtshell.ActionManager.Task(fun=self.handle_action, action=action, path=this_path))
             plan_name = '/' + '/'.join(this_path)
             return yadtshell.defer.DeferredPool(plan_name, queue)
-        
+
         if not len(plan.actions):
             deferred = defer.Deferred()
-            reactor.callLater(0, deferred.callback, None)   # TODO mhhh: good practice?
+            reactor.callLater(0, deferred.callback, None)
             return deferred
-            #return defer.succeed(None)
+
         if not plan.nr_workers:
             plan.nr_workers = self.calc_nr_workers(plan)
         this_path = path + [plan.name]
         plan_name = '/' + '/'.join(this_path)
-        
+
         for action in plan.actions:
             queue.append(yadtshell.ActionManager.Task(fun=self.handle, action=action, path=this_path))
         plan.nr_workers = min(plan.nr_workers, len(queue))
         self.logger.info('%s : %s' % (plan_name, plan.meta_info()))
-        
+
         pool = yadtshell.defer.DeferredPool(
-            plan_name, 
-            queue, 
-            nr_workers=plan.nr_workers, 
-            next_task_fun=self.next_with_preconditions, 
+            plan_name,
+            queue,
+            nr_workers=plan.nr_workers,
+            next_task_fun=self.next_with_preconditions,
             nr_errors_tolerated=plan.nr_errors_tolerated)
         pool.addCallback(self.report_plan_finished, plan, plan_name)
         return pool
@@ -343,7 +339,7 @@ class ActionManager(object):
         for line in action_plan.dump(include_preconditions=True).splitlines():
             log_plan_fun(line)
         log_plan_fun('-' * 51)
-        
+
         def remove_plan_file(result):
             if not self.dryrun:
                 self.logger.debug('no problems so far, thus removing action plan %s' % action_plan_file)
@@ -353,14 +349,14 @@ class ActionManager(object):
                     pass
             f = open(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'), "w")
             pickle.dump(self.orig_components, f)
-            f.close() 
+            f.close()
             return result
 
         def finish_progress_indicator(result, pi):
             if pi:
                 pi.finish()
             return result
-        
+
         self.pi = yadtshell.twisted.ProgressIndicator()
         if not dryrun:
             yadtshell.util.start_ssh_multiplexed()
@@ -368,7 +364,7 @@ class ActionManager(object):
             deferred = self.handle(action_plan)
         except ValueError, ve:
             deferred = defer.Deferred()
-            reactor.callLater(0, deferred.errback, ve)   # TODO mhhh: good practice?
+            reactor.callLater(0, deferred.errback, ve)
             return deferred
 
         deferred.addErrback(yadtshell.twisted.report_error, self.logger.error)
