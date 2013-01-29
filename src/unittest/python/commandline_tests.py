@@ -18,7 +18,7 @@ class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
         self._show_help_callback_has_been_called = True
 
 
-    def test_should_fail_with_error_code_1_when_executing_command_without_arguments(self):
+    def test_should_fail_with_appropriate_error_code_when_executing_command_without_arguments(self):
         when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
 
         ensure_command_has_required_arguments('start', [], self.fake_show_help_callback)
