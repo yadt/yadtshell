@@ -22,9 +22,9 @@ import integrationtest_support
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        unignore_return_code = self.execute_command('yadtshell unignore -v')
+        actual_return_code = self.execute_command('yadtshell unignore -v')
 
-        self.assertEquals(1, unignore_return_code)
+        self.assertEquals(1, actual_return_code)
 
 
 if __name__ == '__main__':

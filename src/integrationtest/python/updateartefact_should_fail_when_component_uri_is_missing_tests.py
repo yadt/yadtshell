@@ -23,9 +23,9 @@ import integrationtest_support
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        update_return_code = self.execute_command('yadtshell updateartefact -v')
+        actual_return_code = self.execute_command('yadtshell updateartefact -v')
 
-        self.assertEquals(1, update_return_code)
+        self.assertEquals(1, actual_return_code)
 
 
 if __name__ == '__main__':

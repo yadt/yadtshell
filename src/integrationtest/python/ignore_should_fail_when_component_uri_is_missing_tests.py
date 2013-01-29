@@ -22,9 +22,9 @@ import integrationtest_support
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        ignore_return_code = self.execute_command('yadtshell ignore -v')
+        actual_return_code = self.execute_command('yadtshell ignore -v')
 
-        self.assertEquals(1, ignore_return_code)
+        self.assertEquals(1, actual_return_code)
 
 
 if __name__ == '__main__':
