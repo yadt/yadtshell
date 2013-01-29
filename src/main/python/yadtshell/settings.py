@@ -159,19 +159,14 @@ def load_settings():
         tag=tag
     )
 
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s', '%Y%m%d-%H%M%S')
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
 
     logger.debug(yaml.dump(USER_INFO, default_flow_style=False))
-    logger.debug(' '.join(sys.argv))
-    logger.debug('\ncmd: %s %s' % (
-        os.path.basename(sys.argv[0]).replace('.py', '').replace('components', '').replace('metalogic', '').lower(),
-        ' '.join(sys.argv[1:])
-    ))
-
+    logger.debug('Called "{0}"'.format(' '.join(sys.argv)))
     logger.debug('output dir is %s' % OUTPUT_DIR)
 
     he = hostexpand.HostExpander.HostExpander(outputformat=hostexpand.HostExpander.HostExpander.FQDN)
@@ -219,7 +214,7 @@ def load_settings():
     if login:
         credentials += ' -l %(login)s' % locals()
     CONNECTIONS_DIR = os.path.join(OUTPUT_DIR, 'connections')
-    #SSH_CONTROL_PATH = os.path.join(CONNECTIONS_DIR, '%r@%l_%h_%p')
+
     global SSH_CONTROL_PATH
     SSH_CONTROL_PATH = os.path.join(CONNECTIONS_DIR, '%h')
     try:
