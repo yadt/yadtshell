@@ -19,25 +19,13 @@ __author__ = 'Michael Gruber'
 import unittest
 import integrationtest_support
 
-import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test(self):
-        self.write_target_file('it01.domain')
+    def test (self):
+        update_return_code = self.execute_command('yadtshell updateartefact -v')
 
-        with self.fixture() as when:
-            when.calling('ssh').with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
-                .then_write(yadt_status_answer.stdout('it01.domain'))
-
-        status_return_code = self.execute_command('yadtshell status -v')
-        start_return_code  = self.execute_command('yadtshell start -v')
-
-        with self.verify() as verify:
-            self.assertEquals(0, status_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
-
-            self.assertEquals(0, start_return_code)
+        self.assertEquals(1, update_return_code)
 
 
 if __name__ == '__main__':

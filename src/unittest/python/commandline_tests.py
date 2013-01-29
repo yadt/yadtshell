@@ -1,7 +1,7 @@
 import unittest
 from mockito import when, verify, unstub, any as any_value
 import yadtshell
-from yadtshell.commandline import ensure_command_has_required_arguments
+from yadtshell.commandline import ensure_command_has_required_arguments, EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT
 
 
 class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
@@ -15,4 +15,4 @@ class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
 
         ensure_command_has_required_arguments('start', [], fake_show_help_function)
 
-        verify(yadtshell.commandline.sys).exit(0)
+        verify(yadtshell.commandline.sys).exit(EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
