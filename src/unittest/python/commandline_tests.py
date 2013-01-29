@@ -1,5 +1,5 @@
 import unittest
-from mockito import when, verify, unstub, any as any_value, mock
+from mockito import when, verify, unstub, any as any_value
 import yadtshell
 from yadtshell.commandline import ensure_command_has_required_arguments
 
