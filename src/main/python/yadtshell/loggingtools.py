@@ -3,7 +3,12 @@ import re
 from yadtshell.helper import create_log_filename
 
 
-def create_log_file_name(command_arguments, log_dir, target_name, command_start_timestamp, user_name, source_host):
+def create_next_log_file_name(command_arguments,
+                        log_dir,
+                        target_name,
+                        command_start_timestamp,
+                        user_name,
+                        source_host):
     tag_args = command_arguments
     if os.path.basename(tag_args[0]) == 'yadtshell':
         tag_args = tag_args[1:]
@@ -22,4 +27,3 @@ def create_log_file_name(command_arguments, log_dir, target_name, command_start_
         source_host,
         tag=tag
     )
-

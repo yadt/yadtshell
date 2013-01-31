@@ -28,7 +28,7 @@ import hostexpand.HostExpander
 
 import yadtshell.TerminalController
 from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info
-from yadtshell.loggingtools import create_log_file_name
+from yadtshell.loggingtools import create_next_log_file_name
 import yadtshell.helper
 
 sys.path.append('/etc/yadtshell')
@@ -140,7 +140,7 @@ def load_settings():
             sys.exit(1)
 
     global log_file
-    log_file = create_log_file_name(command_arguments=sys.argv,
+    log_file = create_next_log_file_name(command_arguments=sys.argv,
                                     log_dir=LOG_DIR,
                                     target_name=TARGET_SETTINGS['name'],
                                     command_start_timestamp=STARTED_ON,

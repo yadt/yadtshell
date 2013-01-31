@@ -73,11 +73,11 @@ class Component(object):
 
     def create_remote_log_filename(self, tag=None):
         return yadtshell.helper.create_log_filename(
-            yadtshell.settings.TODAY, 
-            yadtshell.settings.TARGET_SETTINGS['name'], 
-            yadtshell.settings.STARTED_ON, 
-            yadtshell.settings.USER_INFO['user'], 
-            self.host, 
+            yadtshell.settings.TODAY,
+            yadtshell.settings.TARGET_SETTINGS['name'],
+            yadtshell.settings.STARTED_ON,
+            yadtshell.settings.USER_INFO['user'],
+            self.host,
             tag
         )
 
@@ -93,8 +93,8 @@ class Component(object):
         else:
             # TODO valid for uninitialized hosts
             host = self.host
-        # TODO only suiteable for service objects!
-        service = self.name 
+        # TODO only suitable for service objects!
+        service = self.name
         remotecall_script = '/usr/bin/yadt-remotecall'
         log_file = self.create_remote_log_filename(tag=tag)
         owner = yadtshell.util.get_locking_user_info()['owner']
@@ -252,16 +252,16 @@ class Host(Component):
         lockinfo["message"] = message
         lockinfo["force"] = force
         return self._create_owner_file(
-                lockinfo, 
+                lockinfo,
                 os.path.join(self.get_lock_dir(), 'host.lock'),  # TODO extract method for filename
                 force=force, tag="lock_host")
 
     def unlock(self, force=False, **kwargs):
         lockinfo = yadtshell.util.get_locking_user_info()
         return self._remove_owner_file(
-                lockinfo, 
+                lockinfo,
                 os.path.join(self.get_lock_dir(), 'host.lock'),  # TODO extract method for filename
-                force=force, 
+                force=force,
                 tag="unlock_host")
 
     def update_attributes_after_status(self):
@@ -284,7 +284,7 @@ class Artefact(Component):
         #self.needs.add(uri.create(settings.HOST, host.host))
 
     def updateartefact(self):
-        return self.remote_call('sudo /usr/bin/yadt-yum upgrade -y %s' % self.name, 
+        return self.remote_call('sudo /usr/bin/yadt-yum upgrade -y %s' % self.name,
                                 'artefact_%s_%s_%s' % (self.host, self.name, yadtshell.constants.UPDATEARTEFACT))
 
 
@@ -292,7 +292,7 @@ class Artefact(Component):
 class Service(Component):
     def __init__(self, host, name, settings = None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
-        
+
         self.needs_services = []
         self.needs_artefacts = []
         self.needs = set()
@@ -315,7 +315,7 @@ class Service(Component):
             self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, n % locals() +
                 "/" + yadtshell.settings.CURRENT))
         #self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
-        
+
         self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(settings.get('state'),
                 yadtshell.settings.UNKNOWN)
         self.script = None
@@ -417,7 +417,7 @@ def do(args, opts):
 #
 #    from twisted.internet import reactor
 #    import yadttwisted
-#    
+#
 #    deferred = do(args, **vars(opts))
 #    print deferred
 #    deferred.addErrback(yadttwisted.report_error)

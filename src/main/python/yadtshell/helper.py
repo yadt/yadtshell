@@ -174,7 +174,7 @@ def get_user_info():
 
 def create_log_filename(log_dir, target_name, started_on, user, host, tag=None):
     global cmd_counter
-    log_file = '%s/yadtshell.%s.%s.%s.%s' % (log_dir, target_name, started_on, user, host)
+    log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (log_dir, target_name, started_on, user, cmd_counter, host)
     cmd_counter = cmd_counter + 1
     if tag:
         log_file = '%s.%s' % (log_file, tag)
