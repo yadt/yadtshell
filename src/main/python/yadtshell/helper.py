@@ -27,7 +27,6 @@ import linecache
 cmd_counter = 0
 
 
-
 def condense_hosts(words):
     wgs = {}
     for word in words:
@@ -81,6 +80,7 @@ def condense_hosts(words):
             results.append(prefix + result + suffix)
     return results
 
+
 def expand_hosts(words):
     def add_result(host, aux):
         if host.startswith('host://'):
@@ -114,6 +114,7 @@ def expand_hosts(words):
                 add_result('%(prefix)s%(i)02i%(suffix)s' % locals(), aux)
     return results
 
+
 def glob_hosts(components, words):
     results = []
     for w in words:
@@ -122,6 +123,7 @@ def glob_hosts(components, words):
         else:
             results.append(w)
     return results
+
 
 def condense_hosts2(words):
     ws = {}
@@ -152,6 +154,7 @@ def condense_hosts2(words):
             result.append((condensed, constant[2]))
     return result
 
+
 def get_user_info():
     user = pwd.getpwuid(os.getuid())[0]
     yadt_host = socket.gethostname()
@@ -168,17 +171,20 @@ def get_user_info():
             "pid": pid,
     }
 
+
 def create_log_filename(log_dir, target_name, started_on, user, host, tag=None):
-    global cmd_counter 
-    log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % ( 
+    global cmd_counter
+    log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (
         log_dir, target_name, started_on, user, cmd_counter, host)
-    cmd_counter = cmd_counter + 1 
-    if tag: 
+    cmd_counter = cmd_counter + 1
+    if tag:
         log_file = '%s.%s' % (log_file, tag)
-    return '%s.log' % log_file 
+    return '%s.log' % log_file
+
 
 def plural(string):
     return string + 's'
+
 
 def locate(pattern, root=os.curdir, blacklist=None):
     '''Locate all files matching supplied filename pattern in and below
@@ -199,17 +205,16 @@ def locate(pattern, root=os.curdir, blacklist=None):
             yield os.path.join(path, filename)
 
 
-
-def _traceit(frame, event, arg): 
-    '''http://www.dalkescientific.com/writings/diary/archive/2005/04/20/tracing_python_code.html''' 
-    if event == "line": 
-        lineno = frame.f_lineno 
-        filename = frame.f_globals["__file__"] 
-        if (filename.endswith(".pyc") or filename.endswith(".pyo")): 
-            filename = filename[:-1] 
-        name = frame.f_globals["__name__"] 
-        line = linecache.getline(filename, lineno) 
-        print "%s  # %s:%s" % (line.rstrip(), name, lineno,) 
-    return _traceit 
-#    sys.settrace(_traceit) 
+def _traceit(frame, event, arg):
+    '''http://www.dalkescientific.com/writings/diary/archive/2005/04/20/tracing_python_code.html'''
+    if event == "line":
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        if (filename.endswith(".pyc") or filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print "%s  # %s:%s" % (line.rstrip(), name, lineno,)
+    return _traceit
+#    sys.settrace(_traceit)
 
