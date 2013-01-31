@@ -22,13 +22,13 @@ import logging
 import time
 import filecmp
 import shutil
-import re
 import yaml
 
 import hostexpand.HostExpander
 
 import yadtshell.TerminalController
-from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info, create_log_filename
+from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info
+from yadtshell.loggingtools import create_log_file_name
 import yadtshell.helper
 
 sys.path.append('/etc/yadtshell')
@@ -139,25 +139,14 @@ def load_settings():
             root_logger.exception(e)
             sys.exit(1)
 
-    tag_args = sys.argv
-    if os.path.basename(tag_args[0]) == 'yadtshell':
-        tag_args = tag_args[1:]
-    tag = '_'.join(tag_args)
-    tag = tag.replace('://', '_')
-    tag = tag.replace('/', '_')
-    tag = tag.replace('-', '')
-    tag = re.sub('[:\*\[\]]*', '', tag).lower()
-    tag = re.sub('^_', '', tag)
-    tag = re.sub('_$', '', tag)
     global log_file
-    log_file = create_log_filename(
-        LOG_DIR,
-        TARGET_SETTINGS['name'],
-        STARTED_ON,
-        USER_INFO['user'],
-        USER_INFO['yadt_host'].split('.')[0],
-        tag=tag
-    )
+    log_file = create_log_file_name(command_arguments=sys.argv,
+                                    log_dir=LOG_DIR,
+                                    target_name=TARGET_SETTINGS['name'],
+                                    command_start_timestamp=STARTED_ON,
+                                    user_name=USER_INFO['user'],
+                                    source_host=USER_INFO['yadt_host'].split('.')[0])
+
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
     file_handler = logging.FileHandler(log_file)
