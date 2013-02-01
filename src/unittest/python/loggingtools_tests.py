@@ -1,6 +1,9 @@
 import unittest
 
-from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag, get_command_counter_and_increment
+from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
+                                    create_next_log_file_name,
+                                    get_command_counter_and_increment)
+from unittest_support import FileNameTestCase
 import yadtshell.loggingtools
 
 
@@ -22,17 +25,16 @@ class GetCommandCounterAndIncrementTests(unittest.TestCase):
         self.assertEqual(2, get_command_counter_and_increment())
 
 
-class CreateNextLogFileNameWithCommandArgumentsAsTagTests(unittest.TestCase):
-
+class CreateNextLogFileNameTests(FileNameTestCase):
     def setUp(self):
         yadtshell.loggingtools.command_counter = 123
-        self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        self.actual_file_name = create_next_log_file_name(
                 log_dir='/var/log/test',
                 target_name='target-name',
                 command_start_timestamp='2013-01-31--11-27-56',
                 user_name='user-name',
                 source_host='host-name',
-                command_arguments=['yadtshell', 'status']
+                tag='status'
         )
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
@@ -56,18 +58,20 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(unittest.TestCase):
     def test_should_use_command_argument_as_seventh_element(self):
         self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
 
-    def _assert_element_at_is(self, actual_file_name, element_position, element_value):
-        actual_element_value = actual_file_name.split('.')[element_position]
-        message = 'Expected : {0} but got {1} instead'.format(element_value, actual_element_value)
-        self.assertTrue(actual_element_value == element_value, message)
 
-    def _assert(self, actual_file_name):
-        self.actual_file_name = actual_file_name
-        return self
+class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
-    def _element_at(self, element_position):
-        self.element_position = element_position
-        return self
+    def setUp(self):
+        yadtshell.loggingtools.command_counter = 123
+        self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                log_dir='/var/log/test',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['yadtshell', 'status']
+        )
 
-    def _is_equal_to(self, element_value):
-        self._assert_element_at_is(self.actual_file_name, self.element_position, element_value)
+    def test_should_use_command_argument_as_seventh_element(self):
+        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
+
