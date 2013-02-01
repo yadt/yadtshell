@@ -5,23 +5,14 @@ command_counter = 0
 
 
 def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
-    global command_counter
+    command_counter = get_command_counter_and_increment()
 
-    log_file_name = '%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s.%(user_name)s.%(command_counter)03i.%(source_host)s' % {
-        "log_dir": log_dir,
-        "target_name": target_name,
-        "command_start_timestamp": command_start_timestamp,
-        "command_counter": command_counter,
-        "user_name": user_name,
-        "source_host": source_host,
-    }
+    log_file_name = '%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s.%(user_name)s.%(command_counter)03i.%(source_host)s' % locals()
 
     if tag:
         log_file_name += '.' + tag
 
     log_file_name += '.log'
-
-    command_counter += 1
     return log_file_name
 
 
@@ -50,3 +41,12 @@ def create_next_log_file_name_with_command_arguments_as_tag(
         source_host,
         tag=tag
     )
+
+
+def get_command_counter_and_increment():
+    current_command_counter = command_counter
+
+    global command_counter
+    command_counter += 1
+
+    return current_command_counter

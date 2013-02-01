@@ -1,7 +1,25 @@
 import unittest
 
-from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag
+from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag, get_command_counter_and_increment
 import yadtshell.loggingtools
+
+
+class GetCommandCounterAndIncrementTests(unittest.TestCase):
+
+    def setUp(self):
+        yadtshell.loggingtools.command_counter = 0
+
+    def test_should_return_zero_as_initial_value(self):
+        self.assertEqual(0, get_command_counter_and_increment())
+
+    def test_should_return_one_as_second_value(self):
+        get_command_counter_and_increment()
+        self.assertEqual(1, get_command_counter_and_increment())
+
+    def test_should_return_two_as_third_value(self):
+        get_command_counter_and_increment()
+        get_command_counter_and_increment()
+        self.assertEqual(2, get_command_counter_and_increment())
 
 
 class CreateNextLogFileNameWithCommandArgumentsAsTagTests(unittest.TestCase):
