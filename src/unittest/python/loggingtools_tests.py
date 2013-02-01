@@ -5,7 +5,7 @@ from mockito import when, unstub, verify, any as any_value
 from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
                                     create_next_log_file_name,
-                                    get_command_counter_and_increment,
+                                    _get_command_counter_and_increment,
                                     _strip_special_characters,
                                     _trim_underscores,
                                     _strip_dashes,
@@ -13,27 +13,10 @@ from yadtshell.loggingtools import (create_next_log_file_name_with_command_argum
 import yadtshell.loggingtools
 
 
-class GetCommandCounterAndIncrementTests(unittest.TestCase):
-
-    def setUp(self):
-        yadtshell.loggingtools.command_counter = 0
-
-    def test_should_return_zero_as_initial_value(self):
-        self.assertEqual(0, get_command_counter_and_increment())
-
-    def test_should_return_one_as_second_value(self):
-        get_command_counter_and_increment()
-        self.assertEqual(1, get_command_counter_and_increment())
-
-    def test_should_return_two_as_third_value(self):
-        get_command_counter_and_increment()
-        get_command_counter_and_increment()
-        self.assertEqual(2, get_command_counter_and_increment())
-
 
 class CreateNextLogFileNameTests(FileNameTestCase):
     def setUp(self):
-        when(yadtshell.loggingtools).get_command_counter_and_increment().thenReturn(123)
+        when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
         self.actual_file_name = create_next_log_file_name(
                 log_dir='/var/log/test',
                 target_name='target-name',
@@ -72,7 +55,7 @@ class CreateNextLogFileNameTests(FileNameTestCase):
 class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
     def setUp(self):
-        when(yadtshell.loggingtools).get_command_counter_and_increment().thenReturn(123)
+        when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
 
     def tearDown(self):
         unstub()
@@ -102,6 +85,55 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
         self.assertEqual('log-file-name', actual_log_file_name)
         verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
+
+    def test_should_join_arguments_using_underscore(self):
+        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+
+        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                log_dir='log-directory',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['/usr/bin/yadtshell', 'abc', 'def', 'ghi', 'jkl']
+        )
+
+        self.assertEqual('log-file-name', actual_log_file_name)
+        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
+
+    def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self):
+        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+
+        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                log_dir='log-directory',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['foobar', 'abc', 'def', 'ghi', 'jkl']
+        )
+
+        self.assertEqual('log-file-name', actual_log_file_name)
+        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
+
+
+class GetCommandCounterAndIncrementTests(unittest.TestCase):
+
+    def setUp(self):
+        yadtshell.loggingtools.command_counter = 0
+
+    def test_should_return_zero_as_initial_value(self):
+        self.assertEqual(0, _get_command_counter_and_increment())
+
+    def test_should_return_one_as_second_value(self):
+        _get_command_counter_and_increment()
+        self.assertEqual(1, _get_command_counter_and_increment())
+
+    def test_should_return_two_as_third_value(self):
+        _get_command_counter_and_increment()
+        _get_command_counter_and_increment()
+        self.assertEqual(2, _get_command_counter_and_increment())
+
 
 
 class StripSpecialCharactersTest(unittest.TestCase):

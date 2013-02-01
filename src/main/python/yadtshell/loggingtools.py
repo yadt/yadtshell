@@ -5,7 +5,7 @@ command_counter = 0
 
 
 def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
-    command_counter = get_command_counter_and_increment()
+    command_counter = _get_command_counter_and_increment()
 
     log_file_name = '%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s.%(user_name)s.%(command_counter)03i.%(source_host)s' % locals()
 
@@ -43,6 +43,15 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     )
 
 
+def _get_command_counter_and_increment():
+    global command_counter
+
+    current_command_counter = command_counter
+    command_counter += 1
+
+    return current_command_counter
+
+
 def _strip_special_characters(tag):
     tag = re.sub('[:\*\[\]]*', '', tag).lower()
     return tag
@@ -65,10 +74,3 @@ def _replace_uri_specific_characters_with_underscores(tag):
     return tag
 
 
-def get_command_counter_and_increment():
-    global command_counter
-
-    current_command_counter = command_counter
-    command_counter += 1
-
-    return current_command_counter
