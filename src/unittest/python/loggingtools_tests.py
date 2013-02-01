@@ -1,9 +1,11 @@
 import unittest
 
+from mockito import when, verify, any as any_value
+
+from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
                                     create_next_log_file_name,
                                     get_command_counter_and_increment)
-from unittest_support import FileNameTestCase
 import yadtshell.loggingtools
 
 
@@ -62,7 +64,7 @@ class CreateNextLogFileNameTests(FileNameTestCase):
 class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
     def setUp(self):
-        yadtshell.loggingtools.command_counter = 123
+        when(yadtshell.loggingtools).get_command_counter_and_increment().thenReturn(123)
         self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
                 log_dir='/var/log/test',
                 target_name='target-name',
@@ -71,3 +73,6 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
                 source_host='host-name',
                 command_arguments=['yadtshell', 'status']
         )
+
+    def test_should_use_command_argument_as_seventh_element(self):
+        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
