@@ -1,5 +1,5 @@
 #   YADT - an Augmented Deployment Tool
-#   Copyright (C) 2010-2012  Immobilien Scout GmbH
+#   Copyright (C) 2010-2013  Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.test.domain'))
-        
+
         actual_return_code = self.execute_command('yadtshell status -v')
-        
+
         self.assertEquals(0, actual_return_code)
-        
+
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status')
 

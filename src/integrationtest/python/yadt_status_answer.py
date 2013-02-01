@@ -1,5 +1,5 @@
 #   YADT - an Augmented Deployment Tool
-#   Copyright (C) 2010-2012  Immobilien Scout GmbH
+#   Copyright (C) 2010-2013  Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -71,13 +71,13 @@ query_time: 1
 
 def stdout (host, frontend_service_state=0, backend_service_state=0):
     date = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y")
-    
+
     placeholders = {
         'backend_service_state'  : backend_service_state,
         'date'                   : date,
         'frontend_service_state' : frontend_service_state,
-        'host'                   : host[0:host.index('.')], 
-        'host_fqdn'              : host, 
+        'host'                   : host[0:host.index('.')],
+        'host_fqdn'              : host,
         'timestamp'              : int(time.time())}
-    
+
     return STATUS_TEMPLATE.substitute(placeholders)
