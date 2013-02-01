@@ -141,12 +141,13 @@ def load_settings():
 
     global log_file
     log_file = create_next_log_file_name_with_command_arguments_as_tag(
-                                    command_arguments=sys.argv,
-                                    log_dir=LOG_DIR,
-                                    target_name=TARGET_SETTINGS['name'],
-                                    command_start_timestamp=STARTED_ON,
-                                    user_name=USER_INFO['user'],
-                                    source_host=USER_INFO['yadt_host'].split('.')[0])
+                    log_dir=LOG_DIR,
+                    target_name=TARGET_SETTINGS['name'],
+                    command_start_timestamp=STARTED_ON,
+                    user_name=USER_INFO['user'],
+                    source_host=USER_INFO['yadt_host'].split('.')[0],
+                    command_arguments=sys.argv
+    )
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
     file_handler = logging.FileHandler(log_file)

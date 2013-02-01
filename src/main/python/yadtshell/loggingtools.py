@@ -14,12 +14,12 @@ def create_next_log_file_name(log_dir, target_name, started_on, user, host, tag=
 
 
 def create_next_log_file_name_with_command_arguments_as_tag(
-                        command_arguments,
                         log_dir,
                         target_name,
                         command_start_timestamp,
                         user_name,
-                        source_host):
+                        source_host,
+                        command_arguments):
     tag_args = command_arguments
     if os.path.basename(tag_args[0]) == 'yadtshell':
         tag_args = tag_args[1:]

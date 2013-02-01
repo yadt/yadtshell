@@ -9,12 +9,13 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(unittest.TestCase):
     def setUp(self):
         yadtshell.loggingtools.command_counter = 123
         self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                                                    command_arguments=['yadtshell', 'status'],
-                                                    log_dir='/var/log/test',
-                                                    target_name='target-name',
-                                                    command_start_timestamp='2013-01-31--11-27-56',
-                                                    user_name='user-name',
-                                                    source_host='host-name')
+                log_dir='/var/log/test',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['yadtshell', 'status']
+        )
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
         self._assert(self.actual_file_name)._element_at(0)._is_equal_to('/var/log/test/yadtshell')
