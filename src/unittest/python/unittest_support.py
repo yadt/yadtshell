@@ -8,7 +8,7 @@ class FileNameTestCase(TestCase):
         self.assertTrue(actual_element_value == element_value, message)
 
     def _assert(self, actual_file_name):
-        self.actual_file_name = actual_file_name
+        self._actual_file_name = actual_file_name
         return self
 
     def _element_at(self, element_position):
@@ -16,4 +16,4 @@ class FileNameTestCase(TestCase):
         return self
 
     def _is_equal_to(self, element_value):
-        self._assert_element_at_is(self.actual_file_name, self.element_position, element_value)
+        self._assert_element_at_is(self._actual_file_name, self.element_position, element_value)
