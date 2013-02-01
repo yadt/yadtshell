@@ -124,6 +124,9 @@ class StripSpecialCharactersTest(unittest.TestCase):
     def test_should_not_strip_simple_string(self):
         self.assertEqual('foobar', _strip_special_characters('foobar'))
 
+    def test_should_lower_characters(self):
+        self.assertEqual('foobar', _strip_special_characters('FooBar'))
+
 
 class TrimUnderscoresTests(unittest.TestCase):
 
