@@ -27,8 +27,8 @@ import yaml
 import yadtshell
 
 
-
 logger = logging.getLogger('components')
+
 
 class Component(object):
     def __init__(self, t, host, name=None, version=None):
@@ -72,7 +72,7 @@ class Component(object):
         return self.state == yadtshell.settings.UNKNOWN
 
     def create_remote_log_filename(self, tag=None):
-        return yadtshell.helper.create_log_filename(
+        return yadtshell.loggingtools.create_log_filename(
             yadtshell.settings.TODAY,
             yadtshell.settings.TARGET_SETTINGS['name'],
             yadtshell.settings.STARTED_ON,
