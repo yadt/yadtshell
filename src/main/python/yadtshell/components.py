@@ -72,7 +72,7 @@ class Component(object):
         return self.state == yadtshell.settings.UNKNOWN
 
     def create_remote_log_filename(self, tag=None):
-        return yadtshell.loggingtools.create_log_filename(
+        return yadtshell.loggingtools.create_next_log_file_name(
             yadtshell.settings.TODAY,
             yadtshell.settings.TARGET_SETTINGS['name'],
             yadtshell.settings.STARTED_ON,

@@ -4,7 +4,7 @@ import re
 command_counter = 0
 
 
-def create_log_filename(log_dir, target_name, started_on, user, host, tag=None):
+def create_next_log_file_name(log_dir, target_name, started_on, user, host, tag=None):
     global command_counter
     log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (log_dir, target_name, started_on, user, command_counter, host)
     command_counter += 1
@@ -30,7 +30,7 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     tag = re.sub('[:\*\[\]]*', '', tag).lower()
     tag = re.sub('^_', '', tag)
     tag = re.sub('_$', '', tag)
-    return create_log_filename(
+    return create_next_log_file_name(
         log_dir,
         target_name,
         command_start_timestamp,
