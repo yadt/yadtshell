@@ -32,6 +32,15 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     tag = _strip_special_characters(tag)
     tag = _trim_underscores(tag)
 
+    print "%s %s %s %s %s %s" % (
+        log_dir,
+        target_name,
+        command_start_timestamp,
+        user_name,
+        source_host,
+        tag
+    )
+
     return create_next_log_file_name(
         log_dir,
         target_name,
@@ -65,9 +74,9 @@ def _replace_uri_specific_characters_with_underscores(tag):
 
 
 def get_command_counter_and_increment():
-    current_command_counter = command_counter
-
     global command_counter
+
+    current_command_counter = command_counter
     command_counter += 1
 
     return current_command_counter

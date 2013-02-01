@@ -1,6 +1,6 @@
 import unittest
 
-from mockito import when, verify, any as any_value
+from mockito import when, unstub, verify, any as any_value
 
 from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
@@ -29,7 +29,7 @@ class GetCommandCounterAndIncrementTests(unittest.TestCase):
 
 class CreateNextLogFileNameTests(FileNameTestCase):
     def setUp(self):
-        yadtshell.loggingtools.command_counter = 123
+        when(yadtshell.loggingtools).get_command_counter_and_increment().thenReturn(123)
         self.actual_file_name = create_next_log_file_name(
                 log_dir='/var/log/test',
                 target_name='target-name',
@@ -38,6 +38,10 @@ class CreateNextLogFileNameTests(FileNameTestCase):
                 source_host='host-name',
                 tag='status'
         )
+
+    def tearDown(self):
+        unstub()
+
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
         self._assert(self.actual_file_name)._element_at(0)._is_equal_to('/var/log/test/yadtshell')
@@ -65,8 +69,26 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
     def setUp(self):
         when(yadtshell.loggingtools).get_command_counter_and_increment().thenReturn(123)
+
+    def tearDown(self):
+        unstub()
+
+    def test_should_use_command_argument_as_seventh_element(self):
         self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='/var/log/test',
+                log_dir='log-directory',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['yadtshell', 'status']
+        )
+        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
+
+    def test_should_call_create_next_log_file_name_using_given_arguments(self):
+        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+
+        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                log_dir='log-directory',
                 target_name='target-name',
                 command_start_timestamp='2013-01-31--11-27-56',
                 user_name='user-name',
@@ -74,5 +96,9 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
                 command_arguments=['yadtshell', 'status']
         )
 
-    def test_should_use_command_argument_as_seventh_element(self):
-        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
+        self.assertEqual('log-file-name', actual_log_file_name)
+        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
+
+
+
+
