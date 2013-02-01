@@ -58,8 +58,8 @@ def set_properties(project):
 
     project.set_property('integration_test_print_err', True)
 
-    project.set_property('coverage_threshold_warn', 18)
-    project.set_property('coverage_break_build', True)
+    project.set_property('coverage_threshold_warn', 4)
+    project.set_property('coverage_break_build', False)
 
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').append('setup.cfg')
