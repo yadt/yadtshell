@@ -32,6 +32,7 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     tag = _strip_dashes(tag)
     tag = _strip_special_characters(tag)
     tag = _trim_underscores(tag)
+    tag = _replace_blanks_with_underscores(tag)
 
     return create_next_log_file_name(
         log_dir,
@@ -73,4 +74,6 @@ def _replace_uri_specific_characters_with_underscores(tag):
     tag = tag.replace('/', '_')
     return tag
 
+def _replace_blanks_with_underscores(text):
+    return re.sub(' ', '_', text)
 

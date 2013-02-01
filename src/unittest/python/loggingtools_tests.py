@@ -9,7 +9,8 @@ from yadtshell.loggingtools import (create_next_log_file_name_with_command_argum
                                     _strip_special_characters,
                                     _trim_underscores,
                                     _strip_dashes,
-                                    _replace_uri_specific_characters_with_underscores)
+                                    _replace_uri_specific_characters_with_underscores,
+                                    _replace_blanks_with_underscores)
 import yadtshell.loggingtools
 
 
@@ -116,6 +117,36 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         self.assertEqual('log-file-name', actual_log_file_name)
         verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
 
+    def test_should_prepare_string_as_expected(self):
+
+        when(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(any_value()).thenReturn('replaced uri specific characters')
+        when(yadtshell.loggingtools)._strip_dashes(any_value()).thenReturn('stripped dashes')
+        when(yadtshell.loggingtools)._strip_special_characters(any_value()).thenReturn('stripped special characters')
+        when(yadtshell.loggingtools)._trim_underscores(any_value()).thenReturn('trimmed underscores')
+        when(yadtshell.loggingtools)._replace_blanks_with_underscores(any_value()).thenReturn('replaced blanks with underscores')
+
+        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+
+        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                log_dir='log-directory',
+                target_name='target-name',
+                command_start_timestamp='2013-01-31--11-27-56',
+                user_name='user-name',
+                source_host='host-name',
+                command_arguments=['yadtshell', 'arg1', 'arg2']
+        )
+
+        self.assertEqual('log-file-name', actual_log_file_name)
+        verify(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores('arg1_arg2')
+        verify(yadtshell.loggingtools)._strip_dashes('replaced uri specific characters')
+        verify(yadtshell.loggingtools)._strip_special_characters('stripped dashes')
+        verify(yadtshell.loggingtools)._trim_underscores('stripped special characters')
+        verify(yadtshell.loggingtools)._replace_blanks_with_underscores('trimmed underscores')
+
+        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='replaced blanks with underscores')
+
+
+
 
 class GetCommandCounterAndIncrementTests(unittest.TestCase):
 
@@ -200,4 +231,19 @@ class ReplaceUriSpecificCharactersWithUnderscoresTests(unittest.TestCase):
 
     def test_should_return_string_with_replaced_uri_characters(self):
         self.assertEqual('foo_bar_boo', _replace_uri_specific_characters_with_underscores('foo://bar/boo'))
+
+
+class ReplaceBlanksWithUnderscoresTest(unittest.TestCase):
+
+    def test_should_return_given_string(self):
+        self.assertEqual('spameggs', _replace_blanks_with_underscores('spameggs'))
+
+    def test_should_replace_one_blank_with_one_underscore(self):
+        self.assertEqual('_', _replace_blanks_with_underscores(' '))
+
+    def test_should_replace_blank_after_character_with_underscore(self):
+        self.assertEqual('a_', _replace_blanks_with_underscores('a '))
+
+    def test_should_replace_blank_between_words_with_underscore(self):
+        self.assertEqual('spam_eggs', _replace_blanks_with_underscores('spam eggs'))
 
