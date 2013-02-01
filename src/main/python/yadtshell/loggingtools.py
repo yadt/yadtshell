@@ -27,12 +27,11 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     if os.path.basename(tag_args[0]) == 'yadtshell':
         tag_args = tag_args[1:]
     tag = '_'.join(tag_args)
-    tag = tag.replace('://', '_')
-    tag = tag.replace('/', '_')
-    tag = tag.replace('-', '')
-    tag = re.sub('[:\*\[\]]*', '', tag).lower()
-    tag = re.sub('^_', '', tag)
-    tag = re.sub('_$', '', tag)
+    tag = _replace_uri_specific_characters_with_underscores(tag)
+    tag = _strip_dashes(tag)
+    tag = _strip_special_characters(tag)
+    tag = _trim_underscores(tag)
+
     return create_next_log_file_name(
         log_dir,
         target_name,
@@ -41,6 +40,28 @@ def create_next_log_file_name_with_command_arguments_as_tag(
         source_host,
         tag=tag
     )
+
+
+def _strip_special_characters(tag):  # :*[]:*[]:*[]
+    tag = re.sub('[:\*\[\]]*', '', tag).lower()
+    return tag
+
+
+def _trim_underscores(tag):
+    tag = re.sub('^_', '', tag)
+    tag = re.sub('_$', '', tag)
+    return tag
+
+
+def _strip_dashes(tag):
+    tag = tag.replace('-', '')
+    return tag
+
+
+def _replace_uri_specific_characters_with_underscores(tag):
+    tag = tag.replace('://', '_')
+    tag = tag.replace('/', '_')
+    return tag
 
 
 def get_command_counter_and_increment():

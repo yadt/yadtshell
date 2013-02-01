@@ -71,7 +71,3 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
                 source_host='host-name',
                 command_arguments=['yadtshell', 'status']
         )
-
-    def test_should_use_command_argument_as_seventh_element(self):
-        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
-
