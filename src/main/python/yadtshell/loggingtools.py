@@ -13,7 +13,8 @@ def create_log_filename(log_dir, target_name, started_on, user, host, tag=None):
     return '%s.log' % log_file
 
 
-def create_next_log_file_name(command_arguments,
+def create_next_log_file_name_with_command_arguments_as_tag(
+                        command_arguments,
                         log_dir,
                         target_name,
                         command_start_timestamp,

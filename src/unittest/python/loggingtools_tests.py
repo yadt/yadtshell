@@ -1,14 +1,15 @@
 import unittest
 
-from yadtshell.loggingtools import create_next_log_file_name
+from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag
 import yadtshell.loggingtools
 
 
-class CreateNextLogFileNameTests(unittest.TestCase):
+class CreateNextLogFileNameWithCommandArgumentsAsTagTests(unittest.TestCase):
 
     def setUp(self):
         yadtshell.loggingtools.command_counter = 123
-        self.actual_file_name = create_next_log_file_name(command_arguments=['yadtshell', 'status'],
+        self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+                                                    command_arguments=['yadtshell', 'status'],
                                                     log_dir='/var/log/test',
                                                     target_name='target-name',
                                                     command_start_timestamp='2013-01-31--11-27-56',
