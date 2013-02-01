@@ -1,12 +1,13 @@
 import os
 import re
-import yadtshell.helper
+
+command_counter = 0
 
 
 def create_log_filename(log_dir, target_name, started_on, user, host, tag=None):
-    command_counter = yadtshell.helper.cmd_counter
+    global command_counter
     log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (log_dir, target_name, started_on, user, command_counter, host)
-    yadtshell.helper.cmd_counter = command_counter + 1
+    command_counter += 1
     if tag:
         log_file = '%s.%s' % (log_file, tag)
     return '%s.log' % log_file

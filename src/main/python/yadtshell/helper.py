@@ -24,8 +24,6 @@ import socket
 import time
 import linecache
 
-cmd_counter = 0
-
 
 def condense_hosts(words):
     wgs = {}

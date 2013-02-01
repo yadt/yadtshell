@@ -1,13 +1,13 @@
 import unittest
 
 from yadtshell.loggingtools import create_next_log_file_name
-import yadtshell.helper
+import yadtshell.loggingtools
 
 
 class CreateNextLogFileNameTests(unittest.TestCase):
 
     def setUp(self):
-        yadtshell.helper.cmd_counter = 123
+        yadtshell.loggingtools.command_counter = 123
         self.actual_file_name = create_next_log_file_name(command_arguments=['yadtshell', 'status'],
                                                     log_dir='/var/log/test',
                                                     target_name='target-name',
