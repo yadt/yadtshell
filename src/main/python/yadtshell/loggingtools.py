@@ -4,9 +4,9 @@ import re
 command_counter = 0
 
 
-def create_next_log_file_name(log_dir, target_name, started_on, user, host, tag=None):
+def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
     global command_counter
-    log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (log_dir, target_name, started_on, user, command_counter, host)
+    log_file = '%s/yadtshell.%s.%s.%s.%03i.%s' % (log_dir, target_name, command_start_timestamp, user_name, command_counter, source_host)
     command_counter += 1
     if tag:
         log_file = '%s.%s' % (log_file, tag)
