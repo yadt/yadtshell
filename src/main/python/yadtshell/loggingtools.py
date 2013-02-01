@@ -23,6 +23,7 @@ def create_next_log_file_name_with_command_arguments_as_tag(
                         user_name,
                         source_host,
                         command_arguments):
+
     tag_args = command_arguments
     if os.path.basename(tag_args[0]) == 'yadtshell':
         tag_args = tag_args[1:]
@@ -31,15 +32,6 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     tag = _strip_dashes(tag)
     tag = _strip_special_characters(tag)
     tag = _trim_underscores(tag)
-
-    print "%s %s %s %s %s %s" % (
-        log_dir,
-        target_name,
-        command_start_timestamp,
-        user_name,
-        source_host,
-        tag
-    )
 
     return create_next_log_file_name(
         log_dir,
@@ -51,14 +43,14 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     )
 
 
-def _strip_special_characters(tag):  # :*[]:*[]:*[]
+def _strip_special_characters(tag):
     tag = re.sub('[:\*\[\]]*', '', tag).lower()
     return tag
 
 
 def _trim_underscores(tag):
-    tag = re.sub('^_', '', tag)
-    tag = re.sub('_$', '', tag)
+    tag = re.sub('^_*', '', tag)
+    tag = re.sub('_*$', '', tag)
     return tag
 
 

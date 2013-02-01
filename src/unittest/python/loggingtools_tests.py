@@ -5,7 +5,11 @@ from mockito import when, unstub, verify, any as any_value
 from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
                                     create_next_log_file_name,
-                                    get_command_counter_and_increment)
+                                    get_command_counter_and_increment,
+                                    _strip_special_characters,
+                                    _trim_underscores,
+                                    _strip_dashes,
+                                    _replace_uri_specific_characters_with_underscores)
 import yadtshell.loggingtools
 
 
@@ -100,5 +104,64 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
 
 
+class StripSpecialCharactersTest(unittest.TestCase):
 
+    def test_should_strip_special_character_colon(self):
+        self.assertEqual('', _strip_special_characters(':'))
+
+    def test_should_strip_special_character_asterisk(self):
+        self.assertEqual('', _strip_special_characters('*'))
+
+    def test_should_strip_special_character_left_square_bracket(self):
+        self.assertEqual('', _strip_special_characters('['))
+
+    def test_should_strip_special_character_right_square_bracket(self):
+        self.assertEqual('', _strip_special_characters(']'))
+
+    def test_should_not_strip_normal_characters(self):
+        self.assertEqual('foobar', _strip_special_characters(':*[]foo:*[]bar:*[]'))
+
+    def test_should_not_strip_simple_string(self):
+        self.assertEqual('foobar', _strip_special_characters('foobar'))
+
+class TrimUnderscoresTests(unittest.TestCase):
+
+    def test_should_remove_leading_underscore(self):
+        self.assertEqual('foobar', _trim_underscores('_foobar'))
+
+    def test_should_remove_trailing_underscore(self):
+        self.assertEqual('foobar', _trim_underscores('foobar_'))
+
+    def test_should_trim_underscores(self):
+        self.assertEqual('foobar', _trim_underscores('_foobar_'))
+
+    def test_should_pass_simple_string_without_trimming_anything(self):
+        self.assertEqual('foobar', _trim_underscores('foobar'))
+
+
+class StripDashesTests(unittest.TestCase):
+
+    def test_should_pass_simple_string_without_stripping_any_dashes(self):
+        self.assertEqual('foobar', _strip_dashes('foobar'))
+
+    def test_should_strip_dash(self):
+        self.assertEqual('foobar', _strip_dashes('foo-bar'))
+
+    def test_should_strip_multiple_dashes(self):
+        self.assertEqual('foobar', _strip_dashes('-fo-o-b-a--r---'))
+
+
+class ReplaceUriSpecificCharactersWithUnderscoresTests(unittest.TestCase):
+
+    def test_should_return_given_string(self):
+        self.assertEqual('foobar', _replace_uri_specific_characters_with_underscores('foobar'))
+
+    def test_should_return_string_with_replaced_colon_slash_slash(self):
+        self.assertEqual('foo_bar', _replace_uri_specific_characters_with_underscores('foo://bar'))
+
+    def test_should_return_string_with_replaced_slash(self):
+        self.assertEqual('bar_boo', _replace_uri_specific_characters_with_underscores('bar/boo'))
+
+    def test_should_return_string_with_replaced_uri_characters(self):
+        self.assertEqual('foo_bar_boo', _replace_uri_specific_characters_with_underscores('foo://bar/boo'))
 
