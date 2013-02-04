@@ -54,7 +54,7 @@ def _get_command_counter_and_increment():
 
 
 def _strip_special_characters(tag):
-    tag = re.sub('[:\*\[\]]*', '', tag).lower()
+    tag = re.sub("[:\*\[\]']*", '', tag).lower()
     return tag
 
 
