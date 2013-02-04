@@ -406,26 +406,3 @@ def do(args, opts):
         except AttributeError, ae:
             logger.warning('problem while executing %(cmd)s on %(component_name)s' % locals())
             logger.exception(ae)
-
-#if __name__ == "__main__":
-#    from optparse import OptionParser
-#    parser = OptionParser()
-#    parser.add_option('-m', '--message', dest='message', help='reason for action')
-#    parser.add_option('', '--force', dest='force', action='store_true',
-#            default=False, help='force action')
-#    opts, args = parser.parse_args()
-#
-#    from twisted.internet import reactor
-#    import yadttwisted
-#
-#    deferred = do(args, **vars(opts))
-#    print deferred
-#    deferred.addErrback(yadttwisted.report_error)
-#    deferred.addBoth(yadttwisted.stop_and_return)
-#
-#    if not reactor.running:
-#        reactor.return_code = 127
-#        reactor.run()
-#
-#    sys.exit(reactor.return_code)
-#
