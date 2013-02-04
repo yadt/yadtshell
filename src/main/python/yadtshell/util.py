@@ -16,14 +16,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from time import localtime, strftime
-import os.path
 import logging
+import os.path
 import pwd
 import socket
-import yaml
-import sys
 import subprocess
+import sys
+import yaml
+
+from time import localtime, strftime
 
 import yadtshell.settings
 import yadtshell.components
@@ -38,22 +39,27 @@ except ImportError:
     import pickle
     logger.debug("using default pickle")
 
+
 def determine_loc_type(s):
     return {"host": s, "loc": s[0:3], "type": s[3:6], "loctype": s[0:6], "nr": s[6:8]}
+
 
 def store(o, filename):
     with open(filename, "w") as f:
         pickle.dump(o, f)
 
+
 def restore(filename):
     with open(filename) as f:
         return pickle.load(f)
+
 
 def store2(data, filename):
     f = open(filename, 'w')
     for d in data:
         print >> f, d
     f.close()
+
 
 def restore2(filename):
     f = open(filename)
@@ -62,7 +68,6 @@ def restore2(filename):
         result.append(line.rstrip())
     f.close()
     return result
-
 
 
 def dump_plan(flavor, plan):
@@ -93,9 +98,11 @@ def get_mtime_of_current_state():
 def is_up(state):
     return state in [yadtshell.settings.UP, yadtshell.settings.UPTODATE, yadtshell.settings.UPDATE_NEEDED, yadtshell.settings.INSTALLED]
 
+
 def not_up(state):
     return not is_up(state)
     #return state in [None, settings.UNKNOWN, settings.DOWN, settings.MISSING, settings.UPDATE_NEEDED]
+
 
 def render_state(state, just='left', width=10):
     if not_up(state):
@@ -186,7 +193,6 @@ def get_status_line(components):
         nr_hosts_uptodate, nr_hosts_total)
 
 
-
 def start_ssh_multiplexed(hosts=None):
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
@@ -202,6 +208,7 @@ def start_ssh_multiplexed(hosts=None):
             is_started = subprocess.call(start_multiplexing_call)
             logger.debug(is_started)
             logger.debug('multiplexed ssh connection to %(host)s created' % locals())
+
 
 def stop_ssh_multiplexed(ignored, hosts=None):
     if not hosts:
