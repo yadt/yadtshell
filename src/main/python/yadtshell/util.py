@@ -21,7 +21,6 @@ import os.path
 import logging
 import pwd
 import socket
-import threading
 import yaml
 import sys
 import subprocess
@@ -118,7 +117,6 @@ def render_component_state(uri, state):
     )
 
 
-
 def log_subprocess(pipe, stdout_level=logging.DEBUG, stderr_level=logging.WARNING):
     return_code = pipe.wait()
     for line in pipe.stderr:
@@ -128,22 +126,6 @@ def log_subprocess(pipe, stdout_level=logging.DEBUG, stderr_level=logging.WARNIN
     logger.debug('return code: %i' % return_code)
     return return_code
 
-
-def retrieve_hostloctype_data(loc_type, d, fallback={}):
-    if not type(d) is dict:
-        return fallback
-    for key in [loc_type[k] for k in ['host', 'loctype', 'type', 'loc']] + ['all']:
-        if key in d:
-            logger.debug('key %s matches for loc_type %s' % (key, loc_type))
-            return d.get(key)
-    return fallback
-
-def flatten_data(data):
-    for r in data:
-        if type(r) is dict:
-            yield r.keys()[0]
-        else:
-            yield r
 
 def get_locking_user_info():
     """@Deprecated, use Helper.get_user_info() instead"""
