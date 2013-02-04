@@ -58,7 +58,7 @@ class ProgressIndicator(object):
 
     def finish(self):
         if len(self.progress):
-            print '\r' + 10 * ' ' + '\r'
+            print '\r' + 11 * ' ' + '\r'
 
     def _render_value(self, value):
         if not value:
