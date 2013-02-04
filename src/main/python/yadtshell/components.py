@@ -321,17 +321,14 @@ class Service(Component):
         self.script = None
 
 
-    #@timelimit(10)
     def stop(self, force=False, **kwargs):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.STOP),
                 '%s_%s' % (self.name, yadtshell.settings.STOP), force)
 
-    #@timelimit(10)
     def start(self, force=False, **kwargs):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.START),
                 '%s_%s' % (self.name, yadtshell.settings.START), force)
 
-    #@timelimit(2)
     def status(self):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.STATUS),
                 tag='%s_%s' % (self.name, yadtshell.settings.STATUS), force=True)

@@ -115,7 +115,7 @@ def render_component_state(uri, state):
         render_state(str(state), 'right'),
         uri.split(':', 1)[0],
         uri.split(':', 1)[1],
-    )   
+    )
 
 
 
@@ -160,7 +160,7 @@ def get_locking_user_info():
             "owner": owner,
             "when": when,
             "pid": pid,
-            } 
+            }
 
 def get_yaml(adict):
     return yaml.dump(adict, default_flow_style=False)
@@ -210,7 +210,7 @@ def start_ssh_multiplexed(hosts=None):
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
     for host in hosts:
         ssh_check_cmds = ['ssh',
-            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH, 
+            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH,
             '-O', 'check', host]
         ssh_check_call = subprocess.Popen(ssh_check_cmds, stderr=subprocess.PIPE)
         ssh_check_call.communicate()
@@ -227,70 +227,9 @@ def stop_ssh_multiplexed(ignored, hosts=None):
     for host in hosts:
         logger.debug('multiplexed ssh connections to %(host)s removed' % locals())
         ssh_check_cmds = ['ssh',
-            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH, 
+            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH,
             '-O', 'exit', host]
         #ignore = subprocess.call(ssh_check_call)
         stop_multiplexing_call = subprocess.Popen(ssh_check_cmds, stderr=subprocess.PIPE)
         stop_multiplexing_call.communicate()
     return ignored
-
-
-
-
-
-
-
-## {{{ http://code.activestate.com/recipes/483752/ (r1)
-class TimeoutError(Exception):
-    pass
-
-def timelimit(timeout):
-    def internal(function):
-        def internal2(*args, **kw):
-            class Calculator(threading.Thread):
-                def __init__(self):
-                    threading.Thread.__init__(self)
-                    self.result = None
-                    self.error = None
-                def run(self):
-                    try:
-                        self.result = function(*args, **kw)
-                    except:
-                        self.error = sys.exc_info()[0]
-            c = Calculator()
-            c.start()
-            c.join(timeout)
-            if c.isAlive():
-                raise TimeoutError
-            if c.error:
-                raise c.error
-            return c.result
-        return internal2
-    return internal
-
-
-class Timeout(object):
-    def __init__(self, seconds):
-        self.seconds = seconds
-        
-    def __call__(self, fun):
-        pass
-    
-    
-    
-@timelimit(2)
-def test_timeout():
-    print 'started'
-    import time
-    time.sleep(4)
-    print 'stopped'
-
-if __name__ == '__main__':
-    timelimit(2)
-    sys.exit(0)
-    try:
-        test_timeout()
-    except TimeoutError:
-        print 'TIMEOUT'
-
-    print 'done'
