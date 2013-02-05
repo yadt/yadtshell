@@ -7,8 +7,9 @@ from yadtshell.loggingtools import (create_next_log_file_name_with_command_argum
                                     create_next_log_file_name,
                                     _get_command_counter_and_increment,
                                     _strip_special_characters,
-                                    _trim_underscores,
                                     _strip_dashes,
+                                    _switch_characters_to_lower_case,
+                                    _trim_underscores,
                                     _replace_uri_specific_characters_with_underscores,
                                     _replace_blanks_with_underscores)
 import yadtshell.loggingtools
@@ -190,9 +191,6 @@ class StripSpecialCharactersTest(unittest.TestCase):
     def test_should_not_strip_simple_string(self):
         self.assertEqual('foobar', _strip_special_characters('foobar'))
 
-    def test_should_lower_characters(self):
-        self.assertEqual('foobar', _strip_special_characters('FooBar'))
-
 
 class TrimUnderscoresTests(unittest.TestCase):
 
@@ -250,3 +248,17 @@ class ReplaceBlanksWithUnderscoresTest(unittest.TestCase):
     def test_should_replace_blank_between_words_with_underscore(self):
         self.assertEqual('spam_eggs', _replace_blanks_with_underscores('spam eggs'))
 
+
+class SwitchCharactersToLowerCase(unittest.TestCase):
+
+    def test_should_return_given_string_of_lower_characters(self):
+        self.assertEqual('abc', _switch_characters_to_lower_case('abc'))
+
+    def test_should_return_lower_case_character_of_character(self):
+        self.assertEqual('a', _switch_characters_to_lower_case('A'))
+
+    def test_should_return_lower_case_string_of_given_string(self):
+        self.assertEqual('abc', _switch_characters_to_lower_case('ABC'))
+
+    def test_should_return_lower_case_string_of_string_with_capital_letters(self):
+        self.assertEqual('foobar', _switch_characters_to_lower_case('FooBar'))

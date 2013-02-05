@@ -33,6 +33,7 @@ def create_next_log_file_name_with_command_arguments_as_tag(
     tag = _strip_special_characters(tag)
     tag = _trim_underscores(tag)
     tag = _replace_blanks_with_underscores(tag)
+    tag = _switch_characters_to_lower_case(tag)
 
     return create_next_log_file_name(
         log_dir,
@@ -54,7 +55,7 @@ def _get_command_counter_and_increment():
 
 
 def _strip_special_characters(tag):
-    tag = re.sub("[:\*\[\]']*", '', tag).lower()
+    tag = re.sub("[:\*\[\]']*", '', tag)
     return tag
 
 
@@ -74,6 +75,11 @@ def _replace_uri_specific_characters_with_underscores(tag):
     tag = tag.replace('/', '_')
     return tag
 
+
 def _replace_blanks_with_underscores(text):
     return re.sub(' ', '_', text)
+
+
+def _switch_characters_to_lower_case(text):
+    return text.lower()
 
