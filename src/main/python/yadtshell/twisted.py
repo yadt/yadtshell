@@ -34,6 +34,8 @@ class SshFailure(failure.Failure):
 
 
 class ProgressIndicator(object):
+    PROGRESS_LABEL = 'progress: '
+
     def __init__(self, histo_threshold=40):
         self.observables = []
         self.progress = {}
@@ -58,7 +60,11 @@ class ProgressIndicator(object):
 
     def finish(self):
         if len(self.progress):
-            print '\r' + 11 * ' ' + '\r'
+            self._overwrite_remaining_progress_with_blanks()
+
+    def _overwrite_remaining_progress_with_blanks(self):
+        remaining_progress_character_count = len(self.PROGRESS_LABEL) + 1
+        print '\r' + remaining_progress_character_count * ' ' + '\r'
 
     def _render_value(self, value):
         if not value:
@@ -77,10 +83,10 @@ class ProgressIndicator(object):
     def _update(self):
         if sys.stderr.isatty():
             if len(self.observables) > self.histo_threshold:
-                sys.stderr.write('\rprogress: ' + self._render_compressed() + '\r')
+                sys.stderr.write('\r' + self.PROGRESS_LABEL + self._render_compressed() + '\r')
             else:
                 rendered = [self._render_value(self.progress.get(o)) for o in self.observables]
-                sys.stderr.write('\rprogress: ' + ''.join([str(o) for o in rendered]) + '\r')
+                sys.stderr.write('\r' + self.PROGRESS_LABEL + ''.join([str(o) for o in rendered]) + '\r')
 
 
 class YadtProcessProtocol(protocol.ProcessProtocol):
