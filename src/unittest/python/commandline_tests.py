@@ -47,6 +47,33 @@ class ValidateCommandLineOptionsTest(unittest.TestCase):
 
         verify(yadtshell.commandline.sys, never).exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
 
+    def test_should_exit_with_appropriate_code_when_command_is_ignore_and_no_message_was_given(self):
+        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
+        options = mock()
+        options.message = None
+
+        validate_command_line_options('ignore', options, self.fake_show_help_callback)
+
+        verify(yadtshell.commandline.sys).exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
+
+    def test_should_execute_show_help_callback_when_no_ignore_message_is_given(self):
+        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
+        options = mock()
+        options.message = None
+
+        validate_command_line_options('ignore', options, self.fake_show_help_callback)
+
+        self.assertTrue(self._show_help_callback_has_been_called)
+
+    def test_should_not_exit_when_command_is_ignore_and_message_is_given(self):
+        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
+        options = mock()
+        options.message = 'ignore message'
+
+        validate_command_line_options('ignore', options, self.fake_show_help_callback)
+
+        verify(yadtshell.commandline.sys, never).exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
+
 
 class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
 
