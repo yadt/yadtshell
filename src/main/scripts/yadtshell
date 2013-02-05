@@ -22,7 +22,7 @@ import logging
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-from yadtshell.commandline import EXIT_CODE_MISSING_COMMAND, ensure_command_has_required_arguments
+from yadtshell.commandline import EXIT_CODE_MISSING_COMMAND, ensure_command_has_required_arguments, validate_command_line_options
 from optparse import OptionParser, OptionGroup
 
 
@@ -78,6 +78,7 @@ import yadtshell
 logger = logging.getLogger('yadtshell')
 
 ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
+validate_command_line_options(cmd, opts, parser.print_help)
 
 yadtshell.settings.load_settings()
 

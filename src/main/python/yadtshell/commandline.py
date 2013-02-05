@@ -15,7 +15,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-	This module contains all function used by the command line interface.
+    This module contains all function used by the command line interface.
 """
 
 import logging
@@ -26,6 +26,7 @@ COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 
 
 EXIT_CODE_MISSING_COMMAND = 10
 EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT = 11
+EXIT_CODE_MISSING_MESSAGE_OPTION = 12
 
 LOGGER = logging.getLogger()
 
@@ -35,3 +36,10 @@ def ensure_command_has_required_arguments(command, arguments, show_help_callback
         LOGGER.error('Command "{0}" requires at least one component uri!\n'.format(command))
         show_help_callback()
         sys.exit(EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
+
+
+def validate_command_line_options(command, options, show_help_callback):
+    if command == 'lock' and not options.message:
+        LOGGER.error('The message option is mandatory for the lock command.')
+        show_help_callback()
+        sys.exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
