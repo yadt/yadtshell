@@ -71,7 +71,7 @@ if cmd in ['info']:
 
 opts, args = parser.parse_args()
 
-normalize_options(opts)
+opts = normalize_options(opts)
 
 args = args[1:]
 component_names = args
