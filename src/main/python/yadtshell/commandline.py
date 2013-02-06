@@ -25,7 +25,7 @@ import yadtshell
 
 
 COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
-COMMANDS_WHICH_REQUIRE_ONE_MESSAGE_OPTION = ['lock', 'ignore']
+COMMANDS_WHICH_REQUIRE_A_MESSAGE_OPTION = ['lock', 'ignore']
 
 EXIT_CODE_MISSING_COMMAND = 10
 EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT = 11
@@ -42,7 +42,7 @@ def ensure_command_has_required_arguments(command, arguments, show_help_callback
 
 
 def validate_command_line_options(command, options, show_help_callback):
-    if command in COMMANDS_WHICH_REQUIRE_ONE_MESSAGE_OPTION and not options.message:
+    if command in COMMANDS_WHICH_REQUIRE_A_MESSAGE_OPTION and not options.message:
         LOGGER.error('Command {0} has a mandatory message option.\n'.format(command))
         show_help_callback()
         sys.exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
