@@ -18,9 +18,11 @@
     This module contains all function used by the command line interface.
 """
 
+import copy
 import logging
-import yadtshell
 import sys
+import yadtshell
+
 
 COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
 COMMANDS_WHICH_REQUIRE_ONE_MESSAGE_OPTION = ['lock', 'ignore']
@@ -44,3 +46,15 @@ def validate_command_line_options(command, options, show_help_callback):
         LOGGER.error('Command {0} has a mandatory message option.\n'.format(command))
         show_help_callback()
         sys.exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
+
+
+def normalize_message(message):
+    message = message.replace("'", "").replace('"', '')
+    return message
+
+
+def normalize_options(options):
+    result = copy.deepcopy(options)
+    if hasattr(result, 'message') and result.message is not None:
+        result.message = normalize_message(result.message)
+    return result

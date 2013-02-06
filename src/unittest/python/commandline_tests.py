@@ -4,6 +4,8 @@ from mockito import mock, when, verify, unstub, any as any_value, never
 import yadtshell
 from yadtshell.commandline import (ensure_command_has_required_arguments,
                                     validate_command_line_options,
+                                    normalize_message,
+                                    normalize_options,
                                     EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT,
                                     EXIT_CODE_MISSING_MESSAGE_OPTION)
 
@@ -73,6 +75,66 @@ class ValidateCommandLineOptionsTest(unittest.TestCase):
         validate_command_line_options('ignore', options, self.fake_show_help_callback)
 
         verify(yadtshell.commandline.sys, never).exit(EXIT_CODE_MISSING_MESSAGE_OPTION)
+
+
+class NormalizeMessageTests(unittest.TestCase):
+
+    def test_should_remove_single_quotes_when_message_contains_single_quotes(self):
+        self.assertEqual(normalize_message("don't"), "dont")
+
+    def test_should_not_remove_anything_when_message_does_not_contain_single_nor_double_quotes(self):
+        self.assertEqual(normalize_message('lorem ipsum dolorem'), 'lorem ipsum dolorem')
+
+    def test_should_remove_double_quotes_when_message_contains_double_quotes(self):
+        self.assertEqual(normalize_message('don"t'), 'dont')
+
+
+class NormalizeOptionsTests(unittest.TestCase):
+
+    class MockedOptions:
+        def __init__(self, **keywords):
+            self.__dict__.update(keywords)
+
+    def tearDown(self):
+        unstub()
+
+    def test_should_execute_normalize_message_when_message_option_is_given(self):
+        when(yadtshell.commandline).normalize_message(any_value()).thenReturn('normalized message')
+        options_with_message = self.MockedOptions()
+        options_with_message.message = 'some message'
+
+        actual_options = normalize_options(options_with_message)
+
+        verify(yadtshell.commandline).normalize_message('some message')
+        self.assertEqual(actual_options.message, 'normalized message')
+
+    def test_should_not_execute_normalize_message_when_message_option_is_none(self):
+        when(yadtshell.commandline).normalize_message(any_value()).thenReturn('normalized message')
+        options_with_none_message = self.MockedOptions()
+        options_with_none_message.message = None
+
+        actual_options = normalize_options(options_with_none_message)
+
+        verify(yadtshell.commandline, never).normalize_message(None)
+        self.assertEqual(actual_options.message, None)
+
+    def test_should_not_execute_normalize_message_when_message_option_is_not_given(self):
+        when(yadtshell.commandline).normalize_message(any_value()).thenReturn('normalized message')
+        options_without_message = object()
+
+        normalize_options(options_without_message)
+
+        verify(yadtshell.commandline, never).normalize_message('some message')
+
+    def test_should_not_perform_mutation_on_options_when_normalize_options_is_called(self):
+        when(yadtshell.commandline).normalize_message(any_value()).thenReturn('normalized message')
+        options_with_message = self.MockedOptions()
+        options_with_message.message = 'some message'
+
+        actual_options = normalize_options(options_with_message)
+
+        verify(yadtshell.commandline).normalize_message('some message')
+        self.assertTrue(actual_options is not options_with_message, 'performed mutation on the options instead of creating a new object')
 
 
 class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):

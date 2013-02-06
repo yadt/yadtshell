@@ -22,7 +22,10 @@ import logging
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-from yadtshell.commandline import EXIT_CODE_MISSING_COMMAND, ensure_command_has_required_arguments, validate_command_line_options
+from yadtshell.commandline import (EXIT_CODE_MISSING_COMMAND,
+                                   ensure_command_has_required_arguments,
+                                   normalize_options,
+                                   validate_command_line_options)
 from optparse import OptionParser, OptionGroup
 
 
@@ -67,6 +70,8 @@ if cmd in ['info']:
 
 
 opts, args = parser.parse_args()
+
+normalize_options(opts)
 
 args = args[1:]
 component_names = args
