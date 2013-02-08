@@ -55,13 +55,17 @@ class ActionManager(object):
             return [action.cmd, action.uri, None, None, None]
 
     def probe(self, component, delay=0):
+        def print_component_state(component_uri, component_state):
+            print component_uri + ": " + yadtshell.util.render_state(component.state)
+            self.logger.debug(yadtshell.util.render_component_state(component_uri, component_state))
+
         def store_host_exit_code(result):
             if isinstance(result, failure.Failure):
                 result = result.value.exitCode
             else:
                 result = 0
             component.state = yadtshell.constants.HOST_STATE_DESCRIPTIONS.get(result, result)
-            self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
+            print_component_state(component.uri, component.state)
             self.pi.update(('status', component), '%s' % result)
             return
         if isinstance(component, yadtshell.components.Host):
@@ -76,7 +80,7 @@ class ActionManager(object):
                 else:
                     result = 0
             component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, result)
-            self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
+            print_component_state(component.uri, component.state)
             self.pi.update(('status', component), '%s' % result)
             yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}])
             self.logger.debug("storing new state for %s: %s" % (component.uri, component.state))
@@ -107,7 +111,8 @@ class ActionManager(object):
         component = self.components[uri]
         deferred = None
 
-        self.logger.info('/' + '/'.join(path))
+        self.logger.debug('/' + '/'.join(path))
+
         if cmd == yadtshell.settings.FINISH:
             if self.finish_fun:
                 self.finish_fun(action)
