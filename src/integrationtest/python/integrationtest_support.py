@@ -26,6 +26,10 @@ from shutil import rmtree
 
 from shtub import testbase
 
+TARGET_FILE_PREFIX = """name: integration-test
+log-dir: logs
+hosts:
+"""
 
 class IntegrationTestSupport (testbase.IntegrationTestBase):
     def setUp (self):
@@ -42,9 +46,7 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
     def write_target_file (self, *hostnames):
         target_filename = join(self.base_dir, 'target')
         with open(target_filename, 'w') as target_file:
-            target_file.write('name: integration-test\n'
-                              'log-dir: logs\n'
-                              'hosts:\n')
+            target_file.write(TARGET_FILE_PREFIX)
             for host in hostnames:
                 target_file.write('- %s\n' % host)
 
