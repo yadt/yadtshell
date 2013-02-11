@@ -47,7 +47,7 @@ class DeferredPool(defer.Deferred):
                 reactor.callLater(1, self.run)
                 return None
             self.idle = False
-            self.logger.debug('starting %s(..)' % (task.fun.__name__))
+            self.logger.debug('starting %s(..)' % task.fun.__name__)
             d = task.fun(plan=task.action, path=task.path)  # TODO: plan = action?
             d.addErrback(self.handle_error_fun)
             d.addErrback(yadtshell.twisted.report_error, self.logger.error)

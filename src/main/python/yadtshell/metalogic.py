@@ -49,7 +49,7 @@ def depth_first(d, indent = 0, handled = None):
         handled = set()
     for key in d.keys():
         for y in depth_first(d[key], indent + 1):
-            yield(y)
+            yield y
     for key in d.keys():
         yield(key, indent)
 
@@ -69,7 +69,7 @@ def collect_parallel_tasks(g):
     last_indent = -2
     pt = set()
     for (key, indent) in g:
-        if (indent < 0):
+        if indent < 0:
             continue
         if last_indent != indent or last_indent == -1:
             if last_indent >= 0:
@@ -201,7 +201,7 @@ def chop_minimal_related_chunks(plan):
                 chunk_actions.add(action)
         chunk_plan = yadtshell.actions.ActionPlan('chunk_%s' % nr, chunk_actions)
         chunk_plans.add(chunk_plan)
-    if (len(chunk_plans) > 1):
+    if len(chunk_plans) > 1:
         logger.info('%i independent chunks found' % len(chunk_plans))
 
     return yadtshell.actions.ActionPlan(plan.name, chunk_plans)
