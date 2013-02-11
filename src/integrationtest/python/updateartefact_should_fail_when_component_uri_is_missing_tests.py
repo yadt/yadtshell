@@ -20,7 +20,6 @@ import unittest
 import integrationtest_support
 
 
-
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
         actual_return_code = self.execute_command('yadtshell updateartefact -v')

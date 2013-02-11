@@ -19,8 +19,6 @@ __author__ = 'Michael Gruber'
 import unittest
 import integrationtest_support
 
-import yadt_status_answer
-
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
