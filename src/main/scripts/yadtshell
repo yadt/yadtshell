@@ -31,7 +31,7 @@ from optparse import OptionParser, OptionGroup
 
 reactor.return_code = 127
 
-parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...]')
+parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...] [command options]')
 parser.add_option('-n', '--dryrun', action='store_true', dest='dryrun', default=False, help='does nothing')
 parser.add_option('-v', '', action='store_true', dest='verbose', default=False, help='verbose output')
 
