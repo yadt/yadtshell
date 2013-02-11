@@ -27,7 +27,7 @@ from shutil import rmtree
 from shtub import testbase
 
 TARGET_FILE_PREFIX = """name: integration-test
-log-dir: logs
+
 hosts:
 """
 
