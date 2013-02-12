@@ -50,7 +50,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 message: locking the host
 owner: .*@.*:/.*
 pid: \d*
-user: [A-Za-z0-9]*
+user: .*
 when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
 working_copy: /.*
 yadt_host: .*
