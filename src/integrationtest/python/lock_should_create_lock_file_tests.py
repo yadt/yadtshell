@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber'
+__author__ = 'Michael Gruber, Maximilien Riehl'
 
 import unittest
 import integrationtest_support
@@ -37,7 +37,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
-        lock_return_code   = self.execute_command('yadtshell lock host://it01 -m "locking" -v')
+        lock_return_code   = self.execute_command('yadtshell lock host://it01 -m "locking \'the host\'" -v')
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
@@ -47,7 +47,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('lock') \
                 .and_at_least_one_argument_matches("""umask 0002 && mkdir -pv /var/lock/yadt && echo -e 'force: false
-message: locking
+message: locking the host
 owner: .*@.*:/.*
 pid: \d*
 user: [A-Za-z0-9]*
