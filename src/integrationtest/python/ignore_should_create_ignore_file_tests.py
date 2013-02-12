@@ -55,7 +55,15 @@ when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
 working_copy: /.*
 yadt_host: .*
 ' > /var/lock/yadt/ignore.backend-service""")
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'frontend-service').and_input('ignore')
+
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'frontend-service').and_input('ignore') \
+                .and_at_least_one_argument_matches("""umask 0002 && mkdir -pv /var/lock/yadt && echo -e 'owner: .*@.*:/.*
+pid: \d*
+user: .*
+when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
+working_copy: /.*
+yadt_host: .*
+' > /var/lock/yadt/ignore.frontend-service""")
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
