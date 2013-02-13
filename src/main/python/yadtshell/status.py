@@ -43,7 +43,7 @@ def status_cb(protocol=None):
     return status()
 
 
-def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
+def status(hosts=None, include_artefacts=True, **kwargs):
     try:
         from yaml import CLoader as Loader
         logger.debug("using C implementation of yaml")
@@ -61,22 +61,21 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
     if type(hosts) is str:
         hosts = [hosts]
 
-    if not use_cache_only:
-        try:
-            os.remove(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
-        except OSError:
-            pass
+    try:
+        os.remove(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+    except OSError:
+        pass
 
-        if hosts:
-            state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h) for h in hosts]
-        else:
-            state_files = glob.glob(os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
-        for state_file in state_files:
-            logger.debug('removing old state %(state_file)s' % locals())
-            try:
-                os.remove(state_file)
-            except OSError, e:
-                logger.warning('cannot remove %s:\n    %s' % (state_file, e))
+    if hosts:
+        state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h) for h in hosts]
+    else:
+        state_files = glob.glob(os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
+    for state_file in state_files:
+        logger.debug('removing old state %(state_file)s' % locals())
+        try:
+            os.remove(state_file)
+        except OSError, e:
+            logger.warning('cannot remove %s:\n    %s' % (state_file, e))
 
     logger.debug('starting remote queries')
 
@@ -390,33 +389,13 @@ def status(hosts=None, include_artefacts=True, use_cache_only=False, **kwargs):
             logger.debug("collected services: %s " % ", ".join(local_service_collector.services))
             return local_service_collector.notify()
 
-    def restore_cached_state(component):
-        d = defer.Deferred()
-
-        state_file = os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % component)
-        logger.info('restoring cached data from %s' % state_file)
-
-        try:
-            f = open(state_file)
-            result = f.read()
-            f.close()
-        except IOError, e:
-            logger.warning(str(e))
-        host = yaml.load(result)
-        components[host.uri] = host
-        reactor.callLater(.1, d.callback, host)
-        return d
-
     pi = yadtshell.twisted.ProgressIndicator()
 
     deferreds = []
     for host in hosts:
-        if use_cache_only:
-            deferred = restore_cached_state(host)
-        else:
-            deferred = query_status(host, pi)
-            deferred.addErrback(report_connection_error)
-            deferred.addCallback(create_host)
+        deferred = query_status(host, pi)
+        deferred.addErrback(report_connection_error)
+        deferred.addCallback(create_host)
 
         deferred.addCallback(initialize_services)
         deferred.addCallback(add_local_state)

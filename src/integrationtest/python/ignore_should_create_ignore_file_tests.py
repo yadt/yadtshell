@@ -67,7 +67,7 @@ when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
 working_copy: /.*
 yadt_host: .*
 ' > /var/lock/yadt/ignore.frontend-service""")
-            
+
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
