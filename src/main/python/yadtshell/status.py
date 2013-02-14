@@ -137,6 +137,11 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             def store_service_state(state, service):    # TODO refactor: integrate all store_service_* cbs
                 service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(state, yadtshell.settings.UNKNOWN)
             cmd.addCallback(store_service_state, service)
+
+            def handle_service_state_failure(failure, service):
+                logger.debug('Failure while determining state of {0}. Exit code was {1}.'\
+                                                     .format(service.uri, failure.value.exitCode))
+            cmd.addErrback(handle_service_state_failure, service)
             return cmd
         query_protocol = yadtshell.twisted.YadtProcessProtocol(service.uri, cmd)
         query_protocol.deferred = defer.Deferred()

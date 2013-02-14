@@ -54,7 +54,7 @@ class ActionManager(object):
         else:
             return [action.cmd, action.uri, None, None, None]
 
-    def probe(self, component, delay=0):
+    def probe(self, component, delay=0, target_state=None):
         def store_host_exit_code(result):
             if isinstance(result, failure.Failure):
                 result = result.value.exitCode
@@ -75,7 +75,8 @@ class ActionManager(object):
                     result = result.value.exitCode
                 else:
                     result = 0
-            component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, result)
+            if component.state == yadtshell.settings.UNKNOWN:
+                component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, result)
             self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
             self.pi.update(('status', component), '%s' % result)
             yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}])
@@ -87,6 +88,7 @@ class ActionManager(object):
             if hasattr(component, 'immediate_status'):
                 status_cmd = 'immediate_status'
             deferred = deferLater(reactor, delay, self.issue_command, component, status_cmd)
+            deferred.addErrback(self.handle_ignored_or_locked, status_cmd, component, target_state)
             deferred.addBoth(store_service_exit_code)
             return deferred
         self.logger.critical('do not know how to probe %s: unknown type %s' % (component.uri, type(component)))
@@ -179,7 +181,7 @@ class ActionManager(object):
                         self.logger.info('    %s %s, try %i of %i' % (cmd, component.uri, tries, max_tries - 1))
                         delay = 1
                     self.pi.update((cmd, component))
-                    deferred = self.probe(component, delay=delay)
+                    deferred = self.probe(component, delay=delay, target_state=target_state)
                     deferred.addCallback(self.handle_output, cmd, component, target_state, tries + 1)
                     deferred.addErrback(yadtshell.twisted.report_error, self.logger.warning)
                     return deferred
