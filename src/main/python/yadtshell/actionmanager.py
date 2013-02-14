@@ -75,8 +75,7 @@ class ActionManager(object):
                     result = result.value.exitCode
                 else:
                     result = 0
-            if component.state == yadtshell.settings.UNKNOWN:
-                component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, result)
+            component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, component.state)
             self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
             self.pi.update(('status', component), '%s' % result)
             yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}])
