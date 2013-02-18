@@ -47,3 +47,6 @@ yadtshell.sublime*
 
 # sonar analysis
 .sonar
+
+# MACOS specific files
+.DS_Store
