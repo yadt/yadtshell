@@ -53,12 +53,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.001\.it01\.backend-service_start\.log')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.002\.it01\.backend-service_status\.log')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.003\.it01\.frontend-service_start\.log')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.004\.it01\.frontend-service_status\.log')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.005\.it01\.it01_update\.log')
-            verify.called('ssh').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.006\.it01\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.001\.it01\.backend-service_start\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.002\.it01\.backend-service_status\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.003\.it01\.frontend-service_start\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.004\.it01\.frontend-service_status\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.005\.it01\.it01_update\.log')
+            verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.006\.it01\.log')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 if __name__ == '__main__':
