@@ -47,7 +47,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as verifier:
             self.assertEquals(0, status_return_code)
-            verifier.verify('ssh', ['it01.domain'], '/usr/bin/yadt-status')
+            verifier.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
 
             self.assertEquals(0, start_return_code)
             verifier.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
