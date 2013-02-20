@@ -24,16 +24,12 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.write_target_file('it01.test.domain')
+        self.write_target_file('it01.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status') \
-                .then_write(yadt_status_answer.stdout('it01.test.domain'))
-            when.calling('ssh').at_least_with_arguments('-O', 'check', 'it01.test.domain') \
-                .then_return(0)
-            when.calling('ssh').at_least_with_arguments('-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain').and_input('updateartefact') \
-                .then_return(0)
-            when.calling('ssh').at_least_with_arguments('-O', 'exit', 'it01.test.domain') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
@@ -41,12 +37,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
 
             self.assertEquals(0, update_return_code)
-            verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.test.domain')
-            verify.called('ssh').at_least_with_arguments('-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.test.domain').and_input('updateartefact')
-            verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.test.domain')
+            verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.domain')
+            verify.called('ssh').at_least_with_arguments('-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.domain').and_input('updateartefact')
+            verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.domain')
 
 
 if __name__ == '__main__':

@@ -29,11 +29,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
-            when.calling('ssh').at_least_with_arguments('it01.domain', '-O', 'check') \
-                .then_return(0)
             when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start') \
                 .then_return(1)
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'exit') \
+            when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
         actual_return_code = self.execute_command('yadtshell update -v')
