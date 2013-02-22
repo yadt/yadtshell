@@ -76,7 +76,7 @@ class ProgressIndicator(object):
     def _render_compressed(self):
         rendered = [self._render_value(self.progress.get(o)) for o in self.observables]
         finished = [r for r in rendered if r not in self.rendered]
-        unfinished = [r for r in rendered if r in self.rendered]    # TODO mhh, could be one call only?!
+        unfinished = [r for r in rendered if r in self.rendered]
         finished_histo = dict((i, finished.count(i)) for i in set(finished))
         return ''.join(['%(count)i*%(key)s ' % locals() for key, count in finished_histo.iteritems()]) + ''.join([str(o) for o in unfinished])
 
