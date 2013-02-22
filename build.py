@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pythonbuilder.core import use_plugin, init, Author
+from pybuilder.core import use_plugin, init, Author
 
 use_plugin('python.core')
 use_plugin('python.integrationtest')
