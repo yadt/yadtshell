@@ -36,3 +36,20 @@ class TwistedTests(unittest.TestCase):
 
         self.assertEqual(call(('command', 'component')), mock_progress_indicator.update.call_args)
 
+
+
+    def test_err_received_should_update_progress_indicator_with_command_and_component(self):
+        mock_progress_indicator = Mock()
+
+        mock_process_protocol = Mock(YadtProcessProtocol)
+        mock_process_protocol.data = ''
+        mock_process_protocol.cmd = 'command'
+        mock_process_protocol.component = 'component'
+        mock_process_protocol.err_log_level = 'info'
+        mock_process_protocol.pi = mock_progress_indicator
+        mock_logger = Mock()
+        mock_process_protocol.logger = mock_logger
+
+        YadtProcessProtocol.errReceived(mock_process_protocol, 'data')
+
+        self.assertEqual(call(('command', 'component')), mock_progress_indicator.update.call_args)
