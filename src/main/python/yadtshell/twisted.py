@@ -111,7 +111,7 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
     def outReceived(self, data):
         self.logger.debug("outReceived! with %d bytes!" % len(data))
         for line in data.splitlines():
-            self.logger.log(self.out_log_level, 'stdout: %s' % line)
+            self.logger.log(self.out_log_level, '{0}: {1}'.format(self.component, line))
         self.data = self.data + data
         if self.pi:
             self.pi.update((self.cmd, self.component))
