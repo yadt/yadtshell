@@ -3,6 +3,7 @@ from mock import Mock, call
 
 from yadtshell.twisted import YadtProcessProtocol
 
+
 class TwistedTests(unittest.TestCase):
 
     def test_out_received_should_append_data(self):
