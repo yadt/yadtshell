@@ -55,6 +55,7 @@ def set_properties(project):
 
     project.build_depends_on('shtub')
     project.build_depends_on('mockito')
+    project.build_depends_on('mock')
 
     project.set_property('integration_test_print_err', True)
 
