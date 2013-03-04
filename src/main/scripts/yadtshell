@@ -34,6 +34,7 @@ reactor.return_code = 127
 parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...] [command options]')
 parser.add_option('-n', '--dryrun', action='store_true', dest='dryrun', default=False, help='does nothing')
 parser.add_option('-v', '', action='store_true', dest='verbose', default=False, help='verbose output')
+parser.add_option('', '--event-id', dest='event_id', help='custom id, broadcasted with every event, for easier tracking')
 
 if len(sys.argv) < 2:
     parser.print_help()
@@ -82,6 +83,8 @@ ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
 validate_command_line_options(cmd, opts, parser.print_help)
 
 yadtshell.settings.load_settings()
+if opts.event_id:
+    yadtshell.settings.ybc.set_event_id(opts.event_id)
 
 logging.getLogger("twisted").setLevel(logging.WARN)
 logging.getLogger("broadcaster").setLevel(logging.WARN)
