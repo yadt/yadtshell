@@ -214,6 +214,9 @@ def load_settings():
     global SSH
     SSH = 'ssh -o ControlPath=%s -A %s -T -o ConnectTimeout=4 -o BatchMode=yes -o CheckHostIP=no -o StrictHostKeyChecking=no' % (SSH_CONTROL_PATH, credentials)
 
+    global tracking_id
+    tracking_id = None
+
 
 HOST = "host"
 SERVICE = "service"

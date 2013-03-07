@@ -78,7 +78,7 @@ class ActionManager(object):
             component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(result, component.state)
             self.logger.info(yadtshell.util.render_component_state(component.uri, component.state))
             self.pi.update(('status', component), '%s' % result)
-            yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}])
+            yadtshell.settings.ybc.sendServiceChange([{'uri': component.uri, 'state': component.state}], tracking_id=yadtshell.settings.tracking_id)
             self.logger.debug("storing new state for %s: %s" % (component.uri, component.state))
             self.orig_components[component.uri].state = component.state
             return

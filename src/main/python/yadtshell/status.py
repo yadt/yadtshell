@@ -366,7 +366,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                         }
                 hosts.append(host)
             groups.append(hosts)
-        yadtshell.settings.ybc.sendFullUpdate(groups)
+        yadtshell.settings.ybc.sendFullUpdate(groups, tracking_id=yadtshell.settings.tracking_id)
 
         status_line = yadtshell.util.get_status_line(components)
         logger.debug('\nstatus: %s' % status_line)
