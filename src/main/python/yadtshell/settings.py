@@ -64,10 +64,10 @@ def initialize_broadcast_client():
         def addOnSessionOpenHandler(self, *args, **kwargs):
             pass
 
-        def sendServiceChange(self, data):
+        def sendServiceChange(self, data, **kwargs):
             pass
 
-        def sendFullUpdate(self, data):
+        def sendFullUpdate(self, data, **kwargs):
             pass
 
         def connect(self):
