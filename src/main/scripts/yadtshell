@@ -90,7 +90,7 @@ logging.getLogger("twisted").setLevel(logging.WARN)
 logging.getLogger("broadcaster").setLevel(logging.WARN)
 
 if opts.verbose:
-    yadtshell.settings.console_handler.setLevel(logging.DEBUG)
+    yadtshell.settings.console_stdout_handler.setLevel(logging.DEBUG)
 
 if opts.dryrun:
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()

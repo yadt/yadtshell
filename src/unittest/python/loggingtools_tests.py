@@ -1,6 +1,7 @@
 import unittest
+import logging
 
-from mockito import when, unstub, verify, any as any_value
+from mockito import when, unstub, verify, mock, any as any_value
 
 from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
@@ -11,12 +12,35 @@ from yadtshell.loggingtools import (create_next_log_file_name_with_command_argum
                                     _switch_characters_to_lower_case,
                                     _trim_underscores,
                                     _replace_uri_specific_characters_with_underscores,
-                                    _replace_blanks_with_underscores)
+                                    _replace_blanks_with_underscores,
+                                    ErrorFilter,
+                                    InfoFilter,
+                                    configure_logger_output_stream_by_level)
 import yadtshell.loggingtools
+
+
+class LoggerConfigurationTests(unittest.TestCase):
+
+    def test_should_add_error_filter_to_stderr_and_info_filter_to_stdout(self):
+        stderr_handler = mock()
+        stdout_handler = mock()
+        error_filter = mock()
+        info_filter = mock()
+        when(yadtshell.loggingtools).ErrorFilter().thenReturn(error_filter)
+        when(yadtshell.loggingtools).InfoFilter().thenReturn(info_filter)
+        when(stderr_handler).addFilter(any_value()).thenReturn(None)
+        when(stdout_handler).addFilter(any_value()).thenReturn(None)
+
+        configure_logger_output_stream_by_level(stderr_handler, stdout_handler)
+
+        verify(stderr_handler).addFilter(error_filter)
+        verify(stdout_handler).addFilter(info_filter)
+
 
 
 
 class CreateNextLogFileNameTests(FileNameTestCase):
+
     def setUp(self):
         when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
         self.actual_file_name = create_next_log_file_name(
@@ -30,7 +54,6 @@ class CreateNextLogFileNameTests(FileNameTestCase):
 
     def tearDown(self):
         unstub()
-
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
         self._assert(self.actual_file_name)._element_at(0)._is_equal_to('/var/log/test/yadtshell')
@@ -262,3 +285,86 @@ class SwitchCharactersToLowerCase(unittest.TestCase):
 
     def test_should_return_lower_case_string_of_string_with_capital_letters(self):
         self.assertEqual('foobar', _switch_characters_to_lower_case('FooBar'))
+
+class ErrorFilterTests(unittest.TestCase):
+    LOG_RECORD = 1
+    DO_NOT_LOG_RECORD = 0
+
+    def setUp(self):
+        self.error_filter = ErrorFilter()
+
+    def test_should_log_errors(self):
+        error_record = mock()
+        error_record.levelno = logging.ERROR
+        self.assertEqual(self.error_filter.filter(error_record), self.LOG_RECORD)
+
+    def test_should_log_warnings(self):
+        warning_record = mock()
+        warning_record.levelno = logging.WARN
+        self.assertEqual(self.error_filter.filter(warning_record), self.LOG_RECORD)
+
+        warning_record.levelno = logging.WARNING
+        self.assertEqual(self.error_filter.filter(warning_record), self.LOG_RECORD)
+
+    def test_should_log_criticals(self):
+        critical_record = mock()
+        critical_record.levelno = logging.CRITICAL
+        self.assertEqual(self.error_filter.filter(critical_record), self.LOG_RECORD)
+
+    def test_should_log_fatals(self):
+        fatal_record = mock()
+        fatal_record.levelno = logging.FATAL
+        self.assertEqual(self.error_filter.filter(fatal_record), self.LOG_RECORD)
+
+    def test_should_not_log_infos(self):
+        info_record = mock()
+        info_record.levelno = logging.INFO
+        self.assertEqual(self.error_filter.filter(info_record), self.DO_NOT_LOG_RECORD)
+
+
+    def test_should_not_log_debugs(self):
+        debug_record = mock()
+        debug_record.levelno = logging.DEBUG
+        self.assertEqual(self.error_filter.filter(debug_record), self.DO_NOT_LOG_RECORD)
+
+
+class InfoFilterTests(unittest.TestCase):
+    LOG_RECORD = 1
+    DO_NOT_LOG_RECORD = 0
+
+    def setUp(self):
+        self.info_filter = InfoFilter()
+
+    def test_should_not_log_errors(self):
+        error_record = mock()
+        error_record.levelno = logging.ERROR
+        self.assertEqual(self.info_filter.filter(error_record), self.DO_NOT_LOG_RECORD)
+
+    def test_should_not_log_warnings(self):
+        warning_record = mock()
+        warning_record.levelno = logging.WARN
+        self.assertEqual(self.info_filter.filter(warning_record), self.DO_NOT_LOG_RECORD)
+
+        warning_record.levelno = logging.WARNING
+        self.assertEqual(self.info_filter.filter(warning_record), self.DO_NOT_LOG_RECORD)
+
+    def test_should_not_log_criticals(self):
+        critical_record = mock()
+        critical_record.levelno = logging.CRITICAL
+        self.assertEqual(self.info_filter.filter(critical_record), self.DO_NOT_LOG_RECORD)
+
+    def test_should_not_log_fatals(self):
+        fatal_record = mock()
+        fatal_record.levelno = logging.FATAL
+        self.assertEqual(self.info_filter.filter(fatal_record), self.DO_NOT_LOG_RECORD)
+
+    def test_should_log_infos(self):
+        info_record = mock()
+        info_record.levelno = logging.INFO
+        self.assertEqual(self.info_filter.filter(info_record), self.LOG_RECORD)
+
+
+    def test_should_log_debugs(self):
+        debug_record = mock()
+        debug_record.levelno = logging.DEBUG
+        self.assertEqual(self.info_filter.filter(debug_record), self.LOG_RECORD)

@@ -30,6 +30,7 @@ import yadtshell.TerminalController
 from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info
 from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag
 import yadtshell.helper
+from yadtshell.loggingtools import configure_logger_output_stream_by_level
 
 sys.path.append('/etc/yadtshell')
 
@@ -42,10 +43,14 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
 message_formatter = logging.Formatter('%(levelname)-8s %(message)s')
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(message_formatter)
-root_logger.addHandler(console_handler)
+console_stdout_handler = logging.StreamHandler(stream=sys.stdout)
+console_stderr_handler = logging.StreamHandler(stream=sys.stderr)
+configure_logger_output_stream_by_level(console_stderr_handler, console_stdout_handler)
+console_stdout_handler.setFormatter(message_formatter)
+console_stderr_handler.setFormatter(message_formatter)
+root_logger.addHandler(console_stdout_handler)
+root_logger.addHandler(console_stderr_handler)
+
 
 logger = logging.getLogger('settings')
 

@@ -1,7 +1,17 @@
 import os
 import re
+import logging
 
 command_counter = 0
+
+
+def configure_logger_output_stream_by_level(stderr_handler, stdout_handler):
+    stdout_handler.setLevel(logging.INFO)
+    stderr_handler.setLevel(logging.WARN)
+    stderr_filter = ErrorFilter()
+    stdout_filter = InfoFilter()
+    stderr_handler.addFilter(stderr_filter)
+    stdout_handler.addFilter(stdout_filter)
 
 
 def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
@@ -83,3 +93,18 @@ def _replace_blanks_with_underscores(text):
 def _switch_characters_to_lower_case(text):
     return text.lower()
 
+
+class ErrorFilter(logging.Filter):
+
+    def filter(self, record):
+        if record.levelno == logging.DEBUG or record.levelno == logging.INFO:
+            return 0
+        return 1
+
+
+class InfoFilter(logging.Filter):
+
+    def filter(self, record):
+        if record.levelno == logging.WARN or record.levelno == logging.ERROR or record.levelno == logging.CRITICAL:
+            return 0
+        return 1
