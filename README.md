@@ -18,7 +18,7 @@ pip install yadtshell
 This module uses the [pybuilder](http://pybuilder.github.com).
 ```bash
 git clone https://github.com/yadt/yadtshell
-cd fysom
+cd yadtshell
 virtualenv venv
 . venv/bin/activate
 pip install pybuilder
@@ -37,7 +37,7 @@ pyb verify
 ## Generating a setup.py
 ```bash
 pyb
-cd target/dist/fysom-1.0.9
+cd target/dist/yadtshell-$VERSION
 ./setup.py <whatever you want>
 ```
 
