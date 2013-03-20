@@ -43,7 +43,8 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
 message_formatter = logging.Formatter('%(levelname)-8s %(message)s')
-console_stdout_handler = logging.StreamHandler(sys.stdout)
+console_stdout_handler = logging.StreamHandler(sys.stdout)  # DO NOT USE A KWARG : it's 'strm' in python<2.6 and has
+                                                            # been renamed to 'stream' in 2.7 with NO DOCUMENTATION...
 console_stderr_handler = logging.StreamHandler(sys.stderr)
 configure_logger_output_stream_by_level(console_stderr_handler, console_stdout_handler)
 console_stdout_handler.setFormatter(message_formatter)
