@@ -4,6 +4,8 @@ import logging
 
 command_counter = 0
 
+DO_LOG = 1
+DO_NOT_LOG = 0
 
 def configure_logger_output_stream_by_level(stderr_handler, stdout_handler):
     stdout_handler.setLevel(logging.INFO)
@@ -98,13 +100,16 @@ class ErrorFilter(logging.Filter):
 
     def filter(self, record):
         if record.levelno == logging.DEBUG or record.levelno == logging.INFO:
-            return 0
-        return 1
+            return DO_NOT_LOG
+        return DO_LOG
 
 
 class InfoFilter(logging.Filter):
 
     def filter(self, record):
-        if record.levelno == logging.WARN or record.levelno == logging.ERROR or record.levelno == logging.CRITICAL:
-            return 0
-        return 1
+        if record.levelno == logging.WARN \
+            or record.levelno == logging.ERROR \
+            or record.levelno == logging.CRITICAL \
+                or record.levelno == logging.FATAL:
+                    return DO_NOT_LOG
+        return DO_LOG
