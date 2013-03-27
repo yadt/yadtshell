@@ -99,6 +99,9 @@ if component_names:
     components = yadtshell.util.restore_current_state()
     component_names = yadtshell.helper.expand_hosts(component_names)
     component_names = yadtshell.helper.glob_hosts(components, component_names)
+    if not component_names:
+        logger.error('Could not resolve URIs. Check for typos or syntax issues.')
+        sys.exit(1)
 
 
 def create_simple_plan(cmd, component_names):
