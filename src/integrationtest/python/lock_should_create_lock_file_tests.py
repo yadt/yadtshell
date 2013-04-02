@@ -37,6 +37,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
+
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
 
             self.assertEquals(0, lock_return_code)
@@ -49,7 +50,7 @@ message: locking the host
 owner: .*@.*:/.*
 pid: \d*
 user: .*
-when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
+when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} .*
 working_copy: /.*
 yadt_host: .*
 ' > /var/lock/yadt/host.lock""")
