@@ -47,7 +47,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 umask 0002 && mkdir -pv /var/lock/yadt && echo -e 'owner: .*@.*:/.*
 pid: \d*
 user: .*
-when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
+when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} .*
 working_copy: /.*
 yadt_host: .*
 ' > /var/lock/yadt/ignore.backend-service""")
@@ -57,7 +57,7 @@ yadt_host: .*
 umask 0002 && mkdir -pv /var/lock/yadt && echo -e 'owner: .*@.*:/.*
 pid: \d*
 user: .*
-when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]{3}
+when: [A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} .*
 working_copy: /.*
 yadt_host: .*
 ' > /var/lock/yadt/ignore.frontend-service""")
