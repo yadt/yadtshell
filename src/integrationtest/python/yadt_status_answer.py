@@ -116,11 +116,8 @@ state: update_needed
 query_time: 1
 """)
 
-def stdout (host, frontend_service_state=0, backend_service_state=0):
-    return stdout_with_template(host, frontend_service_state, backend_service_state, template=STATUS_TEMPLATE)
 
-
-def stdout_with_template(host, frontend_service_state=0, backend_service_state=0, template=STATUS_TEMPLATE):
+def stdout(host, frontend_service_state=0, backend_service_state=0, template=STATUS_TEMPLATE):
     date = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y")
 
     placeholders = {
