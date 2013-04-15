@@ -21,9 +21,28 @@ import integrationtest_support
 
 import yadt_status_answer
 
+import threading
+
+parallel = False
+
+class Chunk (threading.Thread):
+    def __init__(self, chunkId, fun, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.chunkId = chunkId
+        self.fun = fun
+        self.args = args
+        self.kwargs = kwargs
+        self.exitcode = None
+
+    def run(self):
+        print "starting %s: %s '%s'" % (self.chunkId, self.fun.__name__, " ".join(self.args))
+        self.exitcode = self.fun(*self.args, **self.kwargs)
+        print "exiting %s, exitcode %s" % (self.chunkId, self.exitcode)
+
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain it02.domain')
 
         with self.fixture() as when:
@@ -35,17 +54,32 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop') \
                 .then_return(0, milliseconds_to_wait=0)
             when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
-                .then_return(1, milliseconds_to_wait=0)
+                .then_return(1)
 
             when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop') \
                 .then_return(0, milliseconds_to_wait=0)
             when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
-                .then_return(1, milliseconds_to_wait=0)
-
+                .then_return(1)
 
         status_return_code = self.execute_command('yadtshell status -v')
-        stop1_return_code   = self.execute_command('yadtshell stop service://it01/frontend-service -v')
-        stop2_return_code   = self.execute_command('yadtshell stop service://it02/frontend-service -v')
+
+        if (parallel):
+            chunks = [
+                Chunk("chunk1", self.execute_command, 'yadtshell stop service://it01/frontend-service -v'),
+                Chunk("chunk2", self.execute_command, 'yadtshell stop service://it02/frontend-service -v')
+            ]
+            [chunk.start() for chunk in chunks]
+            [chunk.join(20) for chunk in chunks]
+            for chunk in chunks:
+                if chunk.isAlive():
+                    print "%s timed out!" % chunk.chunkId
+                else:
+                    print "%s returned %s" % (chunk.chunkId, chunk.exitcode)
+            stop1_return_code = chunks[0].exitcode
+            stop2_return_code = chunks[1].exitcode
+        else:
+            stop1_return_code   = self.execute_command('yadtshell stop service://it01/frontend-service -v')
+            stop2_return_code   = self.execute_command('yadtshell stop service://it02/frontend-service -v')
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
