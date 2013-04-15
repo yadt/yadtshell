@@ -24,21 +24,24 @@ import yadt_status_answer
 
 class Test (integrationtest_support.IntegrationTestSupport):
     def test (self):
-        self.write_target_file(['it01.domain', 'it02.domain'])
+        self.write_target_file('it01.domain it02.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.domain').and_input( '/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
-            when.calling('ssh').at_least_with_arguments('it02.domain').and_input( '/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it02.domain'))
+
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop') \
+                .then_return(0, milliseconds_to_wait=0)
             when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
-                .then_return(1, milliseconds_to_wait=4000)
+                .then_return(1, milliseconds_to_wait=0)
+
+            when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop') \
+                .then_return(0, milliseconds_to_wait=0)
             when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
-                .then_return(1, milliseconds_to_wait=4000)
-            when.calling('ssh').at_least_with_arguments('it01.domain') \
-                .then_return(0)
-            when.calling('ssh').at_least_with_arguments('it02.domain') \
-                .then_return(0)
+                .then_return(1, milliseconds_to_wait=0)
+
 
         status_return_code = self.execute_command('yadtshell status -v')
         stop1_return_code   = self.execute_command('yadtshell stop service://it01/frontend-service -v')
@@ -46,19 +49,18 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
+
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status')
 
-            self.assertEquals(0, stop1_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
             verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
+            self.assertEquals(0, stop1_return_code)
             verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
+
             self.assertEquals(0, stop2_return_code)
-            verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'check')
             verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
             verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status')
-            verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'exit')
+
 
 if __name__ == '__main__':
     unittest.main()
