@@ -81,19 +81,23 @@ class Test (integrationtest_support.IntegrationTestSupport):
             stop1_return_code   = self.execute_command('yadtshell stop service://it01/frontend-service -v')
             stop2_return_code   = self.execute_command('yadtshell stop service://it02/frontend-service -v')
 
-        with self.verify() as verify:
+        with self.verify() as complete_verify:
             self.assertEquals(0, status_return_code)
-
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
-            verify.called('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status')
-
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
             self.assertEquals(0, stop1_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
-
             self.assertEquals(0, stop2_return_code)
-            verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
-            verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+
+            with complete_verify.filter_by_argument('it01.domain') as verify:
+                verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
+                verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+
+
+            with complete_verify.filter_by_argument('it02.domain') as verify:
+                verify.called('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
+                verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+
+            complete_verify.finished()
 
 
 if __name__ == '__main__':
