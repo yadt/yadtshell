@@ -38,10 +38,12 @@ class DeferredPool(defer.Deferred):
             self.logger = logging.getLogger(name)
             self.stopped = False
             self.idle = True
+            self.task = None
         def run(self, lastResult=None):
             if self.stopped:
                 return None
             task = self.next_task_fun()
+            self.task = task
             if not task:
                 self.idle = True
                 reactor.callLater(1, self.run)
@@ -53,6 +55,13 @@ class DeferredPool(defer.Deferred):
             d.addErrback(yadtshell.twisted.report_error, self.logger.error)
             d.addBoth(self.run)
             return d
+
+        def __str__(self):
+            try:
+                action = self.task.action
+            except:
+                action = "None"
+            return "worker[%s], stopped: %s, idle: %s, action: %s" % (self.name, self.stopped, self.idle, action)
 
     def __init__(self, name, queue, nr_workers=1, next_task_fun=next_in_queue, nr_errors_tolerated=0):
         defer.Deferred.__init__(self)
@@ -110,6 +119,8 @@ class DeferredPool(defer.Deferred):
         task = fun(self.queue)
         if not task:
             if self.all_workers_idle():
+                for worker in self.workers:
+                    self.logger.debug("stopping %s" % worker)
                 self._stop_workers()
                 return None
         return task
