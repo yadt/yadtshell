@@ -93,6 +93,7 @@ class DeferredPool(defer.Deferred):
             for task in self.queue:
                 for line in task.action.dump().splitlines():
                     self.logger.warning(line)
+            raise yadtshell.actions.ActionException('not all actions executed', 1)
             #reactor.callLater(0, self.errback, actions.ActionException('some actions not executed', 1))
             #return
         return self.callback(None)   # TODO refactor to something similar to deferredList
