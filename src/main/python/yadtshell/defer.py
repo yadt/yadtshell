@@ -90,6 +90,7 @@ class DeferredPool(defer.Deferred):
             return
         if self.queue:
             self.logger.warning('%i actions not executed, dump follows:' % len(self.queue))
+            self.logger.debug('All workers idle : %s'%self.all_workers_idle())
             for task in self.queue:
                 for line in task.action.dump().splitlines():
                     self.logger.warning(line)
@@ -111,21 +112,27 @@ class DeferredPool(defer.Deferred):
             return None
         if len(self.queue) == 0:
             if not self.all_workers_idle():
+                self.logger.debug('Queue is empty, but all workers are not idle, thus idling.')
                 return None
-            self.logger.debug('queue empty and all worker idle, closing pool instance')
+            self.logger.debug('Queue is empty and all worker are idle, thus closing pool instance.')
             self._stop_workers()
             return None
         fun = self.next_task_fun
         task = fun(self.queue)
         if not task:
+            self.logger.debug('Queue is not empty, but no tasks available.')
             if self.all_workers_idle():
+                self.logger.debug('Queue is not empty, but all workers are idle and no tasks are available. Thus stopping.')
                 for worker in self.workers:
                     self.logger.debug("stopping %s" % worker)
                 self._stop_workers()
                 return None
+            else:
+                self.logger.debug('Queue is not empty, and workers are not all idle, thus idling.')
         return task
 
     def _stop_workers(self):
+        self.logger.debug('Stopping all workers..')
         for worker in self.workers:
             worker.stopped = True
 
