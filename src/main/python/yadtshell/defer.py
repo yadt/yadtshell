@@ -40,13 +40,16 @@ class DeferredPool(defer.Deferred):
             self.idle = True
             self.task = None
         def run(self, lastResult=None):
+            self.logger.debug('Run @ %s'%self.name)
             if self.stopped:
+                self.logger.debug('Worker stopped : '%self.__str__())
                 return None
             task = self.next_task_fun()
             self.task = task
             if not task:
                 self.idle = True
                 reactor.callLater(1, self.run)
+                self.logger.debug("Worker %s : Idling, but I'll be back in 1s"%self.name)
                 return None
             self.idle = False
             self.logger.debug('starting %s(..)' % task.fun.__name__)
@@ -84,6 +87,7 @@ class DeferredPool(defer.Deferred):
         self.dl.addBoth(self._finish)
 
     def _finish(self, protocol, *args, **kwargs):
+        self.logger.debug('DeferredPool %s fired its callback.'%self.name)
         if self.error_count > self.nr_errors_tolerated:
             reactor.callLater(0, self.errback, yadtshell.actions.ActionException(
                 'stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated), 1))
