@@ -42,7 +42,7 @@ class DeferredPool(defer.Deferred):
         def run(self, lastResult=None):
             self.logger.debug('Run @ %s'%self.name)
             if self.stopped:
-                self.logger.debug('Worker stopped : '%self.__str__())
+                self.logger.debug('Worker stopped : %s'%self.__str__())
                 return None
             task = self.next_task_fun()
             self.task = task
