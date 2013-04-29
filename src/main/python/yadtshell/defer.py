@@ -17,7 +17,6 @@
 from __future__ import absolute_import
 
 import logging
-
 import twisted.internet.defer as defer
 import twisted.internet.reactor as reactor
 
@@ -49,7 +48,6 @@ class DeferredPool(defer.Deferred):
             if not task:
                 self.idle = True
                 reactor.callLater(1, self.run)
-                self.logger.debug("Worker %s : Idling, but I'll be back in 1s"%self.name)
                 return None
             self.idle = False
             self.logger.debug('starting %s(..)' % task.fun.__name__)
@@ -83,10 +81,9 @@ class DeferredPool(defer.Deferred):
         else:
             self.logger.debug('started: %i items in queue' % len(queue))
         deferreds = filter(None, [worker.run() for worker in self.workers])
-        self.dl = defer.DeferredList(deferreds)
-        self.dl.addBoth(self._finish)
 
-    def _finish(self, protocol, *args, **kwargs):
+
+    def _finish(self):
         self.logger.debug('DeferredPool %s fired its callback.'%self.name)
         if self.error_count > self.nr_errors_tolerated:
             reactor.callLater(0, self.errback, yadtshell.actions.ActionException(
@@ -116,7 +113,6 @@ class DeferredPool(defer.Deferred):
             return None
         if len(self.queue) == 0:
             if not self.all_workers_idle():
-                self.logger.debug('Queue is empty, but all workers are not idle, thus idling.')
                 return None
             self.logger.debug('Queue is empty and all worker are idle, thus closing pool instance.')
             self._stop_workers()
@@ -131,14 +127,13 @@ class DeferredPool(defer.Deferred):
                     self.logger.debug("stopping %s" % worker)
                 self._stop_workers()
                 return None
-            else:
-                self.logger.debug('Queue is not empty, and workers are not all idle, thus idling.')
         return task
 
     def _stop_workers(self):
         self.logger.debug('Stopping all workers..')
         for worker in self.workers:
             worker.stopped = True
+        self._finish()
 
     def all_workers_idle(self):
         for worker in self.workers:
