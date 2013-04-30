@@ -133,7 +133,8 @@ class DeferredPool(defer.Deferred):
         self.logger.debug('Stopping all workers..')
         for worker in self.workers:
             worker.stopped = True
-        self._finish()
+        if not self.called:
+            self._finish()
 
     def all_workers_idle(self):
         for worker in self.workers:
