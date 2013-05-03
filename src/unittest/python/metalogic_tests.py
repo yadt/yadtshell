@@ -5,7 +5,8 @@ from yadtshell.actions import ActionPlan, Action
 class MetalogicTests(unittest.TestCase):
 
     def test_apply_instructions_should_augment_plan_with_multiple_workers(self):
-        actions = [Action('sudo service bar stop', 'service://foo/bar'), Action('sudo service baz stop', 'service://foo/baz')]
+        actions = [Action('sudo service bar stop', 'service://foo/bar'),
+                   Action('sudo service baz stop', 'service://foo/baz')]
         original_plan = ActionPlan('update', actions)
 
         self.assertEqual(original_plan.nr_workers, None)
