@@ -38,4 +38,13 @@ class MetalogicTests(unittest.TestCase):
         self.assertEqual(actual_plan.actions[0].nr_workers, 1)
         self.assertEqual(actual_plan.actions[0].nr_errors_tolerated, '3')
 
+    def test_apply_instructions_should_default_to_zero_tolerated_errors(self):
+        actions = [Action('sudo service bar stop', 'service://foo/bar'),
+                   Action('sudo service baz stop', 'service://foo/baz')]
+        original_plan = ActionPlan('update', actions)
 
+        self.assertEqual(original_plan.nr_workers, None)
+
+        actual_plan = apply_instructions(original_plan, None)
+
+        self.assertEqual(actual_plan.nr_errors_tolerated, 0)
