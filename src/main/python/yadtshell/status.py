@@ -385,7 +385,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         if failure.value.exitCode == 255:
             logger.critical('ssh: cannot reach %s' % failure.value.component)
             logger.info('passwordless ssh not configured? network problems?')
-            return yadtshell.twisted.SshFailure('ssh connect')
+            return yadtshell.twisted.SshFailure(RuntimeError('ssh connect'))
         return failure
 
     def notify_collector(ignored):
