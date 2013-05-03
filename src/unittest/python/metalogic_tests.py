@@ -1,8 +1,17 @@
 import unittest
+from mockito import when, unstub, any as any_value, mock
+
+from yadtshell import metalogic
 from yadtshell.metalogic import apply_instructions
 from yadtshell.actions import ActionPlan, Action
 
 class MetalogicTests(unittest.TestCase):
+
+    def setUp(self):
+        when(metalogic.logging).getLogger(any_value()).thenReturn(mock())
+
+    def tearDown(self):
+        unstub()
 
     def test_apply_instructions_should_augment_plan_with_multiple_workers(self):
         actions = [Action('sudo service bar stop', 'service://foo/bar'),
