@@ -17,7 +17,6 @@
 from __future__ import absolute_import
 
 import logging
-
 import twisted.internet.defer as defer
 import twisted.internet.reactor as reactor
 
@@ -38,10 +37,13 @@ class DeferredPool(defer.Deferred):
             self.logger = logging.getLogger(name)
             self.stopped = False
             self.idle = True
+            self.task = None
         def run(self, lastResult=None):
             if self.stopped:
+                self.logger.debug('Worker stopped : %s'%self.__str__())
                 return None
             task = self.next_task_fun()
+            self.task = task
             if not task:
                 self.idle = True
                 reactor.callLater(1, self.run)
@@ -53,6 +55,13 @@ class DeferredPool(defer.Deferred):
             d.addErrback(yadtshell.twisted.report_error, self.logger.error)
             d.addBoth(self.run)
             return d
+
+        def __str__(self):
+            try:
+                action = self.task.action
+            except:
+                action = "None"
+            return "worker[%s], stopped: %s, idle: %s, action: %s" % (self.name, self.stopped, self.idle, action)
 
     def __init__(self, name, queue, nr_workers=1, next_task_fun=next_in_queue, nr_errors_tolerated=0):
         defer.Deferred.__init__(self)
@@ -71,10 +80,10 @@ class DeferredPool(defer.Deferred):
         else:
             self.logger.debug('started: %i items in queue' % len(queue))
         deferreds = filter(None, [worker.run() for worker in self.workers])
-        self.dl = defer.DeferredList(deferreds)
-        self.dl.addBoth(self._finish)
 
-    def _finish(self, protocol, *args, **kwargs):
+
+    def _finish(self):
+        self.logger.debug('DeferredPool %s fired its callback.'%self.name)
         if self.error_count > self.nr_errors_tolerated:
             reactor.callLater(0, self.errback, yadtshell.actions.ActionException(
                 'stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated), 1))
@@ -103,20 +112,26 @@ class DeferredPool(defer.Deferred):
         if len(self.queue) == 0:
             if not self.all_workers_idle():
                 return None
-            self.logger.debug('queue empty and all worker idle, closing pool instance')
+            self.logger.debug('Queue is empty and all worker are idle, thus closing pool instance.')
             self._stop_workers()
             return None
         fun = self.next_task_fun
         task = fun(self.queue)
         if not task:
             if self.all_workers_idle():
+                self.logger.debug('Queue is not empty, but all workers are idle and no tasks are available. Thus stopping.')
+                for worker in self.workers:
+                    self.logger.debug("stopping %s" % worker)
                 self._stop_workers()
                 return None
         return task
 
     def _stop_workers(self):
+        self.logger.debug('Stopping all workers..')
         for worker in self.workers:
             worker.stopped = True
+        if not self.called:
+            self._finish()
 
     def all_workers_idle(self):
         for worker in self.workers:
