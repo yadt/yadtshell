@@ -22,6 +22,10 @@ import string
 import time
 
 
+STATUS_JSON_TEMPLATE = string.Template("""
+{"hostname":"$host","fqdn":"$host_fqdn","current_artefacts":["yit-frontend-service/0:0.0.1-1"],"next_artefacts":[],"services":["service_as_json":{}]}
+""")
+
 STATUS_TEMPLATE = string.Template("""
 hostname: "$host"
 fqdn: "$host_fqdn"
