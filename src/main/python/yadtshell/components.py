@@ -33,7 +33,7 @@ logger = logging.getLogger('components')
 class Component(object):
     def __init__(self, t, host, name=None, version=None):
         self.type = t
-        if isinstance(host, str):
+        if type(host) in [str, unicode]:
             self.host = host
         else:
             self.host = host.host
@@ -84,7 +84,7 @@ class Component(object):
     def remote_call(self, cmd, tag=None, force=False):
         if not cmd:
             return
-        if type(cmd) is not str:
+        if type(cmd) not in [str, unicode]:
             cmd = '\n'.join(cmd)
 
         ssh_cmd = yadtshell.settings.SSH

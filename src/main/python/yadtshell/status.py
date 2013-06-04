@@ -26,6 +26,7 @@ import traceback
 import inspect
 import shlex
 import yaml
+import json
 
 from twisted.internet import protocol
 from twisted.internet import reactor
@@ -93,11 +94,15 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         return p.deferred
 
     def create_host(protocol):
-        def convert_string_to_host(data):
-            return yaml.load(data, Loader=Loader)
+        def convert_string_to_host(data, host=None):
+            try:
+                return json.loads(data)
+            except Exception, e:
+                logger.debug('%s: %s, falling back to yaml parser' % (host, str(e)))
+                return yaml.load(data, Loader=Loader)
 
         host = None
-        data = convert_string_to_host(protocol.data)
+        data = convert_string_to_host(protocol.data, protocol.component)
         if data == yadtshell.settings.DOWN:
             host = yadtshell.components.Host(protocol.component)
             host.state = yadtshell.settings.DOWN
@@ -139,7 +144,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             cmd.addCallback(store_service_state, service)
 
             def handle_service_state_failure(failure, service):
-                logger.debug('Failure while determining state of {0}. Exit code was {1}.'\
+                logger.debug('Failure while determining state of {0}. Exit code was {1}.'
                                                      .format(service.uri, failure.value.exitCode))
             cmd.addErrback(handle_service_state_failure, service)
             return cmd

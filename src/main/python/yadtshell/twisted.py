@@ -91,8 +91,12 @@ class ProgressIndicator(object):
 
 class YadtProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG, err_log_level=logging.WARN, log_prefix=''):
-        self.component = component
-        self.cmd = cmd
+        try:
+            self.component = component.encode('ascii')
+        except AttributeError:
+            self.component = component
+        self.cmd = cmd.encode('ascii')
+
         self.data = ""
         self.pi = pi
         if not log_prefix:
