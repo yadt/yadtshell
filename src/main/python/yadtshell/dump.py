@@ -35,8 +35,8 @@ def dump(args = [], mode='all', attribute=None, filter=None, **kwargs):
     for uri in components.keys():
         if len(args) > 0:
             all_matched = reduce(
-                lambda result, arg: result & (re.search(arg, uri) is not None), 
-                args, 
+                lambda result, arg: result & (re.search(arg, uri) is not None),
+                args,
                 True
             )
             if not all_matched:
@@ -48,6 +48,8 @@ def dump(args = [], mode='all', attribute=None, filter=None, **kwargs):
                 continue
             if isinstance(a, list):
                 result = result.union(a)
+            elif type(a) is dict:
+                result = result.union(["%s replaces %s" % (new, old) for new, old in a.iteritems()])
             else:
                 result.add(a)
         else:
