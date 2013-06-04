@@ -29,7 +29,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain', template=yadt_status_answer.STATUS_JSON_TEMPLATE))
-            #when.calling('ssh').at_least_with_arguments('it01.domain', '-O', 'check').then_return(0)
 
         actual_return_code = self.execute_command('yadtshell status')
 
@@ -38,7 +37,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
-                #verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
 
             complete_verify.finished()
 
