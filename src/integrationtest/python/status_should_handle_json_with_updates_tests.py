@@ -16,6 +16,7 @@
 
 __author__ = 'Arne Hilmann, Marcel Wolf'
 
+import re
 import unittest
 import integrationtest_support
 
@@ -34,7 +35,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(0, actual_return_code)
 
         self.assertEquals(0, self.execute_command('yadtshell info | grep " u " | grep "host uptodate"'))
-        #self.assertEquals(0, self.execute_command('yadtshell info | grep "foo" | grep "(next)"'))
+        return_code, stdout, _ = self.execute_command_and_capture_output('yadtshell info')
+        update_found_for_foo = False
+        for line in stdout:
+            if re.search('\(next\) foo', line):
+                update_found_for_foo = True
+        #self.assertTrue(update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
 
         self.assertEquals(0, self.execute_command('yadtshell dump --show-pending-updates | grep foo'))
 
