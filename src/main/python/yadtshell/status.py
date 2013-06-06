@@ -26,7 +26,7 @@ import traceback
 import inspect
 import shlex
 import yaml
-import json
+import simplejson as json
 
 from twisted.internet import protocol
 from twisted.internet import reactor
