@@ -37,10 +37,11 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(0, self.execute_command('yadtshell info | grep " u " | grep "host uptodate"'))
         return_code, stdout, _ = self.execute_command_and_capture_output('yadtshell info')
         update_found_for_foo = False
-        for line in stdout:
+        for line in stdout.splitlines():
             if re.search('\(next\) foo', line):
                 update_found_for_foo = True
-        #self.assertTrue(update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
+                break
+        self.assertTrue(update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
 
         self.assertEquals(0, self.execute_command('yadtshell dump --show-pending-updates | grep foo'))
 

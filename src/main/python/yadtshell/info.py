@@ -57,10 +57,10 @@ def info(logLevel=None, full=False, components=None, **kwargs):
     hosts = sorted([c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
     for host in hosts:
         _show_host_locking(host)
-        logger.info('Next artefacts : %s'%host.next_artefacts)
         if isinstance(host.next_artefacts, dict):
             _render_updates_based_on_key_value_schema(components, host, full)
-        _render_updates_based_on_name_schema(components, host, full)
+        else:
+            _render_updates_based_on_name_schema(components, host, full)
 
     print
 
@@ -167,37 +167,30 @@ def _render_updates_based_on_name_schema(components, host, full):
         if full:
             print
 
-def _render_updates_based_on_key_value_schema(components, host, full):
-        host_artefacts = {}
-        for current_artefact in [
-            c for c in components.values() if c.host == host.hostname and c.revision == yadtshell.settings.CURRENT
-        ]:
-            artefact = host_artefacts.setdefault(current_artefact.name, {})
-            artefact[yadtshell.settings.CURRENT] = current_artefact
-            next_artefact = components.get(yadtshell.uri.change_version(current_artefact.uri, 'next'))
-            if next_artefact:
-                artefact[yadtshell.settings.NEXT] = next_artefact
-        for artefact in sorted(host_artefacts.keys()):
-            variants = host_artefacts[artefact]
-            current_version = variants[yadtshell.settings.CURRENT].version
-            if full:
-                print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version)
-            if yadtshell.settings.NEXT in variants:
-                if not full:
-                    print '%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version)
-                next_version = components[variants[yadtshell.settings.NEXT]].version
-                nd_display = []
-                for i in range(len(next_version)):
-                    try:
-                        if current_version[i] == next_version[i]:
-                            nd_display.append(next_version[i])
-                            continue
-                    except:
-                        pass
-                    nd_display.append('${REVERSE}%s${NORMAL}' % next_version[i])
-                print '%10s  %40s  %s' % ('', '(next)', yadtshell.settings.term.render(''.join(nd_display)))
-        if full:
-            print
+def _render_updates_based_on_key_value_schema(components, host, *args, **kwargs):
+    for next_artefact_uri, old_artefact_uri in host.next_artefacts.iteritems():
+        next_artefact = components["artefact://%s/%s" % (host.host, next_artefact_uri)] # TODO better as helper method in Uri?
+        old_artefact = components["artefact://%s/%s" % (host.host, old_artefact_uri)]
+        next_artefact_name = next_artefact.name if next_artefact.name != old_artefact.name else ''
+        print '%10s  %40s  %s' % (host.host, old_artefact.name, old_artefact.version)
+        print '%10s  %40s  %s' % ('',
+                '(next) ' + render_highlighted_differences(old_artefact.name, next_artefact_name),
+                render_highlighted_differences(old_artefact.version, next_artefact.version))
+    return
+
+def highlight_differences(reference, text):
+    result = []
+    for i in range(len(text)):
+        if text[i] != reference[i]:
+            result.append('${REVERSE}')
+            result.extend(text[i:])
+            result.append('${NORMAL}')
+            break
+        result.append(text[i])
+    return ''.join(result)
+
+def render_highlighted_differences(*args):
+    return yadtshell.settings.term.render(highlight_differences(*args))
 
 def render_services_matrix(components=None, **kwargs):
     if not components:

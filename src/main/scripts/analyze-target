@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+#
+#   YADT - an Augmented Deployment Tool
+#   Copyright (C) 2010-2013  Immobilien Scout GmbH
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import logging
+
+import yadtshell.util
+
+logger = logging.getLogger('analyzetarget')
+
+def pretty_name(name):
+    return name.replace('service://', '')
+
+def analyze():
+    components = yadtshell.util.restore_current_state()
+
+    print "digraph G {"
+    print "graph [ rankdir=LR ];"
+    print "node [ shape=none ];"
+    for uri, component in components.iteritems():
+        if isinstance(component, yadtshell.components.Service):
+            print '"%s";' % pretty_name(uri)
+            for needed_uri in component.needs:
+                needed_component = components[needed_uri]
+                if isinstance(needed_component, yadtshell.components.Service):
+                    print '"%s" -> "%s"' % (pretty_name(uri), pretty_name(needed_uri))
+    print "}"
+
+if __name__ == "__main__":
+    analyze()
+

@@ -23,7 +23,7 @@ import time
 
 
 STATUS_JSON_TEMPLATE = string.Template("""
-{"hostname":"$host","fqdn":"$host_fqdn","current_artefacts":["yit/0:0.0.1"],"next_artefacts":{"foo/0:0.0.2":"yit/0:0.0.1"},"services":["service_as_json":{}]}
+{"hostname":"$host","fqdn":"$host_fqdn","current_artefacts":["yit/0:0.0.1","yat/0:0.0.7"],"next_artefacts":{"foo/0:0.0.0":"yit/0:0.0.1","yat/0:0.0.8":"yat/0:0.0.7"},"services":["service_as_json":{}]}
 """)
 
 STATUS_TEMPLATE = string.Template("""
