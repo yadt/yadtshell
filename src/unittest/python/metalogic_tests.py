@@ -57,3 +57,27 @@ class MetalogicTests(unittest.TestCase):
         actual_plan = apply_instructions(original_plan, None)
 
         self.assertEqual(actual_plan.nr_errors_tolerated, 0)
+
+    def test_apply_instructions_should_split_plan_in_subplans(self):
+        actions = [
+            Action('sudo service bar stop', 'service://foo/bar'),
+            Action('sudo service baz stop', 'service://foo/baz'),
+            Action('sudo service baf start', 'service://foo/baf'),
+            Action('sudo service bam start', 'service://foo/bam')
+        ]
+        original_plan = ActionPlan('test', actions)
+
+        actual_plan = apply_instructions(original_plan, 'test=1_1_0:*_*_1')
+
+        first_subplan = actual_plan.actions[0]
+        second_subplan = actual_plan.actions[1]
+
+        self.assertEqual(first_subplan.nr_workers, 1)
+        self.assertEqual(first_subplan.nr_errors_tolerated, '0')
+        self.assertEqual(len(first_subplan.actions), 1)
+        self.assertEqual(first_subplan.actions, [actions[0]])
+
+        self.assertEqual(second_subplan.nr_workers, 3)
+        self.assertEqual(second_subplan.nr_errors_tolerated, '1')
+        self.assertEqual(len(second_subplan.actions), 3)
+        self.assertEqual(second_subplan.actions, actions[1:])
