@@ -34,7 +34,7 @@ from yadtshell.info import info
 from yadtshell.dump import dump
 
 
-VERSION = '1.5.5-203'
+VERSION = '${version}'
 
 
 def decode1364(encoded_string):
