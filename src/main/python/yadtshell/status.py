@@ -164,8 +164,11 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         for settings in services:
             if type(settings) is str or not settings:
                 name = settings
-                settings = None
-                service_class = 'Service'
+                settings = services.get(settings, None)
+                if settings:
+                    service_class = settings.get('class', 'Service')
+                else:
+                    service_class = 'Service'
             else:
                 name = settings.keys()[0]
                 settings = settings[name]

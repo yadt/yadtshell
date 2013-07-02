@@ -223,7 +223,10 @@ def _render_services_matrix(components, hosts, enable_legend=False):
     services = []
     for host in hosts:
         for servicedef in getattr(host, 'services', []):
-            service = servicedef.keys()[0]
+            try:
+                service = servicedef.keys()[0]
+            except:
+                service = servicedef
             if not service in services:
                 services.append(service)
     for rank, name in enumerate(services):
