@@ -51,14 +51,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it02.domain'))
 
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop') \
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop frontend-service') \
                 .then_return(0, milliseconds_to_wait=0)
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')\
                 .then_return(1)
 
-            when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop') \
+            when.calling('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-stop frontend-service') \
                 .then_return(0, milliseconds_to_wait=0)
-            when.calling('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
+            when.calling('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status frontend-service')\
                 .then_return(1)
 
         status_return_code = self.execute_command('yadtshell status -v')
@@ -88,14 +88,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             with complete_verify.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
-                verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
-                verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+                verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop frontend-service')
+                verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
 
 
             with complete_verify.filter_by_argument('it02.domain') as verify:
                 verify.called('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status')
-                verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
-                verify.called('ssh').at_least_with_arguments('it02.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+                verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-stop frontend-service')
+                verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status frontend-service')
 
             complete_verify.finished()
 

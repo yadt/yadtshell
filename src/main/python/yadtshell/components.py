@@ -98,9 +98,10 @@ class Component(object):
         remotecall_script = '/usr/bin/yadt-remotecall'
         log_file = self.create_remote_log_filename(tag=tag)
         owner = yadtshell.util.get_locking_user_info()['owner']
-        is_force = {False: '', True: '-f'}[force]
-        complete_cmd = '''%(ssh_cmd)s %(host)s %(remotecall_script)s -l %(log_file)s -m %(owner)s -s %(service)s %(is_force)s \"%(cmd)s\" ''' % locals()
-        return complete_cmd
+        is_force = {False: '', True: ' --force'}[force]
+        return '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(is_force)s" ' % locals()
+        #complete_cmd = '''%(ssh_cmd)s %(host)s %(remotecall_script)s -l %(log_file)s -m %(owner)s -s %(service)s %(is_force)s \"%(cmd)s\" ''' % locals()
+        #return complete_cmd
 
     def local_call(self, cmd, tag=None, guard=True, force=False, no_subprocess=True):
         if not cmd:
@@ -215,7 +216,7 @@ class Host(Component):
         Component.__init__(self, yadtshell.settings.HOST, name)
 
     def update(self):
-        return self.remote_call('sudo /usr/bin/yadt-yum upgrade', '%s_%s' %
+        return self.remote_call('yadt-host-update', '%s_%s' %
                 (self.hostname, yadtshell.settings.UPDATE))
 
     def bootstrap(self):
@@ -228,10 +229,10 @@ class Host(Component):
         return self.state == yadtshell.settings.UPDATE_NEEDED
 
     def probe(self):
-        return self.remote_call('/usr/bin/yadt-status-host')
+        return self.remote_call('yadt-host-status')
 
     def probe_uptodate(self):
-        return yadtshell.util.log_subprocess(self.remote_call('/usr/bin/yadt-status-host', '%s_probe' % self.hostname))
+        return yadtshell.util.log_subprocess(self.remote_call('yadt-host-status', '%s_probe' % self.hostname))
 
     def get_lock_dir(self):
         return self.defaults['YADT_LOCK_DIR']
@@ -251,18 +252,10 @@ class Host(Component):
         lockinfo = yadtshell.util.get_locking_user_info()
         lockinfo["message"] = message
         lockinfo["force"] = force
-        return self._create_owner_file(
-                lockinfo,
-                os.path.join(self.get_lock_dir(), 'host.lock'),  # TODO extract method for filename
-                force=force, tag="lock_host")
+        return self.remote_call('yadt-host-lock %s' % message, 'lock_host', force)
 
     def unlock(self, force=False, **kwargs):
-        lockinfo = yadtshell.util.get_locking_user_info()
-        return self._remove_owner_file(
-                lockinfo,
-                os.path.join(self.get_lock_dir(), 'host.lock'),  # TODO extract method for filename
-                force=force,
-                tag="unlock_host")
+        return self.remote_call('yadt-host-unlock', "unlock_host", force)
 
     def update_attributes_after_status(self):
         self.is_locked = not self.lockstate is None
@@ -284,7 +277,7 @@ class Artefact(Component):
         #self.needs.add(uri.create(settings.HOST, host.host))
 
     def updateartefact(self):
-        return self.remote_call('sudo /usr/bin/yadt-yum upgrade -y %s' % self.name,
+        return self.remote_call('yadt-artefact-update %s' % self.name,
                                 'artefact_%s_%s_%s' % (self.host, self.name, yadtshell.constants.UPDATEARTEFACT))
 
 
@@ -331,37 +324,29 @@ class Service(Component):
 
     def status(self):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.STATUS),
-                tag='%s_%s' % (self.name, yadtshell.settings.STATUS), force=True)
+                tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
 
     def _retrieve_service_call(self, action):
-        name = self.name
-        return 'sudo /sbin/service %(name)s %(action)s' % locals()
+        return 'yadt-service-%s %s' % (action, self.name)
 
     def ignore(self, message=None, **kwargs):
         if not message:
             raise ValueError('the "message" parameter is mandatory')
-        components = yadtshell.util.restore_current_state()
-        host = components[self.host_uri]
-        result = self._create_owner_file(
-            yadtshell.util.get_locking_user_info(),
-            os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
-            force=kwargs.get('force', False),
-            tag="ignore_%s" % self.name)
-        if not result:
-            logger.warn("Could not ignore %s. Try --force" % self.uri)
-        return result
+        tag="ignore_%s" % self.name
+        force=kwargs.get('force', False)
+        return self.remote_call('yadt-service-ignore %s "%s"' % (self.name, message), tag, force)
+        #result = self._create_owner_file(
+        #    yadtshell.util.get_locking_user_info(),
+        #    os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
+        #    force=kwargs.get('force', False),
+        #    tag="ignore_%s" % self.name)
+        #if not result:
+        #    logger.warn("Could not ignore %s. Try --force" % self.uri)
+        #return result
 
     def unignore(self, **kwargs):
-        components = yadtshell.util.restore_current_state()
-        host = components[self.host_uri]
-        result = self._remove_owner_file(
-            yadtshell.util.get_locking_user_info(),
-            os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
-            force=True, #kwargs.get('force'),
-            tag="unignore_%s" % self.name)
-        if not result:
-            logger.warn("Could not unignore %s. Try --force" % self.uri)
-        return result
+        tag="unignore_%s" % self.name
+        return self.remote_call('yadt-service-unignore %s' % self.name, tag)
 
 
 def do_cb(protocol, args, opts):

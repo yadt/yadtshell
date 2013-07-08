@@ -41,10 +41,10 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             self.assertEquals(0, start_return_code)
             verifier.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start')
-            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status')
-            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service start').and_input('start')
-            verifier.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start frontend-service')
+            verifier.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
             verifier.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 

@@ -14,8 +14,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber'
-
 import unittest
 import integrationtest_support
 
@@ -41,7 +39,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             self.assertEquals(0, update_return_code)
             verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.domain')
-            verify.called('ssh').at_least_with_arguments('-s', 'yit-config-it01', 'sudo /usr/bin/yadt-yum upgrade -y yit-config-it01', 'it01.domain').and_input('updateartefact')
+            verify.called('ssh').at_least_with_arguments('yadt-command yadt-artefact-update yit-config-it01', 'it01.domain')
             verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.domain')
 
 

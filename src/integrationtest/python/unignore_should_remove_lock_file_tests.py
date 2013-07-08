@@ -41,8 +41,8 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             self.assertEquals(0, unignore_return_code)
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'backend-service', 'rm -fv /var/lock/yadt/ignore.backend-service').and_input('unignore')
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-s', 'frontend-service', 'rm -fv /var/lock/yadt/ignore.frontend-service').and_input('unignore')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-unignore backend-service')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-unignore frontend-service')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 

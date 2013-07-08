@@ -29,9 +29,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input( '/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')\
                 .then_return(1)
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')\
                 .then_return(1)
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
@@ -46,10 +46,10 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             self.assertEquals(0, stop_return_code)
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service stop').and_input('stop')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service frontend-service status').and_input('status')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service stop').and_input('stop')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service status').and_input('status')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop frontend-service')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop backend-service')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 

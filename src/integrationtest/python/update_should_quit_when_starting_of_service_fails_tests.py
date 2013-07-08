@@ -29,7 +29,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start') \
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')\
                 .then_return(1)
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
@@ -41,7 +41,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'sudo /sbin/service backend-service start').and_input('start')
+            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
