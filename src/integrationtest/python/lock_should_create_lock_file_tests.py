@@ -43,7 +43,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
             self.assertEquals(0, lock_return_code)
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
 
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-host-lock locking the host')
+            verify.called('ssh').at_least_with_arguments('it01.domain', "yadt-command yadt-host-lock 'locking the host'")
 
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 

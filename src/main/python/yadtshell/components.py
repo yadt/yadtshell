@@ -99,9 +99,8 @@ class Component(object):
         log_file = self.create_remote_log_filename(tag=tag)
         owner = yadtshell.util.get_locking_user_info()['owner']
         is_force = {False: '', True: ' --force'}[force]
-        return '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(is_force)s" ' % locals()
-        #complete_cmd = '''%(ssh_cmd)s %(host)s %(remotecall_script)s -l %(log_file)s -m %(owner)s -s %(service)s %(is_force)s \"%(cmd)s\" ''' % locals()
-        #return complete_cmd
+        complete_cmd = '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(is_force)s" ' % locals()
+        return complete_cmd
 
     def local_call(self, cmd, tag=None, guard=True, force=False, no_subprocess=True):
         if not cmd:
@@ -252,7 +251,7 @@ class Host(Component):
         lockinfo = yadtshell.util.get_locking_user_info()
         lockinfo["message"] = message
         lockinfo["force"] = force
-        return self.remote_call('yadt-host-lock %s' % message, 'lock_host', force)
+        return self.remote_call("yadt-host-lock '%s'" % message, 'lock_host', force)
 
     def unlock(self, force=False, **kwargs):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
