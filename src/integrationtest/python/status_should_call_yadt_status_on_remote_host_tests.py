@@ -27,7 +27,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.test.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.test.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.test.domain'))
 
         actual_return_code = self.execute_command('yadtshell status -v')
@@ -35,7 +35,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(0, actual_return_code)
 
         with self.verify() as verify:
-            verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.test.domain').and_input('sudo /usr/bin/yadt-status')
 
 
 if __name__ == '__main__':

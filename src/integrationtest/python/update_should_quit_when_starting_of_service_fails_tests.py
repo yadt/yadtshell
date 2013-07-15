@@ -27,7 +27,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
             when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')\
                 .then_return(1)
@@ -39,7 +39,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(1, actual_return_code)
 
         with self.verify() as verify:
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
             verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')

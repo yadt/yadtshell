@@ -27,17 +27,17 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.domain', 'it02.domain', 'it03.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
-            when.calling('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it02.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it02.domain'))
             when.calling('ssh').at_least_with_arguments('it02.domain') \
                 .then_return(0)
 
-            when.calling('ssh').at_least_with_arguments('it03.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it03.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it03.domain'))
             when.calling('ssh').at_least_with_arguments('it03.domain') \
                 .then_return(0)
@@ -48,7 +48,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as filtered_verify:
-                filtered_verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+                filtered_verify.called('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status')
                 filtered_verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
                 filtered_verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')
                 filtered_verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')
@@ -59,7 +59,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 filtered_verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
             with complete_verify.filter_by_argument('it02.domain') as filtered_verify:
-                filtered_verify.called('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status')
+                filtered_verify.called('ssh').at_least_with_arguments('it02.domain').and_input('sudo /usr/bin/yadt-status')
                 filtered_verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'check')
                 filtered_verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-start backend-service')
                 filtered_verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status backend-service')
@@ -70,7 +70,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 filtered_verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'exit')
 
             with complete_verify.filter_by_argument('it03.domain') as filtered_verify:
-                filtered_verify.called('ssh').at_least_with_arguments('it03.domain').and_input('/usr/bin/yadt-status')
+                filtered_verify.called('ssh').at_least_with_arguments('it03.domain').and_input('sudo /usr/bin/yadt-status')
                 filtered_verify.called('ssh').at_least_with_arguments('it03.domain', '-O', 'check')
                 filtered_verify.called('ssh').at_least_with_arguments('it03.domain', 'yadt-command yadt-service-start backend-service')
                 filtered_verify.called('ssh').at_least_with_arguments('it03.domain', 'yadt-command yadt-service-status backend-service')

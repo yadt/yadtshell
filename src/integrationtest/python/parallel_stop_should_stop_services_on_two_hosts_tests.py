@@ -27,7 +27,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.domain', 'it02.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
             when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')\
                 .then_return(1)
@@ -38,7 +38,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
 
 
-            when.calling('ssh').at_least_with_arguments('it02.domain').and_input( '/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it02.domain').and_input( 'sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it02.domain'))
             when.calling('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status frontend-service')\
                 .then_return(1)
@@ -56,7 +56,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
             self.assertEquals(0, stop_return_code)
 
             with complete_verifier.filter_by_argument('it01.domain') as verify:
-                verify.called('ssh').at_least_one_argument_matches('it01.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_one_argument_matches('it01.domain').and_input('sudo /usr/bin/yadt-status')
                 verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
                 verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop frontend-service')
                 verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
@@ -65,7 +65,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
             with complete_verifier.filter_by_argument('it02.domain') as verify:
-                verify.called('ssh').at_least_one_argument_matches('it02.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_one_argument_matches('it02.domain').and_input('sudo /usr/bin/yadt-status')
                 verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'check')
                 verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-stop frontend-service')
                 verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status frontend-service')

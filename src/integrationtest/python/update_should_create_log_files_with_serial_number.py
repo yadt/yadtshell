@@ -27,7 +27,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
-            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
+            when.calling('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
@@ -37,7 +37,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(0, actual_return_code)
 
         with self.verify() as verify:
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('sudo /usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
             verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.001\.it01\.backend-service_start\.log')
             verify.called('ssh').at_least_with_arguments('-l').at_least_one_argument_matches('\d{4}-\d{2}-\d{2}/yadtshell.integration-test.\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2}.*\.002\.it01\.backend-service_status\.log')

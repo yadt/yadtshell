@@ -86,7 +86,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     components = yadtshell.components.ComponentDict()
 
     def query_status(component, pi=None):
-        p = yadtshell.twisted.YadtProcessProtocol(component, '/usr/bin/yadt-status', pi)
+        p = yadtshell.twisted.YadtProcessProtocol(component, 'sudo /usr/bin/yadt-status', pi)
         p.deferred = defer.Deferred()
         p.deferred.name = component
         cmd = shlex.split(yadtshell.settings.SSH) + [component]
