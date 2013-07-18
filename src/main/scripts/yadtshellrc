@@ -28,4 +28,13 @@ if [[ -d $TARGETS_DIR ]]; then
     cd $TARGETS_DIR
 fi
 
+if [[ -n "$YADT_TARGET" ]]; then
+    echo "using target $YADT_TARGET"
+    if [[ -d $YADT_TARGET ]]; then
+        cd $YADT_TARGET
+    else
+        echo "target $YADT_TARGET does not exist, sorry"
+    fi
+fi
+
 return 0

@@ -1,1 +1,2 @@
+export YADT_TARGET=$1
 bash --rcfile /usr/bin/yadtshellrc -i
