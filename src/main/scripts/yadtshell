@@ -82,7 +82,7 @@ logger = logging.getLogger('yadtshell')
 ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
 validate_command_line_options(cmd, opts, parser.print_help)
 
-yadtshell.settings.load_settings()
+yadtshell.settings.load_settings(log_to_file=(not cmd in ['dump', 'info']))
 if opts.tracking_id:
     yadtshell.settings.tracking_id = opts.tracking_id
 

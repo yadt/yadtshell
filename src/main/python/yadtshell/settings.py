@@ -93,7 +93,7 @@ def initialize_broadcast_client():
         logger.warn(e)
 
 
-def load_settings():
+def load_settings(log_to_file=True):
 
     initialize_broadcast_client()
 
@@ -156,10 +156,12 @@ def load_settings():
     )
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    root_logger.addHandler(file_handler)
+
+    if log_to_file:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
 
     logger.debug(yaml.dump(USER_INFO, default_flow_style=False))
     logger.debug('Called "{0}"'.format(' '.join(sys.argv)))
