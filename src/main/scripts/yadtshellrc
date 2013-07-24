@@ -32,6 +32,7 @@ if [[ -n "$YADT_TARGET" ]]; then
     echo "using target $YADT_TARGET"
     if [[ -d $YADT_TARGET ]]; then
         cd $YADT_TARGET
+        yadtshell status
     else
         echo "target $YADT_TARGET does not exist, sorry"
     fi

@@ -28,7 +28,6 @@ use_plugin('python.pydev')
 use_plugin('copy_resources')
 use_plugin('filter_resources')
 
-
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
 description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts

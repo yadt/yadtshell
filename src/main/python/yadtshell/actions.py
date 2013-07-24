@@ -59,7 +59,7 @@ class Action(object):
         self.args = args
         self.kwargs = kwargs
         self.rank = self.uri
-        
+
     def are_all_preconditions_met(self, components):
         for precondition in self.preconditions:
             if not precondition.is_reached(components):
@@ -103,13 +103,13 @@ class ActionPlan(object):
         else:
             self.actions = tuple(sorted(actions))
         if self.actions:
-            self.rank = self.actions[0].rank  
+            self.rank = self.actions[0].rank
         else:
             # TODO: yes, plans without actions feel and fail miserably
             self.rank = -1
         self.nr_workers = nr_workers
         self.nr_errors_tolerated = nr_errors_tolerated
-        
+
     def __str__(self):
         return self.dump(include_preconditions=False)
 
@@ -122,14 +122,14 @@ class ActionPlan(object):
         else:
             workers_str = ', workers *undefined*'
         return '%i items%s, %s errors tolerated' % (len(self.actions), workers_str, str(self.nr_errors_tolerated))
-        
+
     def dump(self, depth=0, include_preconditions=True):
         indent = ' ' * depth * 4
         text = '%s%s [%s]:\n' % (indent, self.name, self.meta_info())
         for action in self.actions:
             text += action.dump(depth + 1, include_preconditions)
         return text
-    
+
     def __lt__(self, other):
         return self.rank < other.rank
 
@@ -143,10 +143,10 @@ class ActionPlan(object):
                 if action.name == name:
                     return action.search(rest)
         return None
-    
+
     def list_subplans(self):
         yield (self.name, self)
         for plan in [p for p in self.actions if isinstance(p, ActionPlan)]:
             for sp in plan.list_subplans():
                 yield ('%s/%s' % (self.name, sp[0]), sp[1])
-                
+
