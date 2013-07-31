@@ -16,6 +16,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import logging
 import os.path
 import pwd
@@ -23,8 +25,10 @@ import socket
 import subprocess
 import sys
 import yaml
+import shlex
 
 from time import localtime, strftime
+from twisted.internet import defer, reactor
 
 import yadtshell.settings
 import yadtshell.components
@@ -196,29 +200,45 @@ def get_status_line(components):
 def start_ssh_multiplexed(hosts=None):
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
-    for host in hosts:
-        ssh_check_cmds = ['ssh',
-            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH,
-            '-O', 'check', host]
-        ssh_check_call = subprocess.Popen(ssh_check_cmds, stderr=subprocess.PIPE)
-        ssh_check_call.communicate()
-        if ssh_check_call.returncode != 0:
-            start_multiplexing_call = ['ssh', '-fN', '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH, '-o', 'ControlMaster=yes', host]
-            logger.debug(' '.join(start_multiplexing_call))
-            is_started = subprocess.call(start_multiplexing_call)
-            logger.debug(is_started)
-            logger.debug('multiplexed ssh connection to %(host)s created' % locals())
+
+    def start_ssh(protocol, host):
+        logger.debug('start_ssh %s' % host)
+        start_multiplexing_call = shlex.split('%s -fN -o ControlMaster=yes %s' % (yadtshell.settings.SSH, host))
+        p = yadtshell.twisted.YadtProcessProtocol(host, 'start_ssh', wait_for_io=False)
+        p.deferred = defer.Deferred()
+        logger.debug('cmd: %s' % start_multiplexing_call)
+        reactor.spawnProcess(p, start_multiplexing_call[0], start_multiplexing_call, None)
+        return protocol
+
+
+    def check_ssh(host):
+        ssh_check_cmds = shlex.split('%s -O check %s' % (yadtshell.settings.SSH, host))
+        p = yadtshell.twisted.YadtProcessProtocol(host, 'check_ssh')
+        p.deferred = defer.Deferred()
+        logger.debug('cmd: %s' % ssh_check_cmds)
+        reactor.spawnProcess(p, ssh_check_cmds[0], ssh_check_cmds, None)
+        p.deferred.addErrback(start_ssh, host)
+        return p.deferred
+
+    return defer.DeferredList([check_ssh(host) for host in hosts])
 
 
 def stop_ssh_multiplexed(ignored, hosts=None):
+
+    def stop_ssh(host):
+        ssh_stop_cmds = shlex.split('%s -O exit %s' % (yadtshell.settings.SSH, host))
+        p = yadtshell.twisted.YadtProcessProtocol(host, 'stop_ssh')
+        p.deferred = defer.Deferred()
+        logger.debug('cmd: %s' % ssh_stop_cmds)
+        reactor.spawnProcess(p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={ 2 : 3 })
+        return p.deferred
+
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
-    for host in hosts:
-        logger.debug('multiplexed ssh connections to %(host)s removed' % locals())
-        ssh_check_cmds = ['ssh',
-            '-o', 'ControlPath=%s' % yadtshell.settings.SSH_CONTROL_PATH,
-            '-O', 'exit', host]
-        #ignore = subprocess.call(ssh_check_call)
-        stop_multiplexing_call = subprocess.Popen(ssh_check_cmds, stderr=subprocess.PIPE)
-        stop_multiplexing_call.communicate()
-    return ignored
+
+
+
+    dl = defer.DeferredList([stop_ssh(host) for host in hosts])
+
+    dl.addCallback(lambda _: ignored)
+    return dl

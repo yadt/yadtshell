@@ -264,6 +264,10 @@ class ActionManager(object):
         self.logger.debug('%s finished' % plan_name)
         return result
 
+
+    def handle_cb(self, protocol, plan, path=[]):
+        return self.handle(plan, path)
+
     def handle(self, plan, path=[]):
         queue = []
         if isinstance(plan, yadtshell.actions.Action):
@@ -358,13 +362,17 @@ class ActionManager(object):
                 pi.finish()
             return result
 
+
         self.pi = yadtshell.twisted.ProgressIndicator()
+        deferred = None
         if not dryrun:
-            yadtshell.util.start_ssh_multiplexed()
+            deferred = yadtshell.util.start_ssh_multiplexed()
         try:
-            deferred = self.handle(action_plan)
+            if deferred:
+                deferred.addCallback(self.handle_cb, action_plan)
+            else:
+                deferred = self.handle(action_plan)
         except ValueError, ve:
-            deferred = defer.Deferred()
             reactor.callLater(0, deferred.errback, ve)
             return deferred
 

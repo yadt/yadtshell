@@ -62,7 +62,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-stop backend-service')
                 verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')
-                verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
             with complete_verifier.filter_by_argument('it02.domain') as verify:
                 verify.called('ssh').at_least_one_argument_matches('it02.domain').and_input('/usr/bin/yadt-status')
@@ -71,7 +70,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-stop backend-service')
                 verify.called('ssh').at_least_with_arguments('it02.domain', 'yadt-command yadt-service-status backend-service')
-                verify.called('ssh').at_least_with_arguments('it02.domain', '-O', 'exit')
 
             complete_verifier.finished()
 

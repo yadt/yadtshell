@@ -46,8 +46,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-ignore frontend-service ignoring')
 
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,7 +45,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')
             verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-host-update')
             verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-host-status')
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'exit')
 
 
 if __name__ == '__main__':

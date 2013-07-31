@@ -40,7 +40,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
             self.assertEquals(0, update_return_code)
             verify.called('ssh').at_least_with_arguments('-O', 'check', 'it01.domain')
             verify.called('ssh').at_least_with_arguments('yadt-command yadt-artefact-update yit-config-it01', 'it01.domain')
-            verify.called('ssh').at_least_with_arguments('-O', 'exit', 'it01.domain')
 
 
 if __name__ == '__main__':

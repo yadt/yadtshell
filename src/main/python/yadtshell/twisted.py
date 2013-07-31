@@ -90,13 +90,13 @@ class ProgressIndicator(object):
 
 
 class YadtProcessProtocol(protocol.ProcessProtocol):
-    def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG, err_log_level=logging.WARN, log_prefix=''):
+    def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG, err_log_level=logging.WARN, log_prefix='', wait_for_io=True):
         try:
             self.component = component.encode('ascii')
         except AttributeError:
             self.component = component
         self.cmd = cmd.encode('ascii')
-
+        self.wait_for_io = wait_for_io
         self.data = ""
         self.pi = pi
         if not log_prefix:
@@ -121,24 +121,21 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
 
     def errReceived(self, data):
         for line in data.splitlines():
-            self.logger.log(self.err_log_level, '{0} stderr: {1}'.format(self.component, line))
+            self.logger.log(self.err_log_level, '{0} {1} stderr: {2}'.format(self.component, self.cmd, line))
         if self.pi:
             self.pi.update((self.cmd, self.component))
 
-    def inConnectionLost(self):
-        self.logger.debug("inConnectionLost! stdin is closed! (we probably did it)")
-
-    def outConnectionLost(self):
-        self.logger.debug("outConnectionLost! The child closed their stdout!")
-
-    def errConnectionLost(self):
-        self.logger.debug("errConnectionLost! The child closed their stderr.")
-
     def processExited(self, reason):
-        self.logger.debug("processExited, exit code %s" % str(reason.value.exitCode))
+        self.logger.debug("%s@%s exited, exit code %s" % (self.cmd, self.component, str(reason.value.exitCode)))
+        if not self.wait_for_io:
+            self.finish(reason)
 
     def processEnded(self, reason):
-        self.logger.debug("status received, exit code %s" % str(reason.value.exitCode))
+        self.logger.debug("%s@%s ended, exit code %s" % (self.cmd, self.component, str(reason.value.exitCode)))
+        if self.wait_for_io:
+            self.finish(reason)
+
+    def finish(self, reason):
         self.exitcode = reason.value.exitCode
         if self.pi:
             self.pi.update((self.cmd, self.component), str(self.exitcode))
