@@ -117,7 +117,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             host = yadtshell.components.Host(data['hostname'])
             for key, value in data.iteritems():
                 setattr(host, key, value)
-            host.state = ['update_needed', 'uptodate'][host.next_artefacts is None]
+            host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
         loc_type = yadtshell.util.determine_loc_type(host.hostname)
         host.loc_type = loc_type
         host.update_attributes_after_status()
