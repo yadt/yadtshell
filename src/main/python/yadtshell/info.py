@@ -318,6 +318,16 @@ def _render_services_matrix(components, hosts, enable_legend=False):
     print '  %s  %s' % (separator.join(s), 'host uptodate')
     s = []
     for host in hosts:
+        if host.reboot_required_to_activate_latest_kernel:
+            s.append(icons['REBOOT_NOW'])
+        elif host.reboot_required_after_next_update:
+            s.append(icons['REBOOT_AFTER_UPDATE'])
+        else:
+            s.append(icons['UP'])
+    print '  %s  %s' % (separator.join(s), 'reboot required')
+
+    s = []
+    for host in hosts:
         if host.is_locked_by_other:
             s.append(icons['LOCKED_BY_OTHER'])
         elif host.is_locked_by_me:
@@ -346,10 +356,14 @@ def get_icons():
         'LOCKED_BY_OTHER': 'L',
         'UPTODATE': '|',
         'UPDATE_NEEDED': 'u',
+        'REBOOT_NOW': 'R',
+        'REBOOT_AFTER_UPDATE': 'r'
     }
 
 
 def colorize(icons):
+    icons['REBOOT_AFTER_UPDATE'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['REBOOT_AFTER_UPDATE'])
+    icons['REBOOT_NOW'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['REBOOT_NOW'])
     icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
     icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
     icons['UNKNOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['UNKNOWN'])
@@ -373,6 +387,7 @@ def render_legend():
 
     print 'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' % icons
     print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % icons
+    print '        %(REBOOT_NOW)s reboot now for new kernel  %(REBOOT_AFTER_UPDATE)s reboot after updating' % icons
     print
 
 
