@@ -212,6 +212,8 @@ class Host(Component):
         self.is_locked = None
         self.is_locked_by_other = None
         self.is_locked_by_me = None
+        self.reboot_required_to_activate_latest_kernel = False
+        self.reboot_required_after_next_update = False
         Component.__init__(self, yadtshell.settings.HOST, name)
 
     def update(self):
