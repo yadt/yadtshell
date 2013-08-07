@@ -15,7 +15,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import logging
 import time
 
@@ -24,19 +23,26 @@ import yadtshell
 
 logger = logging.getLogger('info')
 
+def render_green(text):
+    return yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % text)
+
+
+def render_yellow(text):
+    return yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % text)
+
+
+def render_red(text):
+    return yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % text)
+
 
 def _show_host_locking(host):
     if host.is_locked:
         lock_owner = host.lockstate.get("owner", "Unknown")
         reason = host.lockstate.get("message", "--- no message given ---")
         if host.is_locked_by_me:
-            print yadtshell.settings.term.render('${BG_YELLOW}${WHITE}${BOLD}')
-            print('%10s is locked by me' % host.host)
-            print yadtshell.settings.term.render('%10s %s ${NORMAL}' % ('reason:', reason))
+            print render_yellow('\n%10s is locked by me\n%10s %s\n' % (host.host, "reason", reason))
         elif host.is_locked_by_other:
-            print yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}')
-            print('%10s is locked by %s' % (host.host, lock_owner))
-            print yadtshell.settings.term.render('%10s %s ${NORMAL}' % ('reason:', reason))
+            print render_red('\n%10s is locked by %s\n%10s %s\n' % (host.host, lock_owner, "reason", reason))
 
 
 def info(logLevel=None, full=False, components=None, **kwargs):
@@ -76,59 +82,23 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     for missing_component in [c for c in components.values() if isinstance(c,
         yadtshell.components.MissingComponent)]:
-        print yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}')
-        print 'config problem: missing %s' % missing_component.uri
-        print yadtshell.settings.term.render('${NORMAL}')
+        print render_red('\nconfig problem: missing %s\n' % missing_component.uri)
 
     for service in [component for component in components.values() if
             isinstance(component, yadtshell.components.Service)]:
         if getattr(service, 'service_artefact_problem', None):
-            print yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}')
-            print 'problem with %(uri)s' % vars(service)
-            print '\t%(service_artefact)s: %(service_artefact_problem)s' % vars(service)
-            print '\t-> no artefact dependencies available!'
-            print yadtshell.settings.term.render('${NORMAL}')
+            print render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service))
             print
 
     info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
-    if 'matrix' in info_view_settings:
-        render_services_matrix(components)
-    else:
-        print 'services'
-
-        def extract_name(s):
-            return s.rsplit('/', 1)[1]
-        ranks = {}
-        services = []
-        for host in [component for component in components.values() if component.type == yadtshell.settings.HOST]:
-            for service in getattr(host, 'defined_services', set()):
-                if not service.name in services:
-                    services.append(service.name)
-        for rank, name in enumerate(services):
-            ranks[name] = rank
-        for c in sorted(
-            [c for c in condensed if c[0].startswith(yadtshell.settings.SERVICE)],
-            key=lambda t: '%03i %s' % (ranks[extract_name(t[0])], t[0])
-        ):
-            print yadtshell.util.render_component_state(c[0], c[1])
-
-        print
-        print 'hosts'
-        for c in sorted(
-            [c for c in condensed if c[0].startswith(yadtshell.settings.HOST)]
-        ):
-            print yadtshell.util.render_component_state(c[0], c[1])
+    render_services_matrix(components)
 
     now = time.time()
     max_age = now - yadtshell.util.get_mtime_of_current_state()
-    if max_age > 120:
-        max_age = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}  %.0f  ${NORMAL}' % max_age)
-    elif max_age > 60:
-        max_age = yadtshell.settings.term.render('${RED}${BOLD}%.0f${NORMAL}' % max_age)
-    elif max_age > 20:
-        max_age = yadtshell.settings.term.render('${RED}%.0f${NORMAL}' % max_age)
+    if max_age > 20:
+        max_age = render_red('  %.0f  ' % max_age)
     else:
-        max_age = yadtshell.settings.term.render('${GREEN}${BOLD}%.0f${NORMAL}' % max_age)
+        max_age = render_green('  %.0f  ' % max_age)
     print 'queried %s seconds ago' % max_age
     print
 
@@ -316,6 +286,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         else:
             s.append(icons['NA'])
     print '  %s  %s' % (separator.join(s), 'host uptodate')
+
     s = []
     for host in hosts:
         if host.reboot_required_to_activate_latest_kernel:
@@ -362,19 +333,19 @@ def get_icons():
 
 
 def colorize(icons):
-    icons['REBOOT_AFTER_UPDATE'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['REBOOT_AFTER_UPDATE'])
-    icons['REBOOT_NOW'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['REBOOT_NOW'])
-    icons['UP'] = yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % icons['UP'])
-    icons['DOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['DOWN'])
-    icons['UNKNOWN'] = yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % icons['UNKNOWN'])
-    icons['UP_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UP_IGNORED'])
-    icons['DOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['DOWN_IGNORED'])
-    icons['UNKNOWN_IGNORED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UNKNOWN_IGNORED'])
+    icons['REBOOT_AFTER_UPDATE'] = render_yellow(icons['REBOOT_AFTER_UPDATE'])
+    icons['REBOOT_NOW'] = render_red(icons['REBOOT_NOW'])
+    icons['UP'] = render_green(icons['UP'])
+    icons['DOWN'] = render_red(icons['DOWN'])
+    icons['UNKNOWN'] = render_red(icons['UNKNOWN'])
+    icons['UP_IGNORED'] = render_yellow(icons['UP_IGNORED'])
+    icons['DOWN_IGNORED'] = render_yellow(icons['DOWN_IGNORED'])
+    icons['UNKNOWN_IGNORED'] = render_yellow(icons['UNKNOWN_IGNORED'])
     icons['NOT_LOCKED'] = icons['UP']
-    icons['LOCKED_BY_ME'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['LOCKED_BY_ME'])
-    icons['LOCKED_BY_OTHER'] = yadtshell.settings.term.render('${BG_RED}${BOLD}${WHITE}%s${NORMAL}' % icons['LOCKED_BY_OTHER'])
+    icons['LOCKED_BY_ME'] = render_yellow(icons['LOCKED_BY_ME'])
+    icons['LOCKED_BY_OTHER'] = render_red(icons['LOCKED_BY_OTHER'])
     icons['UPTODATE'] = icons['UP']
-    icons['UPDATE_NEEDED'] = yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s${NORMAL}' % icons['UPDATE_NEEDED'])
+    icons['UPDATE_NEEDED'] = render_yellow(icons['UPDATE_NEEDED'])
     return icons
 
 
@@ -387,7 +358,7 @@ def render_legend():
 
     print 'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' % icons
     print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % icons
-    print '        %(REBOOT_NOW)s reboot now for new kernel  %(REBOOT_AFTER_UPDATE)s reboot after updating' % icons
+    print '        %(REBOOT_NOW)s%(REBOOT_AFTER_UPDATE)s reboot needed (due to new kernel/after update)' % icons
     print
 
 
