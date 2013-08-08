@@ -74,7 +74,8 @@ class ProgressIndicator(object):
         return value
 
     def _render_compressed(self):
-        rendered = [self._render_value(self.progress.get(o)) for o in self.observables]
+        rendered = [self._render_value(self.progress.get(o))
+                    for o in self.observables]
         finished = [r for r in rendered if r not in self.rendered]
         unfinished = [r for r in rendered if r in self.rendered]
         finished_histo = dict((i, finished.count(i)) for i in set(finished))
@@ -90,7 +91,8 @@ class ProgressIndicator(object):
 
 
 class YadtProcessProtocol(protocol.ProcessProtocol):
-    def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG, err_log_level=logging.WARN, log_prefix='', wait_for_io=True):
+    def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG,
+                 err_log_level=logging.WARN, log_prefix='', wait_for_io=True):
         try:
             self.component = component.encode('ascii')
         except AttributeError:
@@ -114,24 +116,32 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
 
     def outReceived(self, data):
         for line in data.splitlines():
-            self.logger.log(self.out_log_level, '{0}: {1}'.format(self.component, line))
+            self.logger.log(self.out_log_level,
+                            '{0}: {1}'.format(self.component, line))
         self.data = self.data + data
         if self.pi:
             self.pi.update((self.cmd, self.component))
 
     def errReceived(self, data):
         for line in data.splitlines():
-            self.logger.log(self.err_log_level, '{0} {1} stderr: {2}'.format(self.component, self.cmd, line))
+            self.logger.log(self.err_log_level,
+                            '{0} {1} stderr: {2}'.format(self.component,
+                                                         self.cmd,
+                                                         line))
         if self.pi:
             self.pi.update((self.cmd, self.component))
 
     def processExited(self, reason):
-        self.logger.debug("%s@%s exited, exit code %s" % (self.cmd, self.component, str(reason.value.exitCode)))
+        self.logger.debug("%s@%s exited, exit code %s" % (self.cmd,
+                                                          self.component,
+                                                          str(reason.value.exitCode)))
         if not self.wait_for_io:
             self.finish(reason)
 
     def processEnded(self, reason):
-        self.logger.debug("%s@%s ended, exit code %s" % (self.cmd, self.component, str(reason.value.exitCode)))
+        self.logger.debug("%s@%s ended, exit code %s" % (self.cmd,
+                                                         self.component,
+                                                         str(reason.value.exitCode)))
         if self.wait_for_io:
             self.finish(reason)
 
@@ -179,7 +189,9 @@ def report_error(failure, line_fun=None, include_stacktrace=True):
     if isinstance(failure, SshFailure):
         return failure
     if hasattr(failure.value, 'component'):
-        line_fun('%s%s: %s' % (_determine_issued_command(failure), failure.value.component, failure.getErrorMessage()))
+        line_fun('%s%s: %s' % (_determine_issued_command(failure),
+                               failure.value.component,
+                               failure.getErrorMessage()))
     else:
         line_fun(failure.getErrorMessage())
         if include_stacktrace:
