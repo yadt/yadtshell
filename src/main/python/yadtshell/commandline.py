@@ -21,7 +21,6 @@
 import copy
 import logging
 import sys
-import yadtshell
 
 
 COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']

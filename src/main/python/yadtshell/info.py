@@ -23,6 +23,7 @@ import yadtshell
 
 logger = logging.getLogger('info')
 
+
 def render_green(text):
     return yadtshell.settings.term.render('${BG_GREEN}${WHITE}${BOLD}%s${NORMAL}' % text)
 
@@ -72,8 +73,8 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     condensed = yadtshell.helper.condense_hosts2(yadtshell.helper.condense_hosts(result))
     components_with_problems = [c for c in condensed
-        if (c[0].startswith(yadtshell.settings.ARTEFACT) or
-            c[0].startswith(yadtshell.settings.CONFIG)) and yadtshell.util.not_up(c[1])]
+                                if (c[0].startswith(yadtshell.settings.ARTEFACT) or c[0].startswith(yadtshell.settings.CONFIG))
+                                and yadtshell.util.not_up(c[1])]
     if components_with_problems:
         print 'problems'
         for c in components_with_problems:
@@ -81,16 +82,15 @@ def info(logLevel=None, full=False, components=None, **kwargs):
         print
 
     for missing_component in [c for c in components.values() if isinstance(c,
-        yadtshell.components.MissingComponent)]:
+                              yadtshell.components.MissingComponent)]:
         print render_red('\nconfig problem: missing %s\n' % missing_component.uri)
 
-    for service in [component for component in components.values() if
-            isinstance(component, yadtshell.components.Service)]:
+    for service in [component for component in components.values()
+                    if isinstance(component, yadtshell.components.Service)]:
         if getattr(service, 'service_artefact_problem', None):
             print render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service))
             print
 
-    info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
     render_services_matrix(components)
 
     now = time.time()
@@ -137,16 +137,18 @@ def _render_updates_based_on_name_schema(components, host, full):
         if full:
             print
 
+
 def _render_updates_based_on_key_value_schema(components, host, *args, **kwargs):
     for next_artefact_uri, old_artefact_uri in host.next_artefacts.iteritems():
-        next_artefact = components["artefact://%s/%s" % (host.host, next_artefact_uri)] # TODO better as helper method in Uri?
+        next_artefact = components["artefact://%s/%s" % (host.host, next_artefact_uri)]  # TODO better as helper method in Uri?
         old_artefact = components["artefact://%s/%s" % (host.host, old_artefact_uri)]
         next_artefact_name = next_artefact.name if next_artefact.name != old_artefact.name else ''
         print '%10s  %40s  %s' % (host.host, old_artefact.name, old_artefact.version)
         print '%10s  %40s  %s' % ('',
-                '(next) ' + render_highlighted_differences(old_artefact.name, next_artefact_name),
-                render_highlighted_differences(old_artefact.version, next_artefact.version))
+                                  '(next) ' + render_highlighted_differences(old_artefact.name, next_artefact_name),
+                                  render_highlighted_differences(old_artefact.version, next_artefact.version))
     return
+
 
 def highlight_differences(reference, text):
     result = []
@@ -159,8 +161,10 @@ def highlight_differences(reference, text):
         result.append(text[i])
     return ''.join(result)
 
+
 def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
+
 
 def render_services_matrix(components=None, **kwargs):
     if not components:
@@ -366,9 +370,9 @@ if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('', '--full', action='store_true',
-        dest='full', default=False)
+                      dest='full', default=False)
     parser.add_option('', '--services-matrix-only', action='store_true',
-        dest='services_matrix_only', default=False)
+                      dest='services_matrix_only', default=False)
     opts, args = parser.parse_args()
 
     if opts.services_matrix_only:

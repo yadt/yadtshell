@@ -22,7 +22,6 @@ import logging
 import os.path
 import pwd
 import socket
-import subprocess
 import sys
 import yaml
 import shlex
@@ -84,6 +83,7 @@ def dump_plan(flavor, plan):
         yaml.dump(plan, f)
     f.close()
 
+
 def dump_action_plan(flavor, plan):
     dump_plan(flavor + '-action', plan)
 
@@ -94,6 +94,7 @@ def restore_current_state():
     except IOError:
         logger.warning('no current state stored, try "status" first')
         sys.exit(1)
+
 
 def get_mtime_of_current_state():
     return os.path.getmtime(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))  # TODO combine this with prev method
@@ -155,6 +156,7 @@ def get_locking_user_info():
             "pid": pid,
             }
 
+
 def get_yaml(adict):
     return yaml.dump(adict, default_flow_style=False)
 
@@ -210,7 +212,6 @@ def start_ssh_multiplexed(hosts=None):
         reactor.spawnProcess(p, start_multiplexing_call[0], start_multiplexing_call, None)
         return protocol
 
-
     def check_ssh(host):
         ssh_check_cmds = shlex.split('%s -O check %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(host, 'check_ssh')
@@ -230,13 +231,11 @@ def stop_ssh_multiplexed(ignored, hosts=None):
         p = yadtshell.twisted.YadtProcessProtocol(host, 'stop_ssh')
         p.deferred = defer.Deferred()
         logger.debug('cmd: %s' % ssh_stop_cmds)
-        reactor.spawnProcess(p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={ 2 : 3 })
+        reactor.spawnProcess(p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={2: 3})
         return p.deferred
 
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
-
-
 
     dl = defer.DeferredList([stop_ssh(host) for host in hosts])
 

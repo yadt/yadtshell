@@ -23,7 +23,8 @@ import util
 
 logger = logging.getLogger('dump')
 
-def dump(args = [], mode='all', attribute=None, filter=None, **kwargs):
+
+def dump(args=[], mode='all', attribute=None, filter=None, **kwargs):
     if filter == 'pending-updates':
         args = ['host://']
         attribute = 'next_artefacts'
@@ -58,4 +59,3 @@ def dump(args = [], mode='all', attribute=None, filter=None, **kwargs):
             print component.dump()
     if attribute:
         print '\n'.join(result)
-

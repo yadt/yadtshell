@@ -33,6 +33,7 @@ from twisted.internet.task import deferLater
 
 import yadtshell
 
+
 class ActionManager(object):
     class Task(object):
         def __init__(self, fun, action, path=None):
@@ -143,7 +144,12 @@ class ActionManager(object):
             self.logger.info('-' * 20 + ' verbatim stdout of %s follows this line ' % cmd + '-' * 20)
 
         if not deferred:
-            deferred = self.issue_command(component, cmd, target_state, out_log_level=out_log_level, args=getattr(action,'args', []), kwargs=getattr(action, 'kwargs', {}))
+            deferred = self.issue_command(component,
+                                          cmd,
+                                          target_state,
+                                          out_log_level=out_log_level,
+                                          args=getattr(action, 'args', []),
+                                          kwargs=getattr(action, 'kwargs', {}))
         if out_log_level == logging.INFO:
             deferred.addBoth(self.mark_end_of_verbatim_stdout)
         deferred.addErrback(self.handle_ignored_or_locked, cmd, component, target_state)
@@ -189,8 +195,14 @@ class ActionManager(object):
                     '%s could not reach target state %s, is still %s' % (component.uri, target_state, component.state), 1)
         return ignored
 
-
-    def issue_command(self, component, cmd, target_state=None, args=[], kwargs={}, out_log_level=logging.DEBUG, err_log_level=logging.WARN):
+    def issue_command(self,
+                      component,
+                      cmd,
+                      target_state=None,
+                      args=[],
+                      kwargs={},
+                      out_log_level=logging.DEBUG,
+                      err_log_level=logging.WARN):
         cmdline = None
         try:
             fun = getattr(component, cmd, None)
@@ -217,12 +229,17 @@ class ActionManager(object):
             self.logger.error('no cmdline?')
             raise yadtshell.actions.ActionException('problem during %s %s: could not determine the cmdline' % (cmd, component.uri), 1, None)
 
-        if isinstance(cmdline, defer.Deferred): # TODO rename cmdline here
+        if isinstance(cmdline, defer.Deferred):  # TODO rename cmdline here
             self.logger.debug('deferred returned directly')
             self.pi.update((cmd, component))
             return cmdline
 
-        p = yadtshell.twisted.YadtProcessProtocol(component, cmd, self.pi, out_log_level=out_log_level, err_log_level=err_log_level, log_prefix=re.sub('^.*://', '', component.uri))
+        p = yadtshell.twisted.YadtProcessProtocol(component,
+                                                  cmd,
+                                                  self.pi,
+                                                  out_log_level=out_log_level,
+                                                  err_log_level=err_log_level,
+                                                  log_prefix=re.sub('^.*://', '', component.uri))
         p.target_state = target_state
         p.state = yadtshell.settings.UNKNOWN
 
@@ -236,7 +253,6 @@ class ActionManager(object):
 
     def log_host_finished(self, action):
         self.logger.info(yadtshell.settings.term.render('    ${BOLD}%(uri)s finished successfully${NORMAL}' % vars(action)))
-
 
     def next_with_preconditions(self, queue):
         for task in queue:
@@ -263,7 +279,6 @@ class ActionManager(object):
     def report_plan_finished(self, result, plan, plan_name):
         self.logger.debug('%s finished' % plan_name)
         return result
-
 
     def handle_cb(self, protocol, plan, path=[]):
         return self.handle(plan, path)
@@ -301,7 +316,12 @@ class ActionManager(object):
         pool.addCallback(self.report_plan_finished, plan, plan_name)
         return pool
 
-    def action(self, flavor, info_mode = False, dryrun = False, parallel=None, **kwargs):
+    def action(self,
+               flavor,
+               info_mode=False,
+               dryrun=False,
+               parallel=None,
+               **kwargs):
         if not parallel:
             parallel = 1
         self.parallel = parallel
@@ -362,7 +382,6 @@ class ActionManager(object):
                 pi.finish()
             return result
 
-
         self.pi = yadtshell.twisted.ProgressIndicator()
         deferred = None
         if not dryrun:
@@ -384,4 +403,3 @@ class ActionManager(object):
             deferred.addBoth(yadtshell.util.stop_ssh_multiplexed)
 
         return deferred
-

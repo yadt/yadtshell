@@ -24,8 +24,9 @@ import yadtshell
 
 logger = logging.getLogger('metalogic')
 
-def run_along_services2(components, services, indent = 0, key = 'needed_by'):
-    result = {} 
+
+def run_along_services2(components, services, indent=0, key='needed_by'):
+    result = {}
     for service_uri in services:
         service = components[service_uri]
         if service.type not in [yadtshell.settings.HOST, yadtshell.settings.SERVICE]:
@@ -42,7 +43,8 @@ def run_along_services2(components, services, indent = 0, key = 'needed_by'):
             result[service] = None
     return result
 
-def depth_first(d, indent = 0, handled = None):
+
+def depth_first(d, indent=0, handled=None):
     if d is None:
         return
     if handled is None:
@@ -53,7 +55,8 @@ def depth_first(d, indent = 0, handled = None):
     for key in d.keys():
         yield(key, indent)
 
-def depth_first_per_toplevel(d, indent = 0, handled = None):
+
+def depth_first_per_toplevel(d, indent=0, handled=None):
     if handled is None:
         handled = set()
     for toplevel in d.keys():
@@ -64,6 +67,7 @@ def depth_first_per_toplevel(d, indent = 0, handled = None):
         if toplevel not in handled:
             yield(toplevel, indent)
         yield(None, -1)
+
 
 def collect_parallel_tasks(g):
     last_indent = -2
@@ -138,10 +142,10 @@ def metalogic(cmd, args, plan_post_handler=None):
             continue
         action = yadtshell.actions.Action(cmd, touched_component.uri, 'state', target_state)
         action.preconditions = set([
-                yadtshell.actions.TargetState(d, 'state', target_state) 
-                for d in getattr(touched_component, key, set())
-                if yadtshell.uri.parse(d)['type'] == yadtshell.settings.SERVICE
-            ])
+                                   yadtshell.actions.TargetState(d, 'state', target_state)
+                                   for d in getattr(touched_component, key, set())
+                                   if yadtshell.uri.parse(d)['type'] == yadtshell.settings.SERVICE
+                                   ])
         action_set.add(action)
 
     dependencies = yadtshell.actions.ActionPlan('%s' % cmd, action_set)
@@ -159,6 +163,7 @@ def merge_chunks(component_to_chunk, old, new):
 
 def identity(x):
     return x
+
 
 def chop_minimal_related_chunks(plan):
     component_to_chunk = {}
@@ -205,8 +210,6 @@ def chop_minimal_related_chunks(plan):
         logger.info('%i independent chunks found' % len(chunk_plans))
 
     return yadtshell.actions.ActionPlan(plan.name, chunk_plans)
-
-
 
 
 def apply_instructions(plan, instructions):
@@ -259,10 +262,10 @@ def apply_instructions(plan, instructions):
                 if nr_workers in ['*', 'max']:
                     nr_workers = len(acs)
                 nr_workers = int(nr_workers)
-                
+
                 if nr_errors_tolerated.endswith('%'):
                     nr_errors_tolerated = int(len(acs) * int(nr_errors_tolerated.rstrip('%')) / 100)
-                    
+
                 chunks.append(yadtshell.actions.ActionPlan('%s_applied_%i' % (p.name, len(chunks)), acs, nr_workers=nr_workers, nr_errors_tolerated=nr_errors_tolerated))
                 start = end
             p.actions = chunks
@@ -272,4 +275,3 @@ def apply_instructions(plan, instructions):
         logger.debug(line)
     logger.debug('-' * 60)
     return plan
-    

@@ -139,11 +139,13 @@ class Component(object):
         cmd = "rm -fv %(filename)s" % locals()
         return self.remote_call(cmd, tag, force=force)
 
+
 class MissingComponent(Component):
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
         Component.__init__(self, parts['type'], parts['host'], parts['name'], parts['version'])
         self.state = yadtshell.settings.MISSING
+
 
 class ComponentDict(dict):
     def __init__(self):
@@ -161,14 +163,17 @@ class ComponentDict(dict):
             logger.debug('missing ' + key)
             self[self._key_(key)] = MissingComponent(self._key_(key))
         return dict.__getitem__(self, self._key_(key))
+
     def get(self, key, default=None):
         if self._key_(key) not in self and self._add_when_missing_:
             logger.debug('missing' + key)
             self[self._key_(key)] = MissingComponent(key)
         return dict.get(self, self._key_(key), default)
+
     def __setitem__(self, key, value):
         #logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
+
 
 class ComponentSet(set):
     def __init__(self, components=None):
@@ -206,6 +211,7 @@ class ComponentSet(set):
     def __contains__(self, item):
         return self._key_(item) in self._set
 
+
 class Host(Component):
     def __init__(self, name):
         self.lockstate = None
@@ -218,7 +224,7 @@ class Host(Component):
 
     def update(self):
         return self.remote_call('yadt-host-update', '%s_%s' %
-                (self.hostname, yadtshell.settings.UPDATE))
+                                (self.hostname, yadtshell.settings.UPDATE))
 
     def bootstrap(self):
         pass    # TODO to be implemented
@@ -282,9 +288,8 @@ class Artefact(Component):
                                 'artefact_%s_%s_%s' % (self.host, self.name, yadtshell.constants.UPDATEARTEFACT))
 
 
-
 class Service(Component):
-    def __init__(self, host, name, settings = None):
+    def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
         self.needs_services = []
@@ -307,25 +312,24 @@ class Service(Component):
                 self.needs.add(yadtshell.uri.create(yadtshell.settings.SERVICE, host.host, n % locals()))
         for n in self.needs_artefacts:
             self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, n % locals() +
-                "/" + yadtshell.settings.CURRENT))
+                                                "/" + yadtshell.settings.CURRENT))
         #self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
 
         self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(settings.get('state'),
-                yadtshell.settings.UNKNOWN)
+                                                               yadtshell.settings.UNKNOWN)
         self.script = None
-
 
     def stop(self, force=False, **kwargs):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.STOP),
-                '%s_%s' % (self.name, yadtshell.settings.STOP), force)
+                                '%s_%s' % (self.name, yadtshell.settings.STOP), force)
 
     def start(self, force=False, **kwargs):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.START),
-                '%s_%s' % (self.name, yadtshell.settings.START), force)
+                                '%s_%s' % (self.name, yadtshell.settings.START), force)
 
     def status(self):
         return self.remote_call(self._retrieve_service_call(yadtshell.settings.STATUS),
-                tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
+                                tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
 
     def _retrieve_service_call(self, action):
         return 'yadt-service-%s %s' % (action, self.name)
@@ -333,8 +337,8 @@ class Service(Component):
     def ignore(self, message=None, **kwargs):
         if not message:
             raise ValueError('the "message" parameter is mandatory')
-        tag="ignore_%s" % self.name
-        force=kwargs.get('force', False)
+        tag = "ignore_%s" % self.name
+        force = kwargs.get('force', False)
         return self.remote_call('yadt-service-ignore %s "%s"' % (self.name, message), tag, force)
         #result = self._create_owner_file(
         #    yadtshell.util.get_locking_user_info(),
@@ -346,12 +350,13 @@ class Service(Component):
         #return result
 
     def unignore(self, **kwargs):
-        tag="unignore_%s" % self.name
+        tag = "unignore_%s" % self.name
         return self.remote_call('yadt-service-unignore %s' % self.name, tag)
 
 
 def do_cb(protocol, args, opts):
     return do(args, opts)
+
 
 def do(args, opts):
     cmd = args[0]

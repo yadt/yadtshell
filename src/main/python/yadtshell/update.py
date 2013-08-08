@@ -23,6 +23,7 @@ import yadtshell
 
 logger = logging.getLogger('update')
 
+
 def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, parallel=None, **kwargs):
     components = yadtshell.util.restore_current_state()
     if not update_plan_post_handler:
@@ -56,19 +57,18 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         logger.info('No hosts with pending updates.')
 
     next_artefacts = set([artefact.uri
-        for artefact in components.values()
-            if artefact.type == yadtshell.settings.ARTEFACT
-                and artefact.revision == yadtshell.settings.NEXT
-                and artefact.host_uri in handled_hosts
-    ])
+                         for artefact in components.values()
+                         if artefact.type == yadtshell.settings.ARTEFACT
+                         and artefact.revision == yadtshell.settings.NEXT
+                         and artefact.host_uri in handled_hosts
+                          ])
 
     if not next_artefacts:
         yadtshell.util.dump_action_plan('update', start_plan)
         return 'update'
 
     current_artefacts = [components.get(yadtshell.uri.change_version(next_artefact, 'current'))
-        for next_artefact in next_artefacts
-    ]
+                         for next_artefact in next_artefacts]
     current_artefacts = set([current.uri for current in current_artefacts if current])
 
     logger.debug('next_artefacts: ' + ', '.join(next_artefacts))
@@ -80,7 +80,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     if not diff:
         yadtshell.util.dump_action_plan('update', start_plan)
         return 'update'
-
 
     stop_plan = yadtshell.metalogic.metalogic(yadtshell.settings.STOP, diff, plan_post_handler=yadtshell.metalogic.identity)
     stopped_services = set()
@@ -125,4 +124,3 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     plan = yadtshell.metalogic.apply_instructions(plan, parallel)
     yadtshell.util.dump_action_plan('update', plan)
     return 'update'
-

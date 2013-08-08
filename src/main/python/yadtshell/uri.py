@@ -23,6 +23,7 @@ import yadtshell.helper
 
 logger = logging.getLogger('uri')
 
+
 def create(type=None, host=None, name=None, version=None, **kwargs):
     if version is None:
         version = ''
@@ -41,14 +42,17 @@ def create(type=None, host=None, name=None, version=None, **kwargs):
     uri = '%(type)s://%(host)s/%(name)s/%(version)s' % locals()
     return uri.rstrip('/')
 
+
 def change_version(uri, version=None):
     uri_obj = parse(uri)
     uri_obj['version'] = version
     return create(**uri_obj)
 
+
 def as_file(s):
     parts = parse(s)
     return '%(type)s:%(name)s' % parts
+
 
 def as_source_file(s):
     parts = parse(s)
@@ -57,11 +61,13 @@ def as_source_file(s):
         return '%(name)s' % parts
     return '%(name)s/%(version)s' % parts
 
+
 def as_path(s):
     parts = parse(s)
     # TODO: What happens if version is None or empty? Should this raise an exception or be silently
     # converted to something else?
     return os.path.join(yadtshell.helper.plural(parts['type']), parts['name'], parts['version'])
+
 
 def parse(s):
     t, rest = s.split('://', 1)
@@ -85,4 +91,3 @@ def parse(s):
         version=version,
         name_version=name_version
     )
-

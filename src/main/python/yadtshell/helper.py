@@ -167,7 +167,7 @@ def get_user_info():
             "owner": owner,
             "when": when,
             "pid": pid,
-    }
+            }
 
 
 def plural(string):
@@ -187,7 +187,8 @@ def locate(pattern, root=os.curdir, blacklist=None):
         for d in dirs:
             if os.path.islink(d):
                 for filename in locate(pattern,
-                        root=os.path.realpath(os.path.join(path, d)), blacklist=blacklist):
+                                       root=os.path.realpath(os.path.join(path, d)),
+                                       blacklist=blacklist):
                     yield filename
         for filename in fnmatch.filter(files, pattern):
             yield os.path.join(path, filename)
@@ -205,4 +206,3 @@ def _traceit(frame, event, arg):
         print "%s  # %s:%s" % (line.rstrip(), name, lineno,)
     return _traceit
 #    sys.settrace(_traceit)
-
