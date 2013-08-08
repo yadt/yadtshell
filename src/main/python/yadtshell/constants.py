@@ -26,7 +26,7 @@ UPDATE_NEEDED = 'update_needed'
 HOST_STATE_DESCRIPTIONS = {
     0: 'uptodate',
     1: UPDATE_NEEDED
-} 
+}
 
 IGNORE = 'ignore'
 UNIGNORE = 'unignore'

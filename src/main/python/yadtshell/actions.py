@@ -16,6 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 class ActionException(Exception):
     def __init__(self, message, exitcode, rootcause=None):
         self.message = message
@@ -23,6 +24,7 @@ class ActionException(Exception):
         self.rootcause = rootcause
         self.args = [message]
         self.orig_protocol = None
+
 
 class TargetState(object):
     def __init__(self, uri, attr, target_value):
@@ -40,8 +42,10 @@ class TargetState(object):
         indent = ' ' * depth * 4
         return indent + prefix + '%(attr)s of %(uri)s is "%(target_value)s"\n' % vars(self)
 
+
 class State(object):
     PENDING, RUNNING, FINISHED = ['PENDING', 'RUNNING', 'FINISHED']
+
 
 class Action(object):
     def __init__(self, cmd, uri, attr=None, target_value=None, preconditions=None, args=None, kwargs=None):
@@ -94,6 +98,7 @@ class Action(object):
 
     def __lt__(self, other):
         return self.rank < other.rank
+
 
 class ActionPlan(object):
     def __init__(self, name, actions, nr_workers=None, nr_errors_tolerated=0):
@@ -149,4 +154,3 @@ class ActionPlan(object):
         for plan in [p for p in self.actions if isinstance(p, ActionPlan)]:
             for sp in plan.list_subplans():
                 yield ('%s/%s' % (self.name, sp[0]), sp[1])
-

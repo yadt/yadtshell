@@ -7,6 +7,7 @@ command_counter = 0
 DO_LOG = 1
 DO_NOT_LOG = 0
 
+
 def configure_logger_output_stream_by_level(stderr_handler, stdout_handler):
     stdout_handler.setLevel(logging.INFO)
     stderr_handler.setLevel(logging.WARN)
@@ -28,13 +29,12 @@ def create_next_log_file_name(log_dir, target_name, command_start_timestamp, use
     return log_file_name
 
 
-def create_next_log_file_name_with_command_arguments_as_tag(
-                        log_dir,
-                        target_name,
-                        command_start_timestamp,
-                        user_name,
-                        source_host,
-                        command_arguments):
+def create_next_log_file_name_with_command_arguments_as_tag(log_dir,
+                                                            target_name,
+                                                            command_start_timestamp,
+                                                            user_name,
+                                                            source_host,
+                                                            command_arguments):
 
     tag_args = command_arguments
     if os.path.basename(tag_args[0]) == 'yadtshell':
