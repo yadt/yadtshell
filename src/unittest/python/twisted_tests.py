@@ -32,7 +32,7 @@ class TwistedTests(unittest.TestCase):
         failure.value.component = 'internet'
         report_error(failure, line_fun=mock_line_fun)
 
-        self.assertEqual(mock_line_fun.call_args, call('stop@internet: You cannot stop the internet!'))
+        mock_line_fun.assert_called_with('stop@internet: You cannot stop the internet!')
 
 
     def test_report_error_should_report_failure_when_no_component_present(self):
@@ -43,7 +43,7 @@ class TwistedTests(unittest.TestCase):
         failure.getErrorMessage = lambda: 'Something has gone wrong'
         report_error(failure, line_fun=mock_line_fun)
 
-        self.assertEqual(mock_line_fun.call_args,  call('Something has gone wrong'))
+        mock_line_fun.assert_called_with('Something has gone wrong')
 
 
     def test_out_received_should_append_data(self):
@@ -74,7 +74,7 @@ class TwistedTests(unittest.TestCase):
 
         YadtProcessProtocol.outReceived(mock_process_protocol, 'data')
 
-        self.assertEqual(call(('command', 'component')), mock_progress_indicator.update.call_args)
+        mock_progress_indicator.update.assert_called_with(('command', 'component'))
 
 
 
@@ -92,4 +92,4 @@ class TwistedTests(unittest.TestCase):
 
         YadtProcessProtocol.errReceived(mock_process_protocol, 'data')
 
-        self.assertEqual(call(('command', 'component')), mock_progress_indicator.update.call_args)
+        mock_progress_indicator.update.assert_called_with(('command', 'component'))
