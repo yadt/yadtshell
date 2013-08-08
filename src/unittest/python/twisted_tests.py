@@ -1,5 +1,5 @@
 import unittest
-from mock import Mock, call
+from mock import Mock
 
 from yadtshell.twisted import (YadtProcessProtocol,
                                _determine_issued_command,
