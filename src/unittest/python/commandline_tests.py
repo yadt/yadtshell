@@ -3,11 +3,11 @@ from mockito import mock, when, verify, unstub, any as any_value, never
 
 import yadtshell
 from yadtshell.commandline import (ensure_command_has_required_arguments,
-                                    validate_command_line_options,
-                                    normalize_message,
-                                    normalize_options,
-                                    EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT,
-                                    EXIT_CODE_MISSING_MESSAGE_OPTION)
+                                   validate_command_line_options,
+                                   normalize_message,
+                                   normalize_options,
+                                   EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT,
+                                   EXIT_CODE_MISSING_MESSAGE_OPTION)
 
 
 class ValidateCommandLineOptionsTest(unittest.TestCase):

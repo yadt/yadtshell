@@ -1,6 +1,5 @@
 import unittest
 
-import yadtshell
 from yadtshell.info import (highlight_differences)
 
 
@@ -33,6 +32,3 @@ class ValidateHighlightingTest(unittest.TestCase):
     def test_should_highlight_when_string_lengths_differ_again(self):
         text = highlight_differences("fo1234567890", "foo")
         self.assertEqual("fo${REVERSE}o${NORMAL}", text)
-
-if __name__ == '__main__':
-    unittest.main()
