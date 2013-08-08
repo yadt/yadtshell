@@ -145,7 +145,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
             def handle_service_state_failure(failure, service):
                 logger.debug('Failure while determining state of {0}. Exit code was {1}.'
-                                                     .format(service.uri, failure.value.exitCode))
+                             .format(service.uri, failure.value.exitCode))
             cmd.addErrback(handle_service_state_failure, service)
             return cmd
         query_protocol = yadtshell.twisted.YadtProcessProtocol(service.uri, cmd)
@@ -329,18 +329,21 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                 except KeyError, ke:
                     logger.warning("unknown dependent key " + str(ke))
 
+        def _open_component_file(component_type):
+            return open(os.path.join(yadtshell.settings.OUT_DIR, component_type), 'w')
+
         component_files = {
-                yadtshell.settings.ARTEFACT:   open(os.path.join(yadtshell.settings.OUT_DIR, 'artefacts'), 'w'),
-                yadtshell.settings.SERVICE:    open(os.path.join(yadtshell.settings.OUT_DIR, 'services'), 'w'),
-                yadtshell.settings.HOST:       open(os.path.join(yadtshell.settings.OUT_DIR, 'hosts'), 'w'),
-                }
+            yadtshell.settings.ARTEFACT: _open_component_file('artefacts'),
+            yadtshell.settings.SERVICE: _open_component_file('services'),
+            yadtshell.settings.HOST: _open_component_file('hosts'),
+        }
         for component in components.values():
             print >> component_files[component.type], component.uri
 
         for f in component_files.values():
             f.close()
 
-        f = open(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'), "w")
+        f = _open_component_file('current_state.components')
         pickle.dump(components, f)
         f.close()
 
@@ -356,7 +359,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                         'uri': service.uri,
                         'name': service.name,
                         'state': service.state
-                        })
+                    })
 
                 artefacts = []
                 for artefact in sorted(getattr(host, 'handled_artefacts', [])):
@@ -365,13 +368,13 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                         'uri': 'artefact://%s/%s' % (hostname, name),
                         'name': name,
                         'current': version
-                        })
+                    })
 
                 host = {
-                        'name': hostname,
-                        'services': services,
-                        'artefacts': artefacts
-                        }
+                    'name': hostname,
+                    'services': services,
+                    'artefacts': artefacts
+                }
                 hosts.append(host)
             groups.append(hosts)
         yadtshell.settings.ybc.sendFullUpdate(groups, tracking_id=yadtshell.settings.tracking_id)
