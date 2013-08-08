@@ -165,6 +165,13 @@ def stop_and_return(return_code):
     stop_yadt()
 
 
+def _determine_issued_command(failure):
+    try:
+        return '%s@' % failure.value.orig_protocol.cmd
+    except AttributeError:
+        return ''
+
+
 def report_error(failure, line_fun=None, include_stacktrace=True):
     if line_fun is None:
         def line_fun(line):
@@ -172,7 +179,7 @@ def report_error(failure, line_fun=None, include_stacktrace=True):
     if isinstance(failure, SshFailure):
         return failure
     if hasattr(failure.value, 'component'):
-        line_fun('%s: %s' % (failure.value.component, failure.getErrorMessage()))
+        line_fun('%s%s: %s' % (_determine_issued_command(failure), failure.value.component, failure.getErrorMessage()))
     else:
         line_fun(failure.getErrorMessage())
         if include_stacktrace:
