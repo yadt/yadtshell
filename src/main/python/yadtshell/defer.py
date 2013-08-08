@@ -23,6 +23,7 @@ import twisted.internet.reactor as reactor
 import yadtshell.actions
 import yadtshell.twisted
 
+
 def next_in_queue(queue):
     #return queue.popleft()
     return queue.pop(0)
@@ -38,9 +39,10 @@ class DeferredPool(defer.Deferred):
             self.stopped = False
             self.idle = True
             self.task = None
+
         def run(self, lastResult=None):
             if self.stopped:
-                self.logger.debug('Worker stopped : %s'%self.__str__())
+                self.logger.debug('Worker stopped : %s' % self.__str__())
                 return None
             task = self.next_task_fun()
             self.task = task
@@ -81,9 +83,8 @@ class DeferredPool(defer.Deferred):
             self.logger.debug('started: %i items in queue' % len(queue))
         deferreds = filter(None, [worker.run() for worker in self.workers])
 
-
     def _finish(self):
-        self.logger.debug('DeferredPool %s fired its callback.'%self.name)
+        self.logger.debug('DeferredPool %s fired its callback.' % self.name)
         if self.error_count > self.nr_errors_tolerated:
             reactor.callLater(0, self.errback, yadtshell.actions.ActionException(
                 'stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated), 1))

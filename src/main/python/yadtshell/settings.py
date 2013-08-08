@@ -147,12 +147,12 @@ def load_settings(log_to_file=True):
 
     global log_file
     log_file = create_next_log_file_name_with_command_arguments_as_tag(
-                    log_dir=LOG_DIR,
-                    target_name=TARGET_SETTINGS['name'],
-                    command_start_timestamp=STARTED_ON,
-                    user_name=USER_INFO['user'],
-                    source_host=USER_INFO['yadt_host'].split('.')[0],
-                    command_arguments=sys.argv
+        log_dir=LOG_DIR,
+        target_name=TARGET_SETTINGS['name'],
+        command_start_timestamp=STARTED_ON,
+        user_name=USER_INFO['user'],
+        source_host=USER_INFO['yadt_host'].split('.')[0],
+        command_arguments=sys.argv
     )
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
@@ -192,7 +192,7 @@ def load_settings(log_to_file=True):
 
     except:
         logger.debug('"view" file not found, falling back to default values: %s' %
-                VIEW_SETTINGS)
+                     VIEW_SETTINGS)
 
     hosts_condensed_file = open(os.path.join(OUT_DIR, 'hosts_condensed'), 'w')
     print >> hosts_condensed_file, ', '.join(condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
