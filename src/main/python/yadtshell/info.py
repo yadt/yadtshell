@@ -362,7 +362,7 @@ def render_legend():
 
     print 'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' % icons
     print '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % icons
-    print '        %(REBOOT_NOW)s%(REBOOT_AFTER_UPDATE)s reboot needed (due to new kernel/after update)' % icons
+    print '        %(REBOOT_AFTER_UPDATE)s%(REBOOT_NOW)s reboot needed (after update/due to new kernel)' % icons
     print
 
 
