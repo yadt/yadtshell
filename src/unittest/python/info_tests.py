@@ -35,9 +35,9 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         return components
 
-    def _render_info_matrix_to_string(self, mock_print):
+    def _render_info_matrix_to_string(self, mocked_info_output):
         info_matrix = StringIO()
-        for call in mock_print.call_args_list:
+        for call in mocked_info_output.call_args_list:
             try:
                 info_matrix.write(call[0][0])
             except:
@@ -50,11 +50,11 @@ class InfoMatrixRenderingTests(unittest.TestCase):
     @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
-    def test_should_render_matrix_for_one_host(self, mock_state, mock_mtime, mock_print):
-        mock_state.return_value = self._create_component_pool_for_one_host()
+    def test_should_render_matrix_for_one_host(self, component_pool, _, mocked_info_output):
+        component_pool.return_value = self._create_component_pool_for_one_host()
 
         yadtshell.info()
-        info_matrix = self._render_info_matrix_to_string(mock_print)
+        info_matrix = self._render_info_matrix_to_string(mocked_info_output)
         self.assertEqual(info_matrix,
                          '''
 ${BOLD}yadt info | test${NORMAL}
