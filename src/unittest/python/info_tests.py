@@ -17,14 +17,16 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         yadtshell.settings.term = self.mock_term
         yadtshell.settings.term.render = self.mock_render
 
-    def _create_component_dict_for_one_host(self):
+    def _create_component_pool_for_one_host(self):
         components = yadtshell.components.ComponentDict()
         host = yadtshell.components.Host('foobar42')
-        host.state = 'update_needed'
+        host.state = yadtshell.settings.UPDATE_NEEDED
         foo_artefact = yadtshell.components.Artefact(
             'foobar42', 'foo', '0:0.0.0')
+        foo_artefact.state = yadtshell.settings.UP
         yit_artefact = yadtshell.components.Artefact(
             'foobar42', 'yit', '0:0.0.1')
+        yit_artefact.state = yadtshell.settings.UP
         host.next_artefacts = {'foo/0:0.0.0': 'yit/0:0.0.1'}
         host.hostname = 'foobar42'
         components['foobar42'] = host
@@ -49,11 +51,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self, mock_state, mock_mtime, mock_print):
-        mock_state.return_value = self._create_component_dict_for_one_host()
+        mock_state.return_value = self._create_component_pool_for_one_host()
 
         yadtshell.info()
         info_matrix = self._render_info_matrix_to_string(mock_print)
-
         self.assertEqual(info_matrix,
                          '''
 ${BOLD}yadt info | test${NORMAL}
@@ -61,10 +62,6 @@ ${BOLD}yadt info | test${NORMAL}
 target status
   foobar42                                       yit  0:0.0.1
                        (next) ${REVERSE}foo${NORMAL}  0:0.0.${REVERSE}0${NORMAL}
-
-problems
-${RED}${BOLD}   unknown${NORMAL}  artefact://foobar42/yit/0:0.0.1
-${RED}${BOLD}   unknown${NORMAL}  artefact://foobar42/foo/0:0.0.0
 
   f
   o
