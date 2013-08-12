@@ -178,6 +178,9 @@ class ActionManager(object):
             if component.state == target_state:
                 self.pi.update((cmd, component), '0')
                 self.logger.debug('successfully %sed %s' % (cmd, component.uri))
+            elif target_state == yadtshell.settings.HANDLED:
+                component.state = target_state
+                self.logger.debug('successfully handled %s' % component.uri)
             else:
                 max_tries = getattr(component, 'status_max_tries', 1)
                 if tries < max_tries:

@@ -37,7 +37,7 @@ def create(type=None, host=None, name=None, version=None, **kwargs):
     type = type.strip()
     host = host.strip()
     if name and version.startswith(name):
-        #logger.debug('version still starts with name:' + version)
+        # logger.debug('version still starts with name:' + version)
         version = version.replace(name + '/', '')
     uri = '%(type)s://%(host)s/%(name)s/%(version)s' % locals()
     return uri.rstrip('/')

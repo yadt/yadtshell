@@ -31,6 +31,7 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
+
     def __init__(self, t, host, name=None, version=None):
         self.type = t
         if type(host) in [str, unicode]:
@@ -38,14 +39,16 @@ class Component(object):
         else:
             self.host = host.host
             self.fqdn = host.fqdn
-        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
+        self.host_uri = yadtshell.uri.create(
+            yadtshell.settings.HOST, self.host)
         self.name = getattr(self, 'name', name)
         if self.name is not None:
             self.name = self.name.rstrip('/').split('/', 1)[0]
         self.version = version
         if self.version is not None:
             self.version = str(self.version)
-        self.uri = yadtshell.uri.create(self.type, self.host, self.name, self.version)
+        self.uri = yadtshell.uri.create(
+            self.type, self.host, self.name, self.version)
         self.version = yadtshell.uri.parse(self.uri)['version']
         self.name_and_version = yadtshell.uri.as_source_file(self.uri)
         self.state = yadtshell.settings.UNKNOWN
@@ -113,7 +116,9 @@ class Component(object):
         if no_subprocess:
             return cmds
         if guard:
-            sp = self.remote_call(": #check service callable", tag='check_service_callable', force=force)
+            sp = self.remote_call(
+                ": #check service callable", tag='check_service_callable',
+                force=force)
             returncode = yadtshell.util.log_subprocess(sp)
             if returncode != 0:
                 return returncode
@@ -131,7 +136,8 @@ class Component(object):
     def _create_owner_file(self, lockinfo, filename, force=False, tag=None):
         """@return: integer The error code of the remote call"""
         dirname = os.path.dirname(filename)
-        cmd = '''umask 0002 && mkdir -pv %s && echo -e '%s' > %s''' % (dirname, yadtshell.util.get_yaml(lockinfo), filename)
+        cmd = '''umask 0002 && mkdir -pv %s && echo -e '%s' > %s''' % (
+            dirname, yadtshell.util.get_yaml(lockinfo), filename)
         return self.remote_call(cmd, tag, force=force)
 
     def _remove_owner_file(self, lockinfo, filename, force=False, tag=None):
@@ -141,13 +147,16 @@ class Component(object):
 
 
 class MissingComponent(Component):
+
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
-        Component.__init__(self, parts['type'], parts['host'], parts['name'], parts['version'])
+        Component.__init__(self, parts['type'], parts[
+                           'host'], parts['name'], parts['version'])
         self.state = yadtshell.settings.MISSING
 
 
 class ComponentDict(dict):
+
     def __init__(self):
         dict.__init__(self)
         self._add_when_missing_ = False
@@ -171,11 +180,13 @@ class ComponentDict(dict):
         return dict.get(self, self._key_(key), default)
 
     def __setitem__(self, key, value):
-        #logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
+        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value,
+        # 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
 
 
 class ComponentSet(set):
+
     def __init__(self, components=None):
         self.components = components
         self._set = set([])
@@ -191,7 +202,8 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
-            #logger.warning('known keys: ' + ', '.join(self.components.keys()))
+            # logger.warning('known keys: ' + ',
+            # '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
@@ -213,6 +225,7 @@ class ComponentSet(set):
 
 
 class Host(Component):
+
     def __init__(self, name):
         self.lockstate = None
         self.is_locked = None
@@ -223,7 +236,9 @@ class Host(Component):
         Component.__init__(self, yadtshell.settings.HOST, name)
 
     def update(self):
-        return self.remote_call('yadt-host-update', '%s_%s' %
+        next_artefacts = [uri.replace('/', '-', 1)
+                          for uri in self.next_artefacts]
+        return self.remote_call('yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %
                                 (self.hostname, yadtshell.settings.UPDATE))
 
     def bootstrap(self):
@@ -271,17 +286,21 @@ class Host(Component):
         lock_owner = None
         if self.lockstate:
             lock_owner = self.lockstate.get("owner")
-        self.is_locked_by_me = self.is_locked and lock_owner and lock_owner == lockinfo["owner"]
+        self.is_locked_by_me = self.is_locked and lock_owner and lock_owner == lockinfo[
+            "owner"]
 
         self.is_locked_by_other = self.is_locked and not self.is_locked_by_me
 
-        logger.debug("is_locked=" + repr(self.is_locked) + ", is_locked_by_me=" + repr(self.is_locked_by_me) + ", is_locked_by_other=" + repr(self.is_locked_by_other))
+        logger.debug("is_locked=" + repr(self.is_locked) + ", is_locked_by_me=" + repr(
+            self.is_locked_by_me) + ", is_locked_by_other=" + repr(self.is_locked_by_other))
 
 
 class Artefact(Component):
+
     def __init__(self, host, name, version=None):
-        Component.__init__(self, yadtshell.settings.ARTEFACT, host, name, version)
-        #self.needs.add(uri.create(settings.HOST, host.host))
+        Component.__init__(
+            self, yadtshell.settings.ARTEFACT, host, name, version)
+        # self.needs.add(uri.create(settings.HOST, host.host))
 
     def updateartefact(self):
         return self.remote_call('yadt-artefact-update %s' % self.name,
@@ -289,6 +308,7 @@ class Artefact(Component):
 
 
 class Service(Component):
+
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
@@ -309,27 +329,32 @@ class Service(Component):
             if n.startswith(yadtshell.settings.SERVICE):
                 self.needs.add(n % locals())
             else:
-                self.needs.add(yadtshell.uri.create(yadtshell.settings.SERVICE, host.host, n % locals()))
+                self.needs.add(yadtshell.uri.create(
+                    yadtshell.settings.SERVICE, host.host, n % locals()))
         for n in self.needs_artefacts:
             self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, n % locals() +
                                                 "/" + yadtshell.settings.CURRENT))
-        #self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
+        # self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
 
-        self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(settings.get('state'),
-                                                               yadtshell.settings.UNKNOWN)
+        self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
+            settings.get('state'),
+            yadtshell.settings.UNKNOWN)
         self.script = None
 
     def stop(self, force=False, **kwargs):
-        return self.remote_call(self._retrieve_service_call(yadtshell.settings.STOP),
-                                '%s_%s' % (self.name, yadtshell.settings.STOP), force)
+        return self.remote_call(
+            self._retrieve_service_call(yadtshell.settings.STOP),
+            '%s_%s' % (self.name, yadtshell.settings.STOP), force)
 
     def start(self, force=False, **kwargs):
-        return self.remote_call(self._retrieve_service_call(yadtshell.settings.START),
-                                '%s_%s' % (self.name, yadtshell.settings.START), force)
+        return self.remote_call(
+            self._retrieve_service_call(yadtshell.settings.START),
+            '%s_%s' % (self.name, yadtshell.settings.START), force)
 
     def status(self):
-        return self.remote_call(self._retrieve_service_call(yadtshell.settings.STATUS),
-                                tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
+        return self.remote_call(
+            self._retrieve_service_call(yadtshell.settings.STATUS),
+            tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
 
     def _retrieve_service_call(self, action):
         return 'yadt-service-%s %s' % (action, self.name)
@@ -340,14 +365,14 @@ class Service(Component):
         tag = "ignore_%s" % self.name
         force = kwargs.get('force', False)
         return self.remote_call('yadt-service-ignore %s "%s"' % (self.name, message), tag, force)
-        #result = self._create_owner_file(
+        # result = self._create_owner_file(
         #    yadtshell.util.get_locking_user_info(),
-        #    os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
+        # os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
         #    force=kwargs.get('force', False),
         #    tag="ignore_%s" % self.name)
-        #if not result:
+        # if not result:
         #    logger.warn("Could not ignore %s. Try --force" % self.uri)
-        #return result
+        # return result
 
     def unignore(self, **kwargs):
         tag = "unignore_%s" % self.name
@@ -372,7 +397,8 @@ def do(args, opts):
     for component_name in component_names:
         component = components.get(component_name, None)
         if not component:
-            component = components[yadtshell.uri.change_version(component_name, 'current')]
+            component = components[
+                yadtshell.uri.change_version(component_name, 'current')]
         fun = getattr(component, cmd, None)
         import inspect
         if inspect.ismethod(fun):
@@ -381,16 +407,19 @@ def do(args, opts):
             except TypeError:
                 sp = fun()
         else:
-            logger.error('"%(cmd)s" is not defined for %(component_name)s, aborting' % locals())
+            logger.error(
+                '"%(cmd)s" is not defined for %(component_name)s, aborting' % locals())
             sys.exit(2)
         logger.debug('%(cmd)sing %(component_name)s' % locals())
         try:
             logger.debug('executing fun ' + str(fun))
             if isinstance(sp, subprocess.Popen):
-                exit_code = yadtshell.util.log_subprocess(sp, stdout_level=logging.INFO)
+                exit_code = yadtshell.util.log_subprocess(
+                    sp, stdout_level=logging.INFO)
             else:
                 exit_code = sp
             logger.debug('exit code %(exit_code)s' % locals())
         except AttributeError, ae:
-            logger.warning('problem while executing %(cmd)s on %(component_name)s' % locals())
+            logger.warning(
+                'problem while executing %(cmd)s on %(component_name)s' % locals())
             logger.exception(ae)

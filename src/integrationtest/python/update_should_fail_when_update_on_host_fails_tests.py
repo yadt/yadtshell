@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber, Udo Juettner'
+__author__ = 'Maximilien Riehl'
 
 import unittest
 import integrationtest_support
@@ -30,12 +30,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').at_least_with_arguments(
+                'yadt-command yadt-host-update yit-config-it01-0:0.0.1-2').then_return(42)
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
         actual_return_code = self.execute_command('yadtshell update -v')
 
-        self.assertEquals(0, actual_return_code)
+        self.assertEquals(1, actual_return_code)
 
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments(

@@ -256,6 +256,7 @@ DOWN = 'down'
 UP = 'up'
 UPTODATE = 'uptodate'
 UPDATE_NEEDED = 'update_needed'
+HANDLED = 'handled'
 SUCCESS = 'success'
 FINISH = 'finish'
 
