@@ -24,6 +24,8 @@ class InfoMatrixRenderingTests(unittest.TestCase):
                                             host_reboot_after_update=False,
                                             host_reboot_now=False):
         components = yadtshell.components.ComponentDict()
+
+        # create host components
         host = yadtshell.components.Host('foobar42')
         host.state = host_state
         host.reboot_required_after_next_update = host_reboot_after_update
@@ -31,6 +33,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         host.hostname = 'foobar42'
         components['foobar42'] = host
 
+        # create artefact components
         foo_artefact = yadtshell.components.Artefact(
             'foobar42', 'foo', '0:0.0.0')
         foo_artefact.state = yadtshell.settings.UP
@@ -41,6 +44,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         components['artefact://foobar42/foo/0:0.0.0'] = foo_artefact
         components['artefact://foobar42/yit/0:0.0.1'] = yit_artefact
 
+        # create service components
         if add_services:
             host.services = ['barservice', 'bazservice']
             bar_service = yadtshell.components.Service(
