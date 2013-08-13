@@ -1,5 +1,19 @@
 from unittest import TestCase
+from StringIO import StringIO
 import yadtshell
+
+
+def render_info_matrix_to_string(mocked_info_output):
+    info_matrix = StringIO()
+    for call in mocked_info_output.call_args_list:
+        try:
+            info_matrix.write(call[0][0])
+        except:
+            pass
+        info_matrix.write('\n')
+    info_matrix_string = info_matrix.getvalue()
+    info_matrix.close()
+    return info_matrix_string
 
 
 def create_component_pool_for_one_host(host_state,
