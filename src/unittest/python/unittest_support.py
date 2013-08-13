@@ -59,6 +59,7 @@ def create_component_pool_for_one_host(host_state,
 
 
 class FileNameTestCase(TestCase):
+
     def _assert_element_at_is(self,
                               actual_file_name,
                               element_position,
