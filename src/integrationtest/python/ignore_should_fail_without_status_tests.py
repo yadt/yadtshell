@@ -19,14 +19,14 @@ __author__ = 'Michael Gruber'
 import unittest
 import integrationtest_support
 
-import yadt_status_answer
-
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain')
 
-        actual_return_code = self.execute_command('yadtshell ignore service://* -m "ignoring" -v')
+        actual_return_code = self.execute_command(
+            'yadtshell ignore service://* -m "ignoring" -v')
 
         self.assertEquals(1, actual_return_code)
 

@@ -31,8 +31,10 @@ TARGET_FILE_PREFIX = """name: integration-test
 hosts:
 """
 
+
 class IntegrationTestSupport (testbase.IntegrationTestBase):
-    def setUp (self):
+
+    def setUp(self):
         super(IntegrationTestSupport, self).setUp()
         caller_stack_record = inspect.stack()[-1]
         caller_path = caller_stack_record[1]
@@ -42,21 +44,19 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
         self.prepare_testbed(self._create_env(), ['ssh'])
         self._make_yadtshell_testable()
 
-
-    def write_target_file (self, *hostnames):
+    def write_target_file(self, *hostnames):
         target_filename = join(self.base_dir, 'target')
         with open(target_filename, 'w') as target_file:
             target_file.write(TARGET_FILE_PREFIX)
             for host in hostnames:
                 target_file.write('- %s\n' % host)
 
-
-    def _make_yadtshell_testable (self):
-        absolute_path_to_script = abspath(join('src', 'main', 'scripts', 'yadtshell'))
+    def _make_yadtshell_testable(self):
+        absolute_path_to_script = abspath(
+            join('src', 'main', 'scripts', 'yadtshell'))
         destination = join(self.stubs_dir, 'yadtshell')
 
         symlink(absolute_path_to_script, destination)
-
 
     def _create_target_directory(self, name):
         target_dir = abspath(__file__).split(sep)[:-4]
@@ -71,7 +71,6 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
 
         self.make_base_dir(base_dir)
 
-
     def _create_path(self):
         path = self.stubs_dir
         if 'PATH' in environ:
@@ -82,19 +81,18 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
             path += pathsep + '/usr/local/bin'
         return path
 
-
     def _create_python_path(self):
         python_path = pathsep.join(sys.path)
 
-        if environ.has_key('PYTHONPATH'):
+        if 'PYTHONPATH' in environ:
             python_path += pathsep + environ['PYTHONPATH']
 
-        python_path += pathsep + abspath(join('..', 'hostexpand', 'src', 'main', 'python'))
+        python_path += pathsep + \
+            abspath(join('..', 'hostexpand', 'src', 'main', 'python'))
         python_path += pathsep + abspath(join('src', 'main', 'python'))
         return python_path
 
-
     def _create_env(self):
-        return {'HOME'       : self.base_dir,
-                'PATH'       : self._create_path(),
-                'PYTHONPATH' : self._create_python_path()}
+        return {'HOME': self.base_dir,
+                'PATH': self._create_path(),
+                'PYTHONPATH': self._create_python_path()}

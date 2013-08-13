@@ -21,8 +21,10 @@ import integrationtest_support
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
-        actual_return_code = self.execute_command('yadtshell ignore service://hostname/spameggs')
+
+    def test(self):
+        actual_return_code = self.execute_command(
+            'yadtshell ignore service://hostname/spameggs')
 
         self.assertEquals(12, actual_return_code)
 

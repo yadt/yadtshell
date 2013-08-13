@@ -24,7 +24,8 @@ import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
@@ -34,20 +35,25 @@ class Test (integrationtest_support.IntegrationTestSupport):
         actual_return_code = self.execute_command('yadtshell status')
         self.assertEquals(0, actual_return_code)
 
-        self.assertEquals(0, self.execute_command('yadtshell info | grep " u " | grep "host uptodate"'))
-        return_code, stdout, _ = self.execute_command_and_capture_output('yadtshell info')
+        self.assertEquals(0, self.execute_command(
+            'yadtshell info | grep " u " | grep "host uptodate"'))
+        return_code, stdout, _ = self.execute_command_and_capture_output(
+            'yadtshell info')
         update_found_for_foo = False
         for line in stdout.splitlines():
             if re.search('\(next\) foo', line):
                 update_found_for_foo = True
                 break
-        self.assertTrue(update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
+        self.assertTrue(
+            update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
 
-        self.assertEquals(0, self.execute_command('yadtshell dump --show-pending-updates | grep foo'))
+        self.assertEquals(0, self.execute_command(
+            'yadtshell dump --show-pending-updates | grep foo'))
 
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as verify:
-                verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_with_arguments(
+                    'it01.domain').and_input('/usr/bin/yadt-status')
 
             complete_verify.finished()
 

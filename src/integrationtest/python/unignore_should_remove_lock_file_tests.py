@@ -23,7 +23,8 @@ import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
@@ -32,17 +33,22 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
-        status_return_code   = self.execute_command('yadtshell status -v')
-        unignore_return_code = self.execute_command('yadtshell unignore service://* -v')
+        status_return_code = self.execute_command('yadtshell status -v')
+        unignore_return_code = self.execute_command(
+            'yadtshell unignore service://* -v')
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
 
             self.assertEquals(0, unignore_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-unignore backend-service')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-unignore frontend-service')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-service-unignore backend-service')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-service-unignore frontend-service')
 
 
 if __name__ == '__main__':

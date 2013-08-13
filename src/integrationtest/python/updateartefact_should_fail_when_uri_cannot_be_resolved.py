@@ -23,7 +23,8 @@ import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
@@ -33,12 +34,15 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
-        update_return_code = self.execute_command('yadtshell updateartefact artefact://*/*/// -v')  # invalid due to
-                                                                                                    # trailing slashes
+        update_return_code = self.execute_command(
+            'yadtshell updateartefact artefact://*/*/// -v')  # invalid due to
+                                                                                                    # trailing
+                                                                                                    # slashes
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
 
             self.assertEquals(1, update_return_code)
 

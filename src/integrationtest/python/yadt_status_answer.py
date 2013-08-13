@@ -140,11 +140,11 @@ def stdout(host, frontend_service_state=0, backend_service_state=0, template=STA
     date = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y")
 
     placeholders = {
-        'backend_service_state'  : backend_service_state,
-        'date'                   : date,
-        'frontend_service_state' : frontend_service_state,
-        'host'                   : host[0:host.index('.')],
-        'host_fqdn'              : host,
-        'timestamp'              : int(time.time())}
+        'backend_service_state': backend_service_state,
+        'date': date,
+        'frontend_service_state': frontend_service_state,
+        'host': host[0:host.index('.')],
+        'host_fqdn': host,
+        'timestamp': int(time.time())}
 
     return template.substitute(placeholders)

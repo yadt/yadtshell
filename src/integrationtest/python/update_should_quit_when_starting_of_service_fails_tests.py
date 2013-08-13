@@ -23,7 +23,8 @@ import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
-    def test (self):
+
+    def test(self):
         self.write_target_file('it01.domain')
 
         with self.fixture() as when:
@@ -39,9 +40,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEquals(1, actual_return_code)
 
         with self.verify() as verify:
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
-            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-start backend-service')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', '-O', 'check')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-service-start backend-service')
 
 
 if __name__ == '__main__':
