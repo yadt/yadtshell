@@ -17,10 +17,20 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         yadtshell.settings.term = self.mock_term
         yadtshell.settings.term.render = self.mock_render
 
-    def _create_component_pool_for_one_host(self, host_state, add_services=False, service_state=yadtshell.settings.UP):
+    def _create_component_pool_for_one_host(self,
+                                            host_state,
+                                            add_services=False,
+                                            service_state=yadtshell.settings.UP,
+                                            host_reboot_after_update=False,
+                                            host_reboot_now=False):
         components = yadtshell.components.ComponentDict()
         host = yadtshell.components.Host('foobar42')
         host.state = host_state
+        host.reboot_required_after_next_update = host_reboot_after_update
+        host.reboot_required_to_activate_latest_kernel = host_reboot_now
+        host.hostname = 'foobar42'
+        components['foobar42'] = host
+
         foo_artefact = yadtshell.components.Artefact(
             'foobar42', 'foo', '0:0.0.0')
         foo_artefact.state = yadtshell.settings.UP
@@ -28,10 +38,9 @@ class InfoMatrixRenderingTests(unittest.TestCase):
             'foobar42', 'yit', '0:0.0.1')
         yit_artefact.state = yadtshell.settings.UP
         host.next_artefacts = {'foo/0:0.0.0': 'yit/0:0.0.1'}
-        host.hostname = 'foobar42'
-        components['foobar42'] = host
         components['artefact://foobar42/foo/0:0.0.0'] = foo_artefact
         components['artefact://foobar42/yit/0:0.0.1'] = yit_artefact
+
         if add_services:
             host.services = ['barservice', 'bazservice']
             bar_service = yadtshell.components.Service(
@@ -101,6 +110,26 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         yadtshell.info()
         info_matrix = self._render_info_matrix_to_string(mocked_info_output)
         self.assertTrue(' u  host uptodate' in info_matrix)
+
+    @patch('__builtin__.print')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_reboot_after_update(self, component_pool, _, mocked_info_output):
+        component_pool.return_value = self._create_component_pool_for_one_host(
+            host_state=yadtshell.settings.UPDATE_NEEDED, host_reboot_after_update=True)
+        yadtshell.info()
+        info_matrix = self._render_info_matrix_to_string(mocked_info_output)
+        self.assertTrue(' r  reboot required' in info_matrix)
+
+    @patch('__builtin__.print')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_reboot_now(self, component_pool, _, mocked_info_output):
+        component_pool.return_value = self._create_component_pool_for_one_host(
+            host_state=yadtshell.settings.UPDATE_NEEDED, host_reboot_now=True)
+        yadtshell.info()
+        info_matrix = self._render_info_matrix_to_string(mocked_info_output)
+        self.assertTrue(' R  reboot required' in info_matrix)
 
     @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
