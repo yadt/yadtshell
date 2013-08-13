@@ -8,7 +8,7 @@ def render_info_matrix_to_string(mocked_info_output):
     for call in mocked_info_output.call_args_list:
         try:
             info_matrix.write(call[0][0])
-        except:
+        except IndexError:
             pass
         info_matrix.write('\n')
     info_matrix_string = info_matrix.getvalue()
