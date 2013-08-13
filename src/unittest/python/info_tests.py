@@ -30,8 +30,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
             host_state=yadtshell.settings.UPTODATE,
             add_services=True,
             service_state=yadtshell.settings.UP)
+
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' |  service barservice' in info_matrix)
         self.assertTrue(' |  service bazservice' in info_matrix)
 
@@ -46,8 +48,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
             host_state=yadtshell.settings.UPTODATE,
             add_services=True,
             service_state=yadtshell.settings.DOWN)
+
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' O  service barservice' in info_matrix)
         self.assertTrue(' O  service bazservice' in info_matrix)
 
@@ -63,6 +67,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' |  host uptodate' in info_matrix)
         self.assertTrue('1/1 hosts uptodate' in info_matrix)
 
@@ -78,6 +83,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' u  host uptodate' in info_matrix)
 
     @patch('__builtin__.print')
@@ -90,8 +96,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             host_reboot_after_update=True)
+
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' r  reboot required' in info_matrix)
 
     @patch('__builtin__.print')
@@ -104,8 +112,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             host_reboot_now=True)
+
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue(' R  reboot required' in info_matrix)
 
     @patch('__builtin__.print')
@@ -117,13 +127,16 @@ class InfoMatrixRenderingTests(unittest.TestCase):
                                                                   mocked_info_output):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
-            artefact_state=yadtshell.settings.DOWN)
+            artefact_state=yadtshell.settings.MISSING)
+
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertTrue('''
 problems
-${RED}${BOLD}      down${NORMAL}  artefact://foobar42/yit/0:0.0.1
-${RED}${BOLD}      down${NORMAL}  artefact://foobar42/foo/0:0.0.0
+${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/yit/0:0.0.1
+${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
+
 ''' in info_matrix)
 
     @patch('__builtin__.print')
@@ -138,6 +151,7 @@ ${RED}${BOLD}      down${NORMAL}  artefact://foobar42/foo/0:0.0.0
 
         yadtshell.info()
         info_matrix = render_info_matrix_to_string(mocked_info_output)
+
         self.assertEqual(info_matrix,
                          '''
 ${BOLD}yadt info | test${NORMAL}
