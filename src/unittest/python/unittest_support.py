@@ -20,7 +20,8 @@ def create_component_pool_for_one_host(host_state,
                                        add_services=False,
                                        service_state=yadtshell.settings.UP,
                                        host_reboot_after_update=False,
-                                       host_reboot_now=False):
+                                       host_reboot_now=False,
+                                       artefact_state=yadtshell.settings.UP):
     components = yadtshell.components.ComponentDict()
 
     # create host components
@@ -34,10 +35,10 @@ def create_component_pool_for_one_host(host_state,
     # create artefact components
     foo_artefact = yadtshell.components.Artefact(
         'foobar42', 'foo', '0:0.0.0')
-    foo_artefact.state = yadtshell.settings.UP
+    foo_artefact.state = artefact_state
     yit_artefact = yadtshell.components.Artefact(
         'foobar42', 'yit', '0:0.0.1')
-    yit_artefact.state = yadtshell.settings.UP
+    yit_artefact.state = artefact_state
     host.next_artefacts = {'foo/0:0.0.0': 'yit/0:0.0.1'}
     components['artefact://foobar42/foo/0:0.0.0'] = foo_artefact
     components['artefact://foobar42/yit/0:0.0.1'] = yit_artefact

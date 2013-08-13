@@ -87,6 +87,20 @@ class InfoMatrixRenderingTests(unittest.TestCase):
     @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
+    def test_should_render_artefact_problems_when_state_is_not_up(self, component_pool, _, mocked_info_output):
+        component_pool.return_value = create_component_pool_for_one_host(
+            host_state=yadtshell.settings.UPDATE_NEEDED, artefact_state=yadtshell.settings.DOWN)
+        yadtshell.info()
+        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        self.assertTrue('''
+problems
+${RED}${BOLD}      down${NORMAL}  artefact://foobar42/yit/0:0.0.1
+${RED}${BOLD}      down${NORMAL}  artefact://foobar42/foo/0:0.0.0
+''' in info_matrix)
+
+    @patch('__builtin__.print')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self, component_pool, _, mocked_info_output):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
