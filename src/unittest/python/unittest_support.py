@@ -59,7 +59,10 @@ def create_component_pool_for_one_host(host_state,
 
 
 class FileNameTestCase(TestCase):
-    def _assert_element_at_is(self, actual_file_name, element_position, element_value):
+    def _assert_element_at_is(self,
+                              actual_file_name,
+                              element_position,
+                              element_value):
         actual_element_value = actual_file_name.split('.')[element_position]
         message = 'Expected : {0} but got {1} instead'.format(
             element_value, actual_element_value)
