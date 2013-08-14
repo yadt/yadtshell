@@ -22,7 +22,8 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
                                        host_reboot_after_update=False,
                                        host_reboot_now=False,
                                        artefact_state=yadtshell.settings.UP,
-                                       host_locked_by_other=False):
+                                       host_locked_by_other=False,
+                                       host_locked_by_me=False):
     components = yadtshell.components.ComponentDict()
 
     # create host components
@@ -37,6 +38,11 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
                           'message': 'yes we can (lock the host)'}
         host.is_locked = True
         host.is_locked_by_other = True
+    if host_locked_by_me:
+        host.lockstate = {'owner': 'me',
+                          'message': 'yes we can (lock the host)'}
+        host.is_locked = True
+        host.is_locked_by_me = True
 
     # create artefact components
     foo_artefact = yadtshell.components.Artefact(

@@ -164,6 +164,28 @@ ${NORMAL}
     @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
+    def test_should_render_host_locked_by_me(self,
+                                             component_pool,
+                                             _,
+                                             mocked_info_output):
+        component_pool.return_value = create_component_pool_for_one_host(
+            host_locked_by_me=True)
+
+        yadtshell.info()
+        info_matrix = render_info_matrix_to_string(mocked_info_output)
+
+        self.assertTrue('''
+${BG_YELLOW}${BOLD}
+  foobar42 is locked by me
+    reason yes we can (lock the host)
+${NORMAL}
+''' in info_matrix)
+
+        self.assertTrue(' l  host access' in info_matrix)
+
+    @patch('__builtin__.print')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self,
                                                component_pool,
                                                _,
