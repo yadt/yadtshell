@@ -142,6 +142,28 @@ ${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
     @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
+    def test_should_render_host_locked_by_other(self,
+                                                component_pool,
+                                                _,
+                                                mocked_info_output):
+        component_pool.return_value = create_component_pool_for_one_host(
+            host_locked_by_other=True)
+
+        yadtshell.info()
+        info_matrix = render_info_matrix_to_string(mocked_info_output)
+
+        self.assertTrue('''
+${BG_RED}${WHITE}${BOLD}
+  foobar42 is locked by foobar
+    reason yes we can (lock the host)
+${NORMAL}
+''' in info_matrix)
+
+        self.assertTrue(' L  host access' in info_matrix)
+
+    @patch('__builtin__.print')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self,
                                                component_pool,
                                                _,

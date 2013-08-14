@@ -16,12 +16,13 @@ def render_info_matrix_to_string(mocked_info_output):
     return info_matrix_string
 
 
-def create_component_pool_for_one_host(host_state,
+def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
                                        add_services=False,
                                        service_state=yadtshell.settings.UP,
                                        host_reboot_after_update=False,
                                        host_reboot_now=False,
-                                       artefact_state=yadtshell.settings.UP):
+                                       artefact_state=yadtshell.settings.UP,
+                                       host_locked_by_other=False):
     components = yadtshell.components.ComponentDict()
 
     # create host components
@@ -31,6 +32,11 @@ def create_component_pool_for_one_host(host_state,
     host.reboot_required_to_activate_latest_kernel = host_reboot_now
     host.hostname = 'foobar42'
     components['foobar42'] = host
+    if host_locked_by_other:
+        host.lockstate = {'owner': 'foobar',
+                          'message': 'yes we can (lock the host)'}
+        host.is_locked = True
+        host.is_locked_by_other = True
 
     # create artefact components
     foo_artefact = yadtshell.components.Artefact(
