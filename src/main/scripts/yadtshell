@@ -45,6 +45,7 @@ cmd = sys.argv[1]
 # parallel actions stuff
 if cmd in ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'update', 'updateartefact']:
     parser.add_option('-p', '--parallel', action='store', dest='parallel', default='1', help='parallel execution, where and how')
+    parser.add_option('', '--no-final-status', action='store_true', dest='no_final_status', default=False, help='no status after command')
 
 # message for lock, ignore
 if cmd in ['ignore', 'lock']:
@@ -82,7 +83,7 @@ logger = logging.getLogger('yadtshell')
 ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
 validate_command_line_options(cmd, opts, parser.print_help)
 
-yadtshell.settings.load_settings(log_to_file=(not cmd in ['dump', 'info']))
+yadtshell.settings.load_settings(log_to_file=(cmd not in ['dump', 'info']))
 if opts.tracking_id:
     yadtshell.settings.tracking_id = opts.tracking_id
 
@@ -158,7 +159,7 @@ else:
         # TODO event failed needed here
         sys.exit(1)
 
-if cmd in ['stop', 'start', 'update', 'updateartefact']:
+if cmd in ['stop', 'start', 'update', 'updateartefact', 'ignore', 'lock', 'unignore', 'unlock'] and not opts.no_final_status:
     deferred.addCallback(yadtshell.status)
 
 
@@ -203,4 +204,3 @@ else:
     logger.info('For details see: "{0}"'.format(yadtshell.settings.log_file))
 
 sys.exit(reactor.return_code)
-
