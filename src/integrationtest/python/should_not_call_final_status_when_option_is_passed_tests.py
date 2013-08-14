@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber, Maximilien Riehl'
+__author__ = 'Maximilien Riehl'
 
 import unittest
 import integrationtest_support
@@ -30,28 +30,33 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain'))
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service')\
+                .then_return(1)
+            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service')\
+                .then_return(1)
             when.calling('ssh').at_least_with_arguments('it01.domain') \
                 .then_return(0)
 
         status_return_code = self.execute_command('yadtshell status -v')
-        lock_return_code = self.execute_command(
-            'yadtshell lock host://it01 -m "locking \'the host\'" -v')
+        stop_return_code = self.execute_command(
+            'yadtshell stop service://* -v --no-final-status')
 
         with self.verify() as verify:
             self.assertEquals(0, status_return_code)
-
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')
 
-            self.assertEquals(0, lock_return_code)
+            self.assertEquals(0, stop_return_code)
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain', '-O', 'check')
-
             verify.called('ssh').at_least_with_arguments(
-                'it01.domain', "yadt-command yadt-host-lock 'locking the host'")
-
+                'it01.domain', 'yadt-command yadt-service-stop frontend-service')
             verify.called('ssh').at_least_with_arguments(
-                'it01.domain').and_input('/usr/bin/yadt-status')
+                'it01.domain', 'yadt-command yadt-service-status frontend-service')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-service-stop backend-service')
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-service-status backend-service')
 
 if __name__ == '__main__':
     unittest.main()
