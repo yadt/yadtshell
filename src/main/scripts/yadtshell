@@ -158,6 +158,9 @@ else:
         # TODO event failed needed here
         sys.exit(1)
 
+if cmd in ['stop', 'start', 'update', 'updateartefact']:
+    deferred.addCallback(yadtshell.status)
+
 
 def publish_result():
     if reactor.return_code == 0:

@@ -54,6 +54,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verifier.called('ssh').at_least_with_arguments(
                 'it01.domain', 'yadt-command yadt-service-status frontend-service')
 
+            verifier.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
+
 
 if __name__ == '__main__':
     unittest.main()
