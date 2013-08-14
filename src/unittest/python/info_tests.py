@@ -20,117 +20,101 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         yadtshell.settings.term.render = self.mock_render
 
     @patch('__builtin__.print')
+    def _call_info_and_render_output_to_string(self, mock_print):
+        yadtshell.info()
+        return render_info_matrix_to_string(mock_print)
+
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_running_services(self,
                                             component_pool,
-                                            _,
-                                            mocked_info_output):
+                                            _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPTODATE,
             add_services=True,
             service_state=yadtshell.settings.UP)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' |  service barservice' in info_matrix)
         self.assertTrue(' |  service bazservice' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_stopped_services(self,
                                             component_pool,
-                                            _,
-                                            mocked_info_output):
+                                            _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPTODATE,
             add_services=True,
             service_state=yadtshell.settings.DOWN)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' O  service barservice' in info_matrix)
         self.assertTrue(' O  service bazservice' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_uptodate_when_host_is_uptodate(self,
                                                           component_pool,
-                                                          _,
-                                                          mocked_info_output):
+                                                          _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPTODATE)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' |  host uptodate' in info_matrix)
         self.assertTrue('1/1 hosts uptodate' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_update_needed_when_host_is_not_uptodate(self,
                                                                    component_pool,
-                                                                   _,
-                                                                   mocked_info_output):
+                                                                   _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' u  host uptodate' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_reboot_after_update(self,
                                                component_pool,
-                                               _,
-                                               mocked_info_output):
+                                               _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             host_reboot_after_update=True)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' r  reboot required' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_reboot_now(self,
                                       component_pool,
-                                      _,
-                                      mocked_info_output):
+                                      _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             host_reboot_now=True)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue(' R  reboot required' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_artefact_problems_when_state_is_not_up(self,
                                                                   component_pool,
-                                                                  _,
-                                                                  mocked_info_output):
+                                                                  _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             artefact_state=yadtshell.settings.MISSING)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue('''
 problems
@@ -139,18 +123,15 @@ ${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
 
 ''' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_host_locked_by_other(self,
                                                 component_pool,
-                                                _,
-                                                mocked_info_output):
+                                                _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_locked_by_other=True)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue('''
 ${BG_RED}${WHITE}${BOLD}
@@ -161,18 +142,15 @@ ${NORMAL}
 
         self.assertTrue(' L  host access' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_host_locked_by_me(self,
                                              component_pool,
-                                             _,
-                                             mocked_info_output):
+                                             _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_locked_by_me=True)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertTrue('''
 ${BG_YELLOW}${BOLD}
@@ -183,18 +161,15 @@ ${NORMAL}
 
         self.assertTrue(' l  host access' in info_matrix)
 
-    @patch('__builtin__.print')
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self,
                                                component_pool,
-                                               _,
-                                               mocked_info_output):
+                                               _,):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
 
-        yadtshell.info()
-        info_matrix = render_info_matrix_to_string(mocked_info_output)
+        info_matrix = self._call_info_and_render_output_to_string()
 
         self.assertEqual(info_matrix,
                          '''
