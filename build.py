@@ -22,6 +22,7 @@ use_plugin('python.install_dependencies')
 use_plugin('python.unittest')
 use_plugin('python.coverage')
 use_plugin('python.flake8')
+use_plugin('ronn_manpage')
 
 use_plugin('python.distutils')
 use_plugin('copy_resources')
@@ -42,7 +43,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.6.0'
 
-default_task = ['publish']
+default_task = ['generate_manpages', 'publish']
 
 
 @init
@@ -57,6 +58,8 @@ def set_properties(project):
     project.build_depends_on('mock')
 
     project.set_property('integration_test_print_err', True)
+
+    project.set_property('manpage_source', 'man-yadtshell.md')
 
     project.set_property('coverage_threshold_warn', 4)
     project.set_property('coverage_break_build', False)
