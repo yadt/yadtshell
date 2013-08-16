@@ -19,6 +19,9 @@ develop-eggs
 .project
 .pydevproject
 
+# Generated documentation
+docs/man
+
 # Installer logs
 pip-log.txt
 
