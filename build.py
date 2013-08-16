@@ -67,6 +67,10 @@ def set_properties(project):
 
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').append('setup.cfg')
+    project.get_property('copy_resources_glob').append('docs/man/yadtshell.1.gz')
+
+    project.install_file('share/man/man1/', 'docs/man/yadtshell.1.gz')
+
     project.get_property('filter_resources_glob').append('**/yadtshell/__init__.py')
     project.set_property('dir_dist_scripts', 'scripts')
 
