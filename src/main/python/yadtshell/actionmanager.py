@@ -380,6 +380,7 @@ class ActionManager(object):
             reactor.callLater(0, deferred.errback, e)
                               # TODO mhhh: good practice?
             return deferred
+
         if not action_plan:
             self.logger.debug(
                 '%s is empty, thus doing nothing' % action_plan_file)
