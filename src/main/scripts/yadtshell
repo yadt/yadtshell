@@ -23,6 +23,7 @@ from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
 from yadtshell.commandline import (EXIT_CODE_MISSING_COMMAND,
+                                   EXIT_CODE_CANCELED_BY_USER,
                                    ensure_command_has_required_arguments,
                                    normalize_options,
                                    validate_command_line_options)
@@ -196,8 +197,13 @@ except BaseException, e:
     reactor.return_code = 2
     logger.critical(str(e))
 
+
 if reactor.return_code == 0:
     print yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL.${NORMAL}' % cmd.upper())
+
+elif reactor.return_code == EXIT_CODE_CANCELED_BY_USER:
+    print yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER.${NORMAL}' % cmd.upper())
+
 else:
     print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED.${NORMAL}' % cmd.upper())
     logger.critical('exit code: %i' % reactor.return_code)

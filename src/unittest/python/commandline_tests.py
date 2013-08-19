@@ -1,13 +1,64 @@
 import unittest
 from mockito import mock, when, verify, unstub, any as any_value, never
+from mock import Mock
 
 import yadtshell
 from yadtshell.commandline import (ensure_command_has_required_arguments,
                                    validate_command_line_options,
                                    normalize_message,
                                    normalize_options,
+                                   confirm_transaction_by_user,
                                    EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT,
                                    EXIT_CODE_MISSING_MESSAGE_OPTION)
+
+
+class UserConfirmationTests(unittest.TestCase):
+
+    def setUp(self):
+        self.user_input = Mock()
+        yadtshell.commandline.raw_input = self.user_input
+
+    def test_should_return_true_when_user_confirms_immediately(self):
+        self.user_input.return_value = 'y'
+
+        self.assertTrue(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_true_when_user_confirms_with_uppercase(self):
+        self.user_input.return_value = 'Y'
+
+        self.assertTrue(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_true_when_user_confirms_with_yes(self):
+        self.user_input.return_value = 'Yes'
+
+        self.assertTrue(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_false_when_user_declines_immediately(self):
+        self.user_input.return_value = 'n'
+
+        self.assertFalse(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_false_when_user_declines_immediately_with_uppercase(self):
+        self.user_input.return_value = 'N'
+
+        self.assertFalse(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_false_when_user_declines_immediately_with_no(self):
+        self.user_input.return_value = 'nO'
+
+        self.assertFalse(confirm_transaction_by_user('y/n', None))
+
+    def test_should_return_default_when_user_provides_no_value(self):
+        self.user_input.return_value = ''
+
+        self.assertTrue(confirm_transaction_by_user('Y/n', True))
+
+    def test_should_request_input_with_selector(self):
+        self.user_input.return_value = ''
+
+        confirm_transaction_by_user('y/n', None)
+
+        self.user_input.assert_called_with('Do you want to continue [y/n]? ')
 
 
 class ValidateCommandLineOptionsTest(unittest.TestCase):

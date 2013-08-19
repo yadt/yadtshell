@@ -29,8 +29,24 @@ COMMANDS_WHICH_REQUIRE_A_MESSAGE_OPTION = ['lock', 'ignore']
 EXIT_CODE_MISSING_COMMAND = 10
 EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT = 11
 EXIT_CODE_MISSING_MESSAGE_OPTION = 12
+EXIT_CODE_CANCELED_BY_USER = 13
 
 LOGGER = logging.getLogger()
+
+
+def confirm_transaction_by_user(selector='y/N', default_answer=False):
+    prompt = 'Do you want to continue [%s]? ' % selector
+    while True:
+        try:
+            i = raw_input(prompt)
+        except KeyboardInterrupt:
+            return False
+        if not i:
+            return default_answer
+        if i.lower() in ('yes', 'y'):
+            return True
+        elif i.lower() in ('no', 'n'):
+            return False
 
 
 def ensure_command_has_required_arguments(command, arguments, show_help_callback):
