@@ -28,7 +28,7 @@ host://*host*
 ## COMMANDS
 status
 :   Retrieves the actual state of all target hosts
-    (see also https://github.com/yadt/yadtshell/wiki/Status-Information)
+(see also https://github.com/yadt/yadtshell/wiki/Status-Information)
 
 start *SERVICES*
 :   Starts all specified *SERVICES*, regarding the correct order
@@ -41,7 +41,7 @@ info
 
 ignore *SERVICES*
 :   ignores the specified services: all following actions will be skipped and
-    its results are always successfull
+its results are always successfull
 
 ## OPTIONS
 -n
