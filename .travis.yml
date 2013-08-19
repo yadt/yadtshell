@@ -9,7 +9,7 @@ before_script:
 install:
   - pip install pybuilder
   - pyb --debug install_dependencies
-script: "pyb --debug publish"
+script: "pyb --debug -v"
 notifications:
   email:
     - arne.hilmann@immobilienscout24.de
