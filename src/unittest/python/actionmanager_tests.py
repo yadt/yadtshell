@@ -13,6 +13,7 @@ class ActionManagerTestBase(TestCase):
     def setUp(self, mock_logging):
         yadtshell.settings.ybc = Mock()
         yadtshell.settings.log_file = Mock()
+        yadtshell.settings.SSH = 'ssh'
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'hosts': ['foobar42']}
         self.am = ActionManager()
