@@ -72,3 +72,30 @@ class ActionManagerActionTests(TestCase):
         self.am.action('update')
 
         self.assertFalse(mock_stop_and_return.called)
+
+    @patch('yadtshell.actionmanager.print', create=True)
+    @patch('yadtshell.actionmanager.confirm_transaction_by_user')
+    @patch('yadtshell.actionmanager.sys.stdout')
+    @patch('yadtshell.twisted.stop_and_return')
+    @patch('yadtshell.actionmanager.yaml.load')
+    @patch('yadtshell.actionmanager.open', create=True)
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_not_prompt_when_no_tty(self,
+                                           components,
+                                           mock_open,
+                                           mock_load_action_plan,
+                                           mock_stop_and_return,
+                                           mock_stdout,
+                                           mock_transaction,
+                                           _):
+        mock_stdout.isatty.return_value = False
+        noop = Mock()
+        noop.cmd = 'harmless'
+        dangerous = Mock()
+        dangerous.cmd = 'reboot'
+        mock_load_action_plan.return_value.list_actions = [noop, dangerous]
+        self.user_accepts_transaction()
+
+        self.am.action('update')
+
+        self.assertFalse(mock_transaction.called)
