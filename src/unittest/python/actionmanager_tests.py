@@ -23,6 +23,7 @@ class ActionManagerActionTests(TestCase):
         self.am = ActionManager()
 
     @patch('yadtshell.actionmanager.print', create=True)
+    @patch('yadtshell.actionmanager.sys.stdout')
     @patch('yadtshell.twisted.stop_and_return')
     @patch('yadtshell.actionmanager.yaml.load')
     @patch('yadtshell.actionmanager.open', create=True)
@@ -32,7 +33,9 @@ class ActionManagerActionTests(TestCase):
                                             mock_open,
                                             mock_load_action_plan,
                                             mock_stop_and_return,
+                                            mock_stdout,
                                             _):
+        mock_stdout.isatty.return_value = True
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
@@ -46,6 +49,7 @@ class ActionManagerActionTests(TestCase):
             yadtshell.commandline.EXIT_CODE_CANCELED_BY_USER)
 
     @patch('yadtshell.actionmanager.print', create=True)
+    @patch('yadtshell.actionmanager.sys.stdout')
     @patch('yadtshell.twisted.stop_and_return')
     @patch('yadtshell.actionmanager.yaml.load')
     @patch('yadtshell.actionmanager.open', create=True)
@@ -55,7 +59,9 @@ class ActionManagerActionTests(TestCase):
                                                  mock_open,
                                                  mock_load_action_plan,
                                                  mock_stop_and_return,
+                                                 mock_stdout,
                                                  _):
+        mock_stdout.isatty.return_value = True
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
