@@ -26,7 +26,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         actual_return_code = self.execute_command(
             'yadtshell ignore service://hostname/spameggs')
 
-        self.assertEquals(12, actual_return_code)
+        self.assertEquals(1, actual_return_code)
 
 
 if __name__ == '__main__':

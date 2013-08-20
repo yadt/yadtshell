@@ -15,6 +15,30 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+The yadtshell
+
+Usage:
+yadtshell (status|info) [options]
+yadtshell (start|stop) SERVICE-URI ... [options]
+yadtshell update [HOST-URI...] [options]
+yadtshell updateartefact ARTEFACT-URI ... [options]
+yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
+yadtshell unlock HOST-URI ... [options]
+yadtshell ignore -m MESSAGE SERVICE-URI ... [options] [--force]
+yadtshell unignore SERVICE-URI ... [options]
+yadtshell dump [URI-PATTERN...] [--attribute --show-pending-updates --show-current-artefacts]
+
+Options:
+-n --dryrun            do not alter the system
+-v                     be more verbose
+--tracking-id STRING   lets user define a tracking id
+--no-final-status      do not fetch status of target after action
+
+-m --message MESSAGE   reason
+-p --parallel PSPEC    how to execute actions in parallel
+--force                force execution
+"""
 
 import sys
 import logging
@@ -29,6 +53,8 @@ from yadtshell.commandline import (EXIT_CODE_MISSING_COMMAND,
                                    validate_command_line_options)
 from optparse import OptionParser, OptionGroup
 
+from docopt import docopt
+arguments = docopt(__doc__)
 
 reactor.return_code = 127
 
