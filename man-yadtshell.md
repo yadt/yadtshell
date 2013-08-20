@@ -17,10 +17,13 @@ The hosts to handle are taken from the *target* file in the current
 directory.
 
 ## COMPONENTS
+* services :
 service://*host*/*servicename*
 
+* artefacts :
 artefact://*host*/*artefactname*/*version*
 
+* hosts :
 host://*host*
 
 (Wildcards `*` and `?`, and ranges `[start..end]` allowed)
@@ -64,12 +67,23 @@ No operation: change nothing, just show what *would* be done (aka dryrun)
 Runs eligible operations in parallel.
 See https://github.com/yadt/yadtshell/wiki/Wave-deployment-with-parallel-actions for more information.
 
+* --force :
+Ignores locks. Valid only for the `lock` command. This allows to taking over a lock
+in order to release it.
+
+* -m *MESSAGE* :
+Adds a message to a command. Valid only for the `lock` and `ignore` commands.
+
+* --no-final-status :
+Do not query and display the *status* of the target after an action that changed it
+(e.G. *start*, *update*, ...)
+
 ## EXAMPLES
 
 * yadtshell status:
 retrieves the current state of your target
 
-* yadtshell stop service://*/* :
+* yadtshell stop service://\*/\* :
 stops all services
 
 * yadtshell update host://foo1 host://foo2 :
