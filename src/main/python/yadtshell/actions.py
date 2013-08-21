@@ -159,11 +159,10 @@ class ActionPlan(object):
     def list_actions(self):
         for plan_or_action in self.actions:
             if isinstance(plan_or_action, ActionPlan):
-                for a in plan_or_action.list_actions():
+                for a in plan_or_action.list_actions:
                     yield a
             else:
                 yield plan_or_action
-
 
 #        for action in [a for a in self.actions if isinstance(a, Action)]:
 #            yield action
