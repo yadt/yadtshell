@@ -91,11 +91,11 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     for action in start_plan.actions:
         if action.uri in stopped_services:
             host_uri = components[action.uri].host_uri
-            action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.HANDLED))
+            action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
 
     update_actions = set()
     for host in hosts_with_update:
-        action = yadtshell.actions.Action(yadtshell.settings.UPDATE, host.uri, 'state', yadtshell.settings.HANDLED)
+        action = yadtshell.actions.Action(yadtshell.settings.UPDATE, host.uri, 'state', yadtshell.settings.UPTODATE)
         #for needs_host in [s for s in host.needed_by if s.startswith('service://')]:
         for needs_host in [components.get(s) for s in stopped_services]:
             if needs_host.host_uri != host.uri:
