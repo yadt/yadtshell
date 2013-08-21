@@ -90,12 +90,11 @@ class DeferredPool(defer.Deferred):
                 'stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated), 1))
             return
         if self.queue:
-            self.logger.warning('%i actions not executed, dump follows:' % len(self.queue))
+            self.logger.error('%i actions not executed, dump follows:' % len(self.queue))
             for task in self.queue:
                 for line in task.action.dump().splitlines():
-                    self.logger.warning(line)
-            #reactor.callLater(0, self.errback, actions.ActionException('some actions not executed', 1))
-            #return
+                    self.logger.error(line)
+            raise yadtshell.actions.ActionException('Could not execute %i action(s)' % len(self.queue), 1)
         return self.callback(None)   # TODO refactor to something similar to deferredList
 
     def _handle_error(self, failure):
