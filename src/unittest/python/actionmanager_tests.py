@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest import TestCase
 from mock import MagicMock, Mock, patch
 
 import yadtshell
@@ -27,7 +28,7 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         mock_sys.isatty.return_value = False
 
         self.assertFalse(
-            _user_should_acknowledge_plan(dryrun=False, flavor='update'))
+            _user_should_acknowledge_plan(dryrun=False, flavor='update', forcedyes=False))
 
     @patch('yadtshell.actionmanager.sys.stdout')
     def test_should_prompt_when_terminal_is_a_tty(self,
@@ -35,7 +36,7 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         mock_sys.isatty.return_value = True
 
         self.assertTrue(
-            _user_should_acknowledge_plan(dryrun=False, flavor='update'))
+            _user_should_acknowledge_plan(dryrun=False, flavor='update', forcedyes=False))
 
     @patch('yadtshell.actionmanager.sys.stdout')
     def test_should_not_prompt_when_terminal_is_a_tty_but_dryrun_is_true(self,
@@ -43,7 +44,7 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         mock_sys.isatty.return_value = True
 
         self.assertFalse(
-            _user_should_acknowledge_plan(dryrun=True, flavor='update'))
+            _user_should_acknowledge_plan(dryrun=True, flavor='update', forcedyes=False))
 
 
 class ActionManagerHandleTests(ActionManagerTestBase):
