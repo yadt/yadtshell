@@ -81,7 +81,8 @@ class DeferredPool(defer.Deferred):
             self.logger.debug('started: %i items in queue, %i parallel workers' % (len(queue), nr_workers))
         else:
             self.logger.debug('started: %i items in queue' % len(queue))
-        deferreds = filter(None, [worker.run() for worker in self.workers])
+        for worker in self.workers:
+            worker.run()
 
     def _finish(self):
         self.logger.debug('DeferredPool %s fired its callback.' % self.name)
