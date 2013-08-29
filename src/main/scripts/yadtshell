@@ -42,33 +42,24 @@ Options:
 """
 
 import logging
-import re
 import sys
 
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-from yadtshell.commandline import EXIT_CODE_CANCELED_BY_USER
+from yadtshell.commandline import (EXIT_CODE_CANCELED_BY_USER,
+                                   determine_command_from_arguments,
+                                   infer_options_from_arguments)
 
 from docopt import docopt
 arguments = docopt(__doc__)
 
 reactor.return_code = 127
 
-cmd = None
-for key, selected in arguments.iteritems():
-    if re.match('[a-z]', key) and selected:
-        cmd = key
-        break
-
-uris = arguments['ARTEFACT-URI'] + arguments['HOST-URI'] + arguments['SERVICE-URI'] + arguments['URI-PATTERN']
-
-opts = {}
-for key, value in arguments.iteritems():
-    if not key.startswith('-'):
-        continue
-    key = key.lstrip('-').replace('-', '_')
-    opts[key] = value
+cmd = determine_command_from_arguments(arguments)
+uris = arguments['ARTEFACT-URI'] + arguments['HOST-URI'] + \
+    arguments['SERVICE-URI'] + arguments['URI-PATTERN']
+opts = infer_options_from_arguments(arguments)
 
 observer = log.PythonLoggingObserver()
 observer.start()
@@ -94,7 +85,8 @@ if uris:
     uris = yadtshell.helper.expand_hosts(uris)
     uris = yadtshell.helper.glob_hosts(components, uris)
     if not uris:
-        logger.error('Could not resolve URIs. Check for typos or syntax issues.')
+        logger.error(
+            'Could not resolve URIs. Check for typos or syntax issues.')
         sys.exit(1)
 
 
@@ -103,11 +95,13 @@ def create_simple_plan(cmd, uris):
     for component_name in uris:
         component = components.get(component_name, None)
         if not component:
-            component = components[yadtshell.uri.change_version(component_name, 'current')]
+            component = components[
+                yadtshell.uri.change_version(component_name, 'current')]
         if not component:
             logger.warning('could not resolve uri %s' % component_name)
             continue
-        action_set.add(yadtshell.actions.Action(cmd, component.uri, kwargs=opts))
+        action_set.add(
+            yadtshell.actions.Action(cmd, component.uri, kwargs=opts))
     plan = yadtshell.actions.ActionPlan(cmd, action_set)
     yadtshell.util.dump_action_plan(cmd, plan)
     return plan
@@ -148,7 +142,8 @@ else:
         plan = yadtshell.metalogic.metalogic(cmd, uris)
         deferred = createDeferredFromPlan(plan)
     except Exception, e:
-        logger.critical('an error occured while trying to "%s %s"' % (cmd, ', '.join(args)))
+        logger.critical('an error occured while trying to "%s %s"' %
+                        (cmd, ', '.join(args)))
         logger.debug(e)
         # TODO event failed needed here
         sys.exit(1)
@@ -162,13 +157,15 @@ def publish_result():
         state = 'finished'
     else:
         state = 'failed'
-    yadtshell.settings.ybc.publish_cmd(cmd=cmd, state=state, tracking_id=yadtshell.settings.tracking_id)
+    yadtshell.settings.ybc.publish_cmd(
+        cmd=cmd, state=state, tracking_id=yadtshell.settings.tracking_id)
     logger.debug('waiting for outstanding events to be delivered')
     return deferLater(reactor, 2, observer.stop)
 
 
 def publish_start():
-    yadtshell.settings.ybc.publish_cmd(cmd=cmd, state='started', tracking_id=yadtshell.settings.tracking_id)
+    yadtshell.settings.ybc.publish_cmd(
+        cmd=cmd, state='started', tracking_id=yadtshell.settings.tracking_id)
 
 
 try:

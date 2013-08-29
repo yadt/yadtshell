@@ -21,6 +21,7 @@
 import copy
 import logging
 import sys
+import re
 
 
 COMMANDS_WHICH_REQUIRE_AT_LEAST_ONE_COMPONENT_URI = ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'updateartefact']
@@ -73,3 +74,19 @@ def normalize_options(options):
     if hasattr(result, 'message') and result.message is not None:
         result.message = normalize_message(result.message)
     return result
+
+
+def determine_command_from_arguments(arguments):
+    for key, selected in arguments.iteritems():
+        if re.match('^[a-z]+$', key) and selected:
+            return key
+
+
+def infer_options_from_arguments(arguments):
+    opts = {}
+    for key, value in arguments.iteritems():
+        if not key.startswith('-'):
+            continue
+        key = key.lstrip('-').replace('-', '_')
+        opts[key] = value
+    return opts
