@@ -21,7 +21,7 @@ The yadtshell
 Usage:
 yadtshell (status|info) [options]
 yadtshell (start|stop) SERVICE-URI ... [options]
-yadtshell update [HOST-URI...] [-y] [options]
+yadtshell update [HOST-URI...] [-y] [--reboot | --no-reboot] [options]
 yadtshell updateartefact ARTEFACT-URI ... [options]
 yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
 yadtshell unlock HOST-URI ... [options]
@@ -37,8 +37,10 @@ Options:
 
 -m --message MESSAGE   reason
 -p --parallel PSPEC    how to execute actions in parallel [default: 1]
---force                force execution
 -y                     say yes to all questions
+--force                force execution
+--reboot               reboot servers if needed during an update
+--no-reboot            do not reboot servers during an update, even if needed
 """
 
 import logging
