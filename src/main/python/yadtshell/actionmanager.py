@@ -355,6 +355,7 @@ class ActionManager(object):
                info_mode=False,
                dryrun=False,
                parallel=None,
+               forcedyes=False,
                **kwargs):
         if not parallel:
             parallel = 1
@@ -425,10 +426,10 @@ class ActionManager(object):
 
         def filter_dangerous_actions(actions):
             def is_a_dangerous_action(action):
-                return action.cmd == 'reboot'
+                return action.cmd in ['reboot']
             return filter(is_a_dangerous_action, actions)
 
-        if _user_should_acknowledge_plan(dryrun, flavor):
+        if _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
             dangerous_actions = filter_dangerous_actions(action_plan.list_actions)
             if dangerous_actions:
                 print("\n\nThe following actions might be dangerous, please confirm : ")
@@ -461,5 +462,11 @@ class ActionManager(object):
         return deferred
 
 
-def _user_should_acknowledge_plan(dryrun, flavor):
-    return not dryrun and flavor in ('update') and sys.stdout.isatty()
+def _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
+    if dryrun:
+        return False
+    if forcedyes:
+        return False
+    if not sys.stdout.isatty():
+        return False
+    return flavor in ('update')

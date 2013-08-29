@@ -21,7 +21,7 @@ The yadtshell
 Usage:
 yadtshell (status|info) [options]
 yadtshell (start|stop) SERVICE-URI ... [options]
-yadtshell update [HOST-URI...] [options]
+yadtshell update [HOST-URI...] [-y] [options]
 yadtshell updateartefact ARTEFACT-URI ... [options]
 yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
 yadtshell unlock HOST-URI ... [options]
@@ -38,6 +38,7 @@ Options:
 -m --message MESSAGE   reason
 -p --parallel PSPEC    how to execute actions in parallel
 --force                force execution
+-y                      say yes to all questions
 """
 
 import sys
@@ -73,6 +74,7 @@ cmd = sys.argv[1]
 if cmd in ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'update', 'updateartefact']:
     parser.add_option('-p', '--parallel', action='store', dest='parallel', default='1', help='parallel execution, where and how')
     parser.add_option('', '--no-final-status', action='store_true', dest='no_final_status', default=False, help='no status after command')
+    parser.add_option('-y', '', action="store_true", dest="forcedyes", default=False, help="say yes to all questions")
 
 # message for lock, ignore
 if cmd in ['ignore', 'lock']:
