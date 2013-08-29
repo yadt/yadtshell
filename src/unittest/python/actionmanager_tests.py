@@ -22,6 +22,15 @@ class ActionManagerTestBase(TestCase):
 class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
 
     @patch('yadtshell.actionmanager.sys.stdout')
+    def test_should_not_prompt_when_forcedyes_is_true(self,
+                                                      mock_stdout):
+        mock_stdout.isatty.return_value = True
+        self.assertFalse(_user_should_acknowledge_plan(
+            dryrun=False,
+            flavor='update',
+            forcedyes=True))
+
+    @patch('yadtshell.actionmanager.sys.stdout')
     def test_should_not_prompt_when_terminal_is_not_a_tty(self,
                                                           mock_sys):
         mock_sys.isatty.return_value = False
