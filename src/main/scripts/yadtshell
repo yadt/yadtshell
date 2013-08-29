@@ -31,77 +31,44 @@ yadtshell dump [URI-PATTERN...] [--attribute --show-pending-updates --show-curre
 
 Options:
 -n --dryrun            do not alter the system
--v                     be more verbose
+-v --verbose           be more verbose
 --tracking-id STRING   lets user define a tracking id
 --no-final-status      do not fetch status of target after action
 
 -m --message MESSAGE   reason
--p --parallel PSPEC    how to execute actions in parallel
+-p --parallel PSPEC    how to execute actions in parallel [default: 1]
 --force                force execution
--y                      say yes to all questions
+-y                     say yes to all questions
 """
 
-import sys
 import logging
+import re
+import sys
 
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
-from yadtshell.commandline import (EXIT_CODE_MISSING_COMMAND,
-                                   EXIT_CODE_CANCELED_BY_USER,
-                                   ensure_command_has_required_arguments,
-                                   normalize_options,
-                                   validate_command_line_options)
-from optparse import OptionParser, OptionGroup
+from yadtshell.commandline import EXIT_CODE_CANCELED_BY_USER
 
 from docopt import docopt
 arguments = docopt(__doc__)
 
 reactor.return_code = 127
 
-parser = OptionParser(usage='%prog [options] {status|info|dump|start|stop|ignore|unignore|lock|unlock} [uri ...] [command options]')
-parser.add_option('-n', '--dryrun', action='store_true', dest='dryrun', default=False, help='does nothing')
-parser.add_option('-v', '', action='store_true', dest='verbose', default=False, help='verbose output')
-parser.add_option('', '--tracking-id', dest='tracking_id', help='custom id, broadcasted with every event, for easier tracking')
+cmd = None
+for key, selected in arguments.iteritems():
+    if re.match('[a-z]', key) and selected:
+        cmd = key
+        break
 
-if len(sys.argv) < 2:
-    parser.print_help()
-    sys.exit(EXIT_CODE_MISSING_COMMAND)
+uris = arguments['ARTEFACT-URI'] + arguments['HOST-URI'] + arguments['SERVICE-URI'] + arguments['URI-PATTERN']
 
-cmd = sys.argv[1]
-
-# parallel actions stuff
-if cmd in ['start', 'stop', 'ignore', 'unignore', 'lock', 'unlock', 'update', 'updateartefact']:
-    parser.add_option('-p', '--parallel', action='store', dest='parallel', default='1', help='parallel execution, where and how')
-    parser.add_option('', '--no-final-status', action='store_true', dest='no_final_status', default=False, help='no status after command')
-    parser.add_option('-y', '', action="store_true", dest="forcedyes", default=False, help="say yes to all questions")
-
-# message for lock, ignore
-if cmd in ['ignore', 'lock']:
-    group = OptionGroup(parser, '(MANDATORY) reason for command')
-    group.add_option('-m', '--message', dest='message')
-    group.add_option('', '--force', action='store_true', dest='force', default=False, help='force the command')
-    parser.add_option_group(group)
-
-# dump stuff
-if cmd in ['dump']:
-    group = OptionGroup(parser, 'dumping information')
-    group.add_option('', '--attribute', action='store', dest='attribute', help='queries given attribute only')
-    group.add_option('', '--show-pending-updates', action='store_const', dest='filter', const='pending-updates', help='show all pending updates for target')
-    group.add_option('', '--show-current-artefacts', action='store_const', dest='filter', const='current-artefacts', help='show all artefacts on target')
-    parser.add_option_group(group)
-
-# info stuff
-if cmd in ['info']:
-    parser.add_option('', '--full', action='store_true', dest='full', default=False, help='shows all artefacts')
-
-
-opts, args = parser.parse_args()
-
-opts = normalize_options(opts)
-
-args = args[1:]
-component_names = args
+opts = {}
+for key, value in arguments.iteritems():
+    if not key.startswith('-'):
+        continue
+    key = key.lstrip('-').replace('-', '_')
+    opts[key] = value
 
 observer = log.PythonLoggingObserver()
 observer.start()
@@ -109,78 +76,76 @@ observer.start()
 import yadtshell
 logger = logging.getLogger('yadtshell')
 
-ensure_command_has_required_arguments(cmd, component_names, parser.print_help)
-validate_command_line_options(cmd, opts, parser.print_help)
-
 yadtshell.settings.load_settings(log_to_file=(cmd not in ['dump', 'info']))
-if opts.tracking_id:
-    yadtshell.settings.tracking_id = opts.tracking_id
+if opts.get('tracking_id'):
+    yadtshell.settings.tracking_id = opts.get('tracking_id')
 
 logging.getLogger("twisted").setLevel(logging.WARN)
 logging.getLogger("broadcaster").setLevel(logging.WARN)
 
-if opts.verbose:
+if opts.get('verbose'):
     yadtshell.settings.console_stdout_handler.setLevel(logging.DEBUG)
 
-if opts.dryrun:
+if opts.get('dryrun'):
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()
 
-if component_names:
+if uris:
     components = yadtshell.util.restore_current_state()
-    component_names = yadtshell.helper.expand_hosts(component_names)
-    component_names = yadtshell.helper.glob_hosts(components, component_names)
-    if not component_names:
+    uris = yadtshell.helper.expand_hosts(uris)
+    uris = yadtshell.helper.glob_hosts(components, uris)
+    if not uris:
         logger.error('Could not resolve URIs. Check for typos or syntax issues.')
         sys.exit(1)
 
 
-def create_simple_plan(cmd, component_names):
+def create_simple_plan(cmd, uris):
     action_set = set()
-    for component_name in component_names:
+    for component_name in uris:
         component = components.get(component_name, None)
         if not component:
             component = components[yadtshell.uri.change_version(component_name, 'current')]
         if not component:
             logger.warning('could not resolve uri %s' % component_name)
             continue
-        action_set.add(yadtshell.actions.Action(cmd, component.uri, kwargs=vars(opts)))
+        action_set.add(yadtshell.actions.Action(cmd, component.uri, kwargs=opts))
     plan = yadtshell.actions.ActionPlan(cmd, action_set)
     yadtshell.util.dump_action_plan(cmd, plan)
     return plan
 
 
 def createDeferredFromPlan(plan):
-    plan = yadtshell.metalogic.apply_instructions(plan, opts.parallel)
+    plan = yadtshell.metalogic.apply_instructions(plan, opts.get('parallel'))
     yadtshell.util.dump_action_plan(cmd, plan)
     am = yadtshell.ActionManager()
-    return am.action(flavor=cmd, **vars(opts))
+    return am.action(flavor=cmd, **opts)
 
 
 deferred = None
+args = []
 
 if cmd == 'status':
-    deferred = yadtshell.status(hosts=args, **vars(opts))
+    deferred = yadtshell.status(hosts=args, **opts)
 elif cmd == 'info':
-    yadtshell.info(**vars(opts))
+    yadtshell.info(**opts)
     sys.exit(0)
 elif cmd == 'dump':
-    yadtshell.dump(args, **vars(opts))
+    yadtshell.dump(args, **opts)
     sys.exit(0)
 elif cmd == 'update':
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.update.compare_versions,
         args,
-        **vars(opts)
+        **opts
     )
     am = yadtshell.ActionManager()
-    deferred.addCallback(am.action, **vars(opts))
+    deferred.addCallback(am.action, **opts)
 elif cmd in ['ignore', 'unignore', 'lock', 'unlock', 'updateartefact']:
-    plan = create_simple_plan(cmd, component_names)
+    plan = create_simple_plan(cmd, uris)
     deferred = createDeferredFromPlan(plan)
 else:
     try:
-        plan = yadtshell.metalogic.metalogic(cmd, component_names)
+        plan = yadtshell.metalogic.metalogic(cmd, uris)
         deferred = createDeferredFromPlan(plan)
     except Exception, e:
         logger.critical('an error occured while trying to "%s %s"' % (cmd, ', '.join(args)))
@@ -188,7 +153,7 @@ else:
         # TODO event failed needed here
         sys.exit(1)
 
-if cmd in ['stop', 'start', 'update', 'updateartefact', 'ignore', 'lock', 'unignore', 'unlock'] and not opts.no_final_status:
+if cmd in ['stop', 'start', 'update', 'updateartefact', 'ignore', 'lock', 'unignore', 'unlock'] and not opts.get('no_final_status'):
     deferred.addCallback(yadtshell.status)
 
 
