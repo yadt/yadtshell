@@ -28,7 +28,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         actual_return_code = self.execute_command(
             'yadtshell lock host://it01 -m "locking" -v')
 
-        self.assertEquals(1, actual_return_code)
+        self.assertEqual(1, actual_return_code)
 
 
 if __name__ == '__main__':

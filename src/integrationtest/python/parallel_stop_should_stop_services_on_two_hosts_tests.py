@@ -51,8 +51,8 @@ class Test (integrationtest_support.IntegrationTestSupport):
             'yadtshell stop service://* -v -p 2')
 
         with self.verify() as complete_verifier:
-            self.assertEquals(0, status_return_code)
-            self.assertEquals(0, stop_return_code)
+            self.assertEqual(0, status_return_code)
+            self.assertEqual(0, stop_return_code)
 
             with complete_verifier.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_one_argument_matches(

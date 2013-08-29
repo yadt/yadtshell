@@ -38,11 +38,11 @@ class Test (integrationtest_support.IntegrationTestSupport):
             'yadtshell start service://* -v')
 
         with self.verify() as verifier:
-            self.assertEquals(0, status_return_code)
+            self.assertEqual(0, status_return_code)
             verifier.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')
 
-            self.assertEquals(0, start_return_code)
+            self.assertEqual(0, start_return_code)
             verifier.called('ssh').at_least_with_arguments(
                 u'-O', u'check', u'it01.domain')
             verifier.called('ssh').at_least_with_arguments(

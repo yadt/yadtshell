@@ -88,9 +88,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 'yadtshell stop service://it02/frontend-service -v')
 
         with self.verify() as complete_verify:
-            self.assertEquals(0, status_return_code)
-            self.assertEquals(0, stop1_return_code)
-            self.assertEquals(0, stop2_return_code)
+            self.assertEqual(0, status_return_code)
+            self.assertEqual(0, stop1_return_code)
+            self.assertEqual(0, stop2_return_code)
 
             with complete_verify.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_with_arguments(

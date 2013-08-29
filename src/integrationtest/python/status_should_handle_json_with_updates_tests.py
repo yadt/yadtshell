@@ -33,9 +33,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 .then_write(yadt_status_answer.stdout('it01.domain', template=yadt_status_answer.STATUS_JSON_TEMPLATE))
 
         actual_return_code = self.execute_command('yadtshell status')
-        self.assertEquals(0, actual_return_code)
+        self.assertEqual(0, actual_return_code)
 
-        self.assertEquals(0, self.execute_command(
+        self.assertEqual(0, self.execute_command(
             'yadtshell info | grep " u " | grep "host uptodate"'))
         return_code, stdout, _ = self.execute_command_and_capture_output(
             'yadtshell info')
@@ -47,7 +47,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertTrue(
             update_found_for_foo, 'yit not obsoleted by foo, info was:{0}'.format(stdout))
 
-        self.assertEquals(0, self.execute_command(
+        self.assertEqual(0, self.execute_command(
             'yadtshell dump --show-pending-updates | grep foo'))
 
         with self.verify() as complete_verify:

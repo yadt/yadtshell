@@ -45,7 +45,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         actual_return_code = self.execute_command('yadtshell update -v -p 99')
 
-        self.assertEquals(0, actual_return_code)
+        self.assertEqual(0, actual_return_code)
 
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as filtered_verify:

@@ -33,7 +33,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         actual_return_code = self.execute_command('yadtshell status -v')
 
-        self.assertEquals(0, actual_return_code)
+        self.assertEqual(0, actual_return_code)
 
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments(
