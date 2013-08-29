@@ -47,12 +47,12 @@ class ArgumentAndOptionParsingTests(unittest.TestCase):
         self.assertEqual(
             {'test': True,
              'p': 151,
-             '': 'abc',
+             'a_cool_option': 'abc',
              'foobar_arg': 'baz'},
             infer_options_from_arguments({'--foobar-arg': 'baz',
                                           '--test': True,
                                           'status': False,
-                                          '------': 'abc',
+                                          '--a-cool-option': 'abc',
                                           'sOmEaRgUm3nT': 42,
                                           '-p': 151}))
 
