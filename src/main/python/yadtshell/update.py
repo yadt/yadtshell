@@ -63,6 +63,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                          and artefact.host_uri in handled_hosts
                           ])
 
+    hosts_with_reboot = set([h.uri for h in all_hosts if h.reboot_required_to_activate_latest_kernel])
+
     if not next_artefacts:
         yadtshell.util.dump_action_plan('update', start_plan)
         return 'update'
@@ -74,7 +76,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     logger.debug('next_artefacts: ' + ', '.join(next_artefacts))
     logger.debug('current_artefacts: ' + ', '.join(current_artefacts))
 
-    diff = next_artefacts | current_artefacts
+    diff = next_artefacts | current_artefacts | hosts_with_reboot
     logger.debug('diff: ' + ', '.join(diff))
 
     if not diff:
