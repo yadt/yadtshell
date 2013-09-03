@@ -23,7 +23,9 @@ import os
 import subprocess
 import sys
 import yaml
+import shlex
 
+from twisted.internet import defer, reactor
 import yadtshell
 
 
@@ -235,11 +237,46 @@ class Host(Component):
         self.reboot_required_after_next_update = False
         Component.__init__(self, yadtshell.settings.HOST, name)
 
+    @property
+    def reboot_required(self):
+        return self.reboot_required_after_next_update or self.reboot_required_to_activate_latest_kernel
+
     def update(self):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
-        return self.remote_call('yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %
-                                (self.hostname, yadtshell.settings.UPDATE))
+        if not self.reboot_required:
+            return self.remote_call(
+                'yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %
+                (self.hostname, yadtshell.settings.UPDATE))
+
+        update_and_reboot_command = self.remote_call(
+            'yadt-host-update -r %s' % ' '.join(next_artefacts), '%s_%s' %
+            (self.hostname, yadtshell.settings.UPDATE))
+        p = yadtshell.twisted.YadtProcessProtocol(self, update_and_reboot_command, out_log_level=logging.INFO)
+        p.target_state = yadtshell.settings.UPTODATE
+        p.state = yadtshell.settings.UNKNOWN
+
+        p.deferred = defer.Deferred()
+
+        def handle_rebooting_machine(failure):
+            print "nonzero exitcode from reboot command"
+            if failure.value.exitCode == 152:
+                raise yadtshell.actions.ActionException(
+                    'Timed out while waiting for %s to reboot' % self.uri)
+            elif failure.value.exitCode == 255:
+                print "%s is rebooting!" % self.uri
+                return poll_rebooting_machine()
+
+        def poll_rebooting_machine():
+            print "polling %s (dummy implementation)" % self.uri
+            return defer.succeed(None)
+
+        p.deferred.addErrback(handle_rebooting_machine)
+
+        cmdline = shlex.split(p.cmd.encode('ascii'))
+        print 'reboot: %s' % cmdline
+        reactor.spawnProcess(p, cmdline[0], cmdline, None)
+        return p.deferred
 
     def bootstrap(self):
         pass    # TODO to be implemented
