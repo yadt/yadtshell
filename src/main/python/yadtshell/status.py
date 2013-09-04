@@ -225,8 +225,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                 raise Exception('cannot instantiate class %(service_class)s' % locals())
             components[service.uri] = service
             service.fqdn = host.fqdn
-            service.needs = getattr(service, 'needs', set())
-            service.needs.add(host.uri)
             host.defined_services.append(service)
         return host
 
