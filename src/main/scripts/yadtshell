@@ -117,21 +117,20 @@ def createDeferredFromPlan(plan):
 
 
 deferred = None
-args = []
 
 if cmd == 'status':
-    deferred = yadtshell.status(hosts=args, **opts)
+    deferred = yadtshell.status(hosts=uris, **opts)
 elif cmd == 'info':
     yadtshell.info(**opts)
     sys.exit(0)
 elif cmd == 'dump':
-    yadtshell.dump(args, **opts)
+    yadtshell.dump(uris, **opts)
     sys.exit(0)
 elif cmd == 'update':
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.update.compare_versions,
-        args,
+        uris,
         **opts
     )
     am = yadtshell.ActionManager()
@@ -145,7 +144,7 @@ else:
         deferred = createDeferredFromPlan(plan)
     except Exception, e:
         logger.critical('an error occured while trying to "%s %s"' %
-                        (cmd, ', '.join(args)))
+                        (cmd, ', '.join(uris)))
         logger.debug(e)
         # TODO event failed needed here
         sys.exit(1)
