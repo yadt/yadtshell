@@ -25,7 +25,7 @@ import sys
 import yaml
 import shlex
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer, reactor, task
 import yadtshell
 
 
@@ -252,29 +252,37 @@ class Host(Component):
         update_and_reboot_command = self.remote_call(
             'yadt-host-update -r %s' % ' '.join(next_artefacts), '%s_%s' %
             (self.hostname, yadtshell.settings.UPDATE))
-        p = yadtshell.twisted.YadtProcessProtocol(self, update_and_reboot_command, out_log_level=logging.INFO)
+        p = yadtshell.twisted.YadtProcessProtocol(self,
+                update_and_reboot_command,
+                out_log_level=logging.INFO)
         p.target_state = yadtshell.settings.UPTODATE
         p.state = yadtshell.settings.UNKNOWN
 
         p.deferred = defer.Deferred()
 
         def handle_rebooting_machine(failure):
-            print "nonzero exitcode from reboot command"
             if failure.value.exitCode == 152:
                 raise yadtshell.actions.ActionException(
                     'Timed out while waiting for %s to reboot' % self.uri)
             elif failure.value.exitCode == 255:
-                print "%s is rebooting!" % self.uri
+                logger.info("%s: rebooting now" % self.uri)
                 return poll_rebooting_machine()
 
-        def poll_rebooting_machine():
-            print "polling %s (dummy implementation)" % self.uri
-            return defer.succeed(None)
+        def poll_rebooting_machine(count=1):
+            logger.info("%s: polling for ssh connect, try %i of %i" % (self.uri, count, yadtshell.settings.SSH_POLL_MAX_TRIES))
+            poll_command = self.remote_call('uptime', '%s_poll' % self.hostname)
+            poll_protocol = yadtshell.twisted.YadtProcessProtocol(self, poll_command, out_log_level=logging.INFO)
+            poll_protocol.deferred = defer.Deferred()
+            if count < yadtshell.settings.SSH_POLL_MAX_TRIES:
+                poll_protocol.deferred.addErrback(lambda x:
+                        task.deferLater(reactor, yadtshell.settings.SSH_POLL_DELAY, poll_rebooting_machine, count+1))
+            cmdline = shlex.split(poll_protocol.cmd)
+            reactor.spawnProcess(poll_protocol, cmdline[0], cmdline, None)
+            return poll_protocol.deferred
 
         p.deferred.addErrback(handle_rebooting_machine)
 
         cmdline = shlex.split(p.cmd.encode('ascii'))
-        print 'reboot: %s' % cmdline
         reactor.spawnProcess(p, cmdline[0], cmdline, None)
         return p.deferred
 
