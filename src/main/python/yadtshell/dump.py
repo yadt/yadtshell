@@ -25,10 +25,10 @@ logger = logging.getLogger('dump')
 
 
 def dump(args=[], mode='all', attribute=None, filter=None, **kwargs):
-    if filter == 'pending-updates':
+    if kwargs.get('show_pending_updates'):
         args = ['host://']
         attribute = 'next_artefacts'
-    if filter == 'current-artefacts':
+    if kwargs.get('show_current_artefacts'):
         args = ['host://']
         attribute = 'handled_artefacts'
     components = util.restore_current_state()
