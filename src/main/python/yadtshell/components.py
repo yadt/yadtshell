@@ -253,8 +253,8 @@ class Host(Component):
             'yadt-host-update -r %s' % ' '.join(next_artefacts), '%s_%s' %
             (self.hostname, yadtshell.settings.UPDATE))
         p = yadtshell.twisted.YadtProcessProtocol(self,
-                update_and_reboot_command,
-                out_log_level=logging.INFO)
+                                                  update_and_reboot_command,
+                                                  out_log_level=logging.INFO)
         p.target_state = yadtshell.settings.UPTODATE
         p.state = yadtshell.settings.UNKNOWN
 
@@ -269,13 +269,19 @@ class Host(Component):
                 return poll_rebooting_machine()
 
         def poll_rebooting_machine(count=1):
-            logger.info("%s: polling for ssh connect, try %i of %i" % (self.uri, count, yadtshell.settings.SSH_POLL_MAX_TRIES))
-            poll_command = self.remote_call('uptime', '%s_poll' % self.hostname)
-            poll_protocol = yadtshell.twisted.YadtProcessProtocol(self, poll_command, out_log_level=logging.INFO)
+            logger.info("%s: polling for ssh connect, try %i of %i" %
+                        (self.uri, count, yadtshell.settings.SSH_POLL_MAX_TRIES))
+            poll_command = self.remote_call(
+                'uptime', '%s_poll' % self.hostname)
+            poll_protocol = yadtshell.twisted.YadtProcessProtocol(
+                self, poll_command, out_log_level=logging.INFO)
             poll_protocol.deferred = defer.Deferred()
             if count < yadtshell.settings.SSH_POLL_MAX_TRIES:
                 poll_protocol.deferred.addErrback(lambda x:
-                        task.deferLater(reactor, yadtshell.settings.SSH_POLL_DELAY, poll_rebooting_machine, count+1))
+                                                  task.deferLater(reactor,
+                                                                  yadtshell.settings.SSH_POLL_DELAY,
+                                                                  poll_rebooting_machine,
+                                                                  count + 1))
             cmdline = shlex.split(poll_protocol.cmd)
             reactor.spawnProcess(poll_protocol, cmdline[0], cmdline, None)
             return poll_protocol.deferred
