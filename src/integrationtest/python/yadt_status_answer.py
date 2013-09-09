@@ -85,6 +85,7 @@ next_artefacts:
 artefacts_query_epoch: $timestamp
 state: uptodate
 query_time: 1
+reboot_required_to_activate_latest_kernel: $reboot_required_to_activate_latest_kernel
 """)
 
 STATUS_TEMPLATE_WITH_UNSATISFIABLE_DEPENDENCIES = string.Template("""
@@ -177,7 +178,7 @@ query_time: 1
 """)
 
 
-def stdout(host, frontend_service_state=0, backend_service_state=0, template=STATUS_TEMPLATE):
+def stdout(host, frontend_service_state=0, backend_service_state=0, template=STATUS_TEMPLATE, reboot_required_to_activate_latest_kernel=False):
     date = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y")
 
     placeholders = {
@@ -186,6 +187,7 @@ def stdout(host, frontend_service_state=0, backend_service_state=0, template=STA
         'frontend_service_state': frontend_service_state,
         'host': host[0:host.index('.')],
         'host_fqdn': host,
+        'reboot_required_to_activate_latest_kernel': reboot_required_to_activate_latest_kernel,
         'timestamp': int(time.time())}
 
     return template.substitute(placeholders)
