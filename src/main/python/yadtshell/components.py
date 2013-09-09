@@ -267,6 +267,7 @@ class Host(Component):
             elif failure.value.exitCode == 255:
                 logger.info("%s: rebooting now" % self.uri)
                 return poll_rebooting_machine()
+            return failure
 
         def poll_rebooting_machine(count=1):
             logger.info("%s: polling for ssh connect, try %i of %i" %
