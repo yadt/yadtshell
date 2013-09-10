@@ -22,6 +22,7 @@ PROBED = 'probed'
 UPDATEARTEFACT = 'updateartefact'
 
 UPDATE_NEEDED = 'update_needed'
+REBOOT_REQUIRED = 'reboot_required'
 
 HOST_STATE_DESCRIPTIONS = {
     0: 'uptodate',
@@ -30,3 +31,4 @@ HOST_STATE_DESCRIPTIONS = {
 
 IGNORE = 'ignore'
 UNIGNORE = 'unignore'
+

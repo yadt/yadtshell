@@ -118,7 +118,7 @@ class ActionManagerActionTests(ActionManagerTestBase):
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
-        dangerous.cmd = 'reboot'
+        dangerous.cmd = 'update'
         mock_load_action_plan.return_value.list_actions = [noop, dangerous]
         self.user_declines_transaction()
 

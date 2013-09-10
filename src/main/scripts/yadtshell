@@ -190,13 +190,13 @@ except BaseException, e:
 
 
 if reactor.return_code == 0:
-    print yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL.${NORMAL}' % cmd.upper())
+    print yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL${NORMAL}' % cmd.upper())
 
 elif reactor.return_code == EXIT_CODE_CANCELED_BY_USER:
-    print yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER.${NORMAL}' % cmd.upper())
+    print yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER${NORMAL}' % cmd.upper())
 
 else:
-    print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED.${NORMAL}' % cmd.upper())
+    print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED${NORMAL}' % cmd.upper())
     logger.critical('exit code: %i' % reactor.return_code)
     logger.info('For details see: "{0}"'.format(yadtshell.settings.log_file))
 

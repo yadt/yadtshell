@@ -241,10 +241,11 @@ class Host(Component):
     def reboot_required(self):
         return self.reboot_required_after_next_update or self.reboot_required_to_activate_latest_kernel
 
-    def update(self):
+    def update(self, reboot_required=False):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
-        if not self.reboot_required:
+        assert self.reboot_required == reboot_required
+        if not reboot_required:
             return self.remote_call(
                 'yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %
                 (self.hostname, yadtshell.settings.UPDATE))

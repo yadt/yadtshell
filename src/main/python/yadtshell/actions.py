@@ -60,8 +60,8 @@ class Action(object):
         self.executed = False
         self.name = '%s %s' % (cmd, uri)
         self.state = State.PENDING
-        self.args = args
-        self.kwargs = kwargs
+        self.args = args if args else []
+        self.kwargs = kwargs if kwargs else {}
         self.rank = self.uri
 
     def are_all_preconditions_met(self, components):
@@ -73,18 +73,22 @@ class Action(object):
     def __str__(self):
         return self.dump(include_preconditions=False)
 
-    def dump(self, depth=0, include_preconditions=True):
+    def dump(self, depth=0, include_preconditions=True, include_target_value=True):
         indent = ' ' * depth * 4
         text = indent
         text += '%(cmd)s the %(uri)s' % vars(self)
-        if self.attr and self.target_value:
-            text += ', set %(attr)s to "%(target_value)s"' % vars(self)
-        text += '\n'
+        if include_target_value:
+            if self.attr and self.target_value:
+                text += ', set %(attr)s to "%(target_value)s"' % vars(self)
+        aux_text = [key for key, value in self.kwargs.iteritems() if value]
+        if aux_text:
+            text += " (%s)" % " ".join(aux_text)
         if include_preconditions:
-            if self.args:
-                text += indent + '    args: ' + ', '.join(self.args) + '\n'
-            if self.kwargs:
-                text += indent + '    kwargs: ' + ', '.join(['%s: %s' % (key, value) for key, value in self.kwargs.iteritems()]) + '\n'
+            text += '\n'
+#            if self.args:
+#                text += indent + '    args: ' + ', '.join(self.args) + '\n'
+#            if self.kwargs:
+#                text += indent + '    kwargs: ' + ', '.join(['%s: %s' % (key, value) for key, value in self.kwargs.iteritems()]) + '\n'
             for precondition in self.preconditions:
                 text += precondition.dump(depth + 1, 'when ')
             #text += '\n'

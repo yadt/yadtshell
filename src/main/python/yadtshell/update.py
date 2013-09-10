@@ -47,11 +47,11 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 #        host_uri = components[action.uri].host_uri
 #        action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
 
-    hosts_with_update = [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED]
+    hosts_with_update = set([h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
     if hosts_with_update:
         logger.debug('New artefacts found for %s' % ', '.join(h.uri for h in hosts_with_update))
 
-        hosts_with_update = [h for h in hosts_with_update if h.uri in handled_hosts]
+        hosts_with_update = set([h for h in hosts_with_update if h.uri in handled_hosts])
         logger.debug('Handling hosts with new artefacts: %s' % ', '.join(h.uri for h in hosts_with_update))
     else:
         logger.info('No hosts with pending updates.')
@@ -63,7 +63,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                          and artefact.host_uri in handled_hosts
                           ])
 
-    hosts_with_reboot = set([h.uri for h in all_hosts if h.reboot_required])
+    hosts_with_reboot = set([h for h in all_hosts if h.reboot_required])
+    host_uris_with_reboot = set([h.uri for h in hosts_with_reboot])
 
 #    if not next_artefacts:
 #        yadtshell.util.dump_action_plan('update', start_plan)
@@ -76,7 +77,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     logger.debug('next_artefacts: ' + ', '.join(next_artefacts))
     logger.debug('current_artefacts: ' + ', '.join(current_artefacts))
 
-    diff = next_artefacts | current_artefacts | hosts_with_reboot
+    diff = next_artefacts | current_artefacts | host_uris_with_reboot
     logger.debug('diff: ' + ', '.join(diff))
 
     if not diff:
@@ -96,14 +97,16 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
             action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
 
     update_actions = set()
-    for host in hosts_with_update:
+    for host in hosts_with_reboot | hosts_with_update:
         action = yadtshell.actions.Action(yadtshell.settings.UPDATE, host.uri, 'state', yadtshell.settings.UPTODATE)
-        #for needs_host in [s for s in host.needed_by if s.startswith('service://')]:
         for needs_host in [components.get(s) for s in stopped_services]:
             if needs_host.host_uri != host.uri:
                 continue
             action.preconditions.add(yadtshell.actions.TargetState(needs_host, 'state', yadtshell.settings.DOWN))
         update_actions.add(action)
+    for ua in update_actions:
+        if ua.uri in host_uris_with_reboot:
+            ua.kwargs[yadtshell.constants.REBOOT_REQUIRED] = True
 
     all_actions = set(start_plan.actions) | set(stop_plan.actions) | update_actions
     all_plan = yadtshell.actions.ActionPlan('all', all_actions)

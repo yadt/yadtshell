@@ -82,8 +82,9 @@ class HostTests(unittest.TestCase):
         mock_host.hostname = 'foobar42.domain'
         mock_host.remote_call.return_value = 'remote call'
         mock_host.reboot_required = True
+        mock_host.kwargs = {'reboot_required': True}
 
-        yadtshell.components.Host.update(mock_host)
+        yadtshell.components.Host.update(mock_host, reboot_required=True)
 
         mock_host.remote_call.assert_called_with(
             'yadt-host-update -r foo-1-2.3 bar-1-1.3/2', 'foobar42.domain_update')

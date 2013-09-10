@@ -394,6 +394,8 @@ class ActionManager(object):
             service.state = yadtshell.settings.UNKNOWN
         for host in [h for h in self.components.values() if isinstance(h, yadtshell.components.Host)]:
             setattr(
+                host, 'state', yadtshell.settings.UNKNOWN)
+            setattr(
                 host, yadtshell.constants.PROBED, yadtshell.settings.UNKNOWN)
 
         if dryrun:
@@ -426,14 +428,15 @@ class ActionManager(object):
 
         def filter_dangerous_actions(actions):
             def is_a_dangerous_action(action):
-                return action.cmd in ['reboot']
+                return action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)
             return filter(is_a_dangerous_action, actions)
 
         if _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
             dangerous_actions = filter_dangerous_actions(action_plan.list_actions)
             if dangerous_actions:
-                print("\n\nThe following actions might be dangerous, please confirm : ")
-                print(''.join(map(str, dangerous_actions)))
+                print("\n\nThe following actions might be dangerous (i.e. host reboot), please confirm :\n")
+                for da in dangerous_actions:
+                    print(da.dump(depth=1, include_preconditions=False, include_target_value=False))
                 print()
                 if not confirm_transaction_by_user():
                     yadtshell.twisted.stop_and_return(EXIT_CODE_CANCELED_BY_USER)
