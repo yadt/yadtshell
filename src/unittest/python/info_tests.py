@@ -177,7 +177,7 @@ legend: | up(todate),accessible  O down  ? unknown  io? ignored (up,down,unknown
         lL locked by me/other  u update pending
         rR reboot needed (after update/due to new kernel)
 
-queried ${BG_RED}${WHITE}${BOLD}  1  ${NORMAL} seconds ago
+queried ${BG_GREEN}${WHITE}${BOLD}  1  ${NORMAL} seconds ago
 
 status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
 ''')
