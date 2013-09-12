@@ -37,7 +37,7 @@ Options:
 
 -m --message MESSAGE   reason
 -p --parallel PSPEC    how to execute actions in parallel [default: 1]
--y                     say yes to all questions
+-y --forcedyes         say yes to all questions
 --force                force execution
 --reboot               reboot servers if needed during an update
 --no-reboot            do not reboot servers during an update, even if needed
