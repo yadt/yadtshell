@@ -21,7 +21,8 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('__builtin__.print')
-    def _call_info_and_render_output_to_string(self, mock_print, _):
+    def _call_info_and_render_output_to_string(self, mock_print, mock_mtime):
+        mock_mtime.return_value = 1
         yadtshell.info()
         return render_info_matrix_to_string(mock_print)
 
@@ -144,9 +145,12 @@ ${NORMAL}
 
         self.assertTrue(' l  host access' in info_matrix)
 
+    @patch('time.time')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self,
-                                               component_pool):
+                                               component_pool,
+                                               mock_time):
+        mock_time.return_value = 1
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
 
@@ -177,7 +181,7 @@ legend: | up(todate),accessible  O down  ? unknown  io? ignored (up,down,unknown
         lL locked by me/other  u update pending
         rR reboot needed (after update/due to new kernel)
 
-queried ${BG_RED}${WHITE}${BOLD}  1  ${NORMAL} seconds ago
+queried ${BG_GREEN}${WHITE}${BOLD}  0  ${NORMAL} seconds ago
 
 status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
 ''')
