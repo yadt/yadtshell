@@ -14,7 +14,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         try:
             self.assert_in = self.assertIn
         except AttributeError:
-            def assert_in(self, element, container):
+            def assert_in(element, container):
                 if not element in container:
                     raise AssertionError(
                         '{0} not found in {1}'.format(element, container))
