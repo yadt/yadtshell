@@ -5,6 +5,7 @@ from yadtshell import metalogic
 from yadtshell.metalogic import apply_instructions
 from yadtshell.actions import ActionPlan, Action
 
+
 class MetalogicTests(unittest.TestCase):
 
     def setUp(self):

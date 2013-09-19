@@ -82,6 +82,8 @@ if opts.get('verbose'):
 if opts.get('dryrun'):
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()
 
+yadtshell.settings.reboot_enabled = opts.get('reboot')
+
 if uris:
     components = yadtshell.util.restore_current_state()
     uris = yadtshell.helper.expand_hosts(uris)

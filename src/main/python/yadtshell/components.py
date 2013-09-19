@@ -247,7 +247,6 @@ class Host(Component):
     def update(self, reboot_required=False):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
-        assert self.reboot_required == reboot_required
         if not reboot_required:
             return self.remote_call(
                 'yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %

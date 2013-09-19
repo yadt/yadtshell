@@ -30,13 +30,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain', reboot_required_to_activate_latest_kernel=True))
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status frontend-service').then_return(3).then_return(0)
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-host-update -r yit-config-it01-0:0.0.1-2').then_return(255)
-            when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service').then_return(3).then_return(0)
-            when.calling('ssh').at_least_with_arguments('it01.domain') \
-                .then_return(0)
+            when.calling('ssh').at_least_with_arguments('it01.domain').then_return(0)
 
-        actual_return_code = self.execute_command('yadtshell update -v --reboot')
+        actual_return_code = self.execute_command('yadtshell update')
 
         self.assertEqual(0, actual_return_code)
 
@@ -45,18 +41,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 'it01.domain').and_input('/usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain', '-O', 'check')
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-stop frontend-service')
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-status frontend-service')
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-stop backend-service')
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-status backend-service')
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-host-update -r yit-config-it01-0:0.0.1-2')
-
-            verify.called('ssh').at_least_with_arguments('it01.domain', 'yadt-command uptime')
 
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain', 'yadt-command yadt-service-start backend-service')
@@ -67,7 +51,11 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain', 'yadt-command yadt-service-status frontend-service')
 
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain', 'yadt-command yadt-host-update yit-config-it01-0:0.0.1-2')
+
             verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
+
 
 if __name__ == '__main__':
     unittest.main()
