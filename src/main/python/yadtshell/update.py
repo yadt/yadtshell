@@ -63,7 +63,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                          and artefact.host_uri in handled_hosts
                           ])
 
-    hosts_with_reboot = set([h for h in all_hosts if h.reboot_required])
+    hosts_with_reboot = set([h for h in all_hosts if h.reboot_required and h.uri in handled_hosts])
     host_uris_with_reboot = set([h.uri for h in hosts_with_reboot])
 
 #    if not next_artefacts:
