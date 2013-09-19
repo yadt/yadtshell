@@ -241,6 +241,9 @@ class Host(Component):
     def reboot_required(self):
         return self.reboot_required_after_next_update or self.reboot_required_to_activate_latest_kernel
 
+    def is_reachable(self):
+        return True
+
     def update(self, reboot_required=False):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
@@ -346,6 +349,33 @@ class Host(Component):
 
         logger.debug("is_locked=" + repr(self.is_locked) + ", is_locked_by_me=" + repr(
             self.is_locked_by_me) + ", is_locked_by_other=" + repr(self.is_locked_by_other))
+
+
+class UnreachableHost(Component):
+
+    def __init__(self, name):
+        self.fqdn = name
+        self.hostname = self.fqdn.split('.')[0]
+        self.name = self.hostname
+        Component.__init__(self, yadtshell.settings.HOST, self.name)
+
+    def is_reachable(self):
+        return False
+
+    def is_unknown(self):
+        return True
+
+    @property
+    def next_artefacts(self):
+        return {}
+
+    @property
+    def is_locked_by_other(self):
+        return False
+
+    @property
+    def is_locked_by_me(self):
+        return False
 
 
 class Artefact(Component):

@@ -62,7 +62,42 @@ class ArtefactTests(unittest.TestCase):
             'yadt-artefact-update ham', 'artefact_foobar42.domain_ham_updateartefact')
 
 
+class UnreachableHostTests(unittest.TestCase):
+
+    def setUp(self):
+        yadtshell.settings.TARGET_SETTINGS = {
+            'name': 'foo'
+        }
+
+    def test_should_be_unreachable(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42')
+        self.assertFalse(unreachable_host.is_reachable())
+
+    def test_should_be_unknown(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42')
+        self.assertTrue(unreachable_host.is_unknown)
+
+    def test_should_not_have_updates(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42')
+        self.assertEquals(unreachable_host.next_artefacts, {})
+
+    def test_should_not_be_locked_by_me(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42')
+        self.assertEquals(unreachable_host.is_locked_by_me, False)
+
+    def test_should_not_be_locked_by_other(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42')
+        self.assertEquals(unreachable_host.is_locked_by_me, False)
+
+
 class HostTests(unittest.TestCase):
+
+    def test_should_be_reachable(self):
+        yadtshell.settings.TARGET_SETTINGS = {
+            'name': 'foo'
+        }
+        reachable_host = yadtshell.components.Host('foobar42')
+        self.assertTrue(reachable_host.is_reachable())
 
     def test_should_update_next_artefacts_only(self):
         mock_host = Mock(yadtshell.components.Host)

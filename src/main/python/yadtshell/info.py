@@ -37,7 +37,10 @@ def render_red(text):
     return yadtshell.settings.term.render('${BG_RED}${WHITE}${BOLD}%s${NORMAL}' % text)
 
 
-def _show_host_locking(host):
+def _show_host_locking_or_unreachable(host):
+    if not host.is_reachable():
+        print(render_red('\n%10s is unreachable!\n' % (host.host)))
+        return
     if host.is_locked:
         lock_owner = host.lockstate.get("owner", "Unknown")
         reason = host.lockstate.get("message", "--- no message given ---")
@@ -64,7 +67,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     hosts = sorted([c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
     for host in hosts:
-        _show_host_locking(host)
+        _show_host_locking_or_unreachable(host)
         if isinstance(host.next_artefacts, dict):
             _render_updates_based_on_key_value_schema(components, host, full)
         else:
@@ -181,7 +184,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
     for host in hosts:
         found = components.get(host)
         if not found:
-            for c in [h for h in components.values() if type(h) is yadtshell.components.Host]:
+            for c in [h for h in components.values() if type(h) is yadtshell.components.Host or type(h) is yadtshell.components.UnreachableHost]:
                 if getattr(c, 'hostname', None) == host:
                     found = c
                     break
@@ -284,7 +287,9 @@ def _render_services_matrix(components, hosts, enable_legend=False):
         print('  %s  service %s %s' % (separator.join(s), name, suffix))
     s = []
     for host in hosts:
-        if host.is_uptodate():
+        if not host.is_reachable():
+            s.append(icons['UNKNOWN'])
+        elif host.is_uptodate():
             s.append(icons['UPTODATE'])
         elif host.is_update_needed():
             s.append(icons['UPDATE_NEEDED'])
@@ -294,7 +299,9 @@ def _render_services_matrix(components, hosts, enable_legend=False):
 
     s = []
     for host in hosts:
-        if host.reboot_required_to_activate_latest_kernel:
+        if not host.is_reachable():
+            s.append(icons['UNKNOWN'])
+        elif host.reboot_required_to_activate_latest_kernel:
             s.append(icons['REBOOT_NOW'])
         elif host.reboot_required_after_next_update:
             s.append(icons['REBOOT_AFTER_UPDATE'])

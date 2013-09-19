@@ -94,6 +94,12 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         return p.deferred
 
     def create_host(protocol):
+        if isinstance(protocol, yadtshell.components.UnreachableHost):
+            unreachable_host = protocol
+            unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST, host=unreachable_host.hostname)
+            components[unreachable_host_uri] = unreachable_host
+            return unreachable_host
+
         def convert_string_to_host(data, host=None):
             try:
                 return json.loads(data)
@@ -396,9 +402,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     def report_connection_error(failure):
         if failure.value.exitCode == 255:
-            logger.critical('ssh: cannot reach %s' % failure.value.component)
-            logger.info('passwordless ssh not configured? network problems?')
-            return yadtshell.twisted.SshFailure(RuntimeError('ssh connect'))
+            logger.critical('ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' % failure.value.component)
+            return yadtshell.components.UnreachableHost(failure.value.component)
         return failure
 
     def notify_collector(ignored):

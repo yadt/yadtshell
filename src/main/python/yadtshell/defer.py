@@ -95,7 +95,8 @@ class DeferredPool(defer.Deferred):
             for task in self.queue:
                 for line in task.action.dump().splitlines():
                     self.logger.error(line)
-            raise yadtshell.actions.ActionException('Could not execute %i action(s)' % len(self.queue), 1)
+            reactor.callLater(0, self.errback, yadtshell.actions.ActionException('Could not execute %i action(s)' % len(self.queue), 1))
+            return
         return self.callback(None)   # TODO refactor to something similar to deferredList
 
     def _handle_error(self, failure):
