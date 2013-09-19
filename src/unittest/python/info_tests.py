@@ -10,6 +10,16 @@ from unittest_support import (create_component_pool_for_one_host,
 
 class InfoMatrixRenderingTests(unittest.TestCase):
 
+    def _patch_assert_in(self):
+        try:
+            self.assert_in = self.assertIn
+        except AttributeError:
+            def assert_in(self, element, container):
+                if not element in container:
+                    raise AssertionError(
+                        '{0} not found in {1}'.format(element, container))
+            self.assert_in = assert_in
+
     def setUp(self):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
@@ -18,6 +28,8 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         self.mock_render = lambda unrendered: unrendered
         yadtshell.settings.term = self.mock_term
         yadtshell.settings.term.render = self.mock_render
+
+        self._patch_assert_in()
 
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('__builtin__.print')
@@ -54,7 +66,7 @@ ${NORMAL}
   ?  reboot required
   ?  host access
 '''
-        self.assertIn(expected_matrix, info_matrix)
+        self.assert_in(expected_matrix, info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_running_services(self,
@@ -66,8 +78,8 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' |  service barservice', info_matrix)
-        self.assertIn(' |  service bazservice', info_matrix)
+        self.assert_in(' |  service barservice', info_matrix)
+        self.assert_in(' |  service bazservice', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_stopped_services(self,
@@ -79,8 +91,8 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' O  service barservice', info_matrix)
-        self.assertIn(' O  service bazservice', info_matrix)
+        self.assert_in(' O  service barservice', info_matrix)
+        self.assert_in(' O  service bazservice', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_uptodate_when_host_is_uptodate(self,
@@ -90,8 +102,8 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' |  host uptodate', info_matrix)
-        self.assertIn('1/1 hosts uptodate', info_matrix)
+        self.assert_in(' |  host uptodate', info_matrix)
+        self.assert_in('1/1 hosts uptodate', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_update_needed_when_host_is_not_uptodate(self,
@@ -101,7 +113,7 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' u  host uptodate', info_matrix)
+        self.assert_in(' u  host uptodate', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_reboot_after_update(self,
@@ -112,7 +124,7 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' r  reboot required', info_matrix)
+        self.assert_in(' r  reboot required', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_reboot_now(self,
@@ -123,7 +135,7 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn(' R  reboot required', info_matrix)
+        self.assert_in(' R  reboot required', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_artefact_problems_when_state_is_not_up(self,
@@ -134,7 +146,7 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn('''
+        self.assert_in('''
 problems
 ${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/yit/0:0.0.1
 ${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
@@ -149,14 +161,14 @@ ${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn('''
+        self.assert_in('''
 ${BG_RED}${WHITE}${BOLD}
   foobar42 is locked by foobar
     reason yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)
 
-        self.assertIn(' L  host access', info_matrix)
+        self.assert_in(' L  host access', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_host_locked_by_me(self,
@@ -166,14 +178,14 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertIn('''
+        self.assert_in('''
 ${BG_YELLOW}${BOLD}
   foobar42 is locked by me
     reason yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)
 
-        self.assertIn(' l  host access', info_matrix)
+        self.assert_in(' l  host access', info_matrix)
 
     @patch('time.time')
     @patch('yadtshell.util.restore_current_state')
