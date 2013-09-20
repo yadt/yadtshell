@@ -324,12 +324,17 @@ class Host(Component):
             return None
 
     def lock(self, message=None, force=False, **kwargs):
+        def strip_quotes_from_message(message):
+            return message.replace("'", "").replace('"', '')
         if not message:
             raise ValueError('the "message" parameter is mandatory')
         lockinfo = yadtshell.util.get_locking_user_info()
         lockinfo["message"] = message
         lockinfo["force"] = force
-        return self.remote_call("yadt-host-lock '%s'" % message, 'lock_host', force)
+        return self.remote_call(
+            "yadt-host-lock '%s'" % strip_quotes_from_message(message),
+            'lock_host',
+            force)
 
     def unlock(self, force=False, **kwargs):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
