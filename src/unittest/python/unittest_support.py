@@ -23,7 +23,8 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
                                        host_reboot_now=False,
                                        artefact_state=yadtshell.settings.UP,
                                        host_locked_by_other=False,
-                                       host_locked_by_me=False):
+                                       host_locked_by_me=False,
+                                       next_artefacts_present=False):
     components = yadtshell.components.ComponentDict()
 
     # create host components
@@ -51,9 +52,25 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     yit_artefact = yadtshell.components.Artefact(
         'foobar42', 'yit', '0:0.0.1')
     yit_artefact.state = artefact_state
-    host.next_artefacts = {'foo/0:0.0.0': 'yit/0:0.0.1'}
+
+    if not next_artefacts_present:
+        host.next_artefacts = {'foo/0:0.0.0': 'yit/0:0.0.1'}
     components['artefact://foobar42/foo/0:0.0.0'] = foo_artefact
     components['artefact://foobar42/yit/0:0.0.1'] = yit_artefact
+
+    if next_artefacts_present:
+        host.next_artefacts = {'foo/0:0.1.0': 'yit/0:0.1.1'}
+
+        foo2_artefact = yadtshell.components.Artefact(
+            'foobar42', 'foo', '0:0.1.0')
+        foo2_artefact.state = artefact_state
+        foo2_artefact.revision = yadtshell.settings.NEXT
+        yit2_artefact = yadtshell.components.Artefact(
+            'foobar42', 'yit', '0:0.1.1')
+        yit2_artefact.state = artefact_state
+        yit2_artefact.revision = yadtshell.settings.NEXT
+        components['artefact://foobar42/foo/0:0.1.0'] = foo2_artefact
+        components['artefact://foobar42/yit/0:0.1.1'] = yit2_artefact
 
     # create service components
     if add_services:
@@ -63,6 +80,7 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
         bar_service.state = service_state
         baz_service = yadtshell.components.Service(
             'foobar42', 'barservice', {})
+        bar_service.needs_artefacts = ['artefact://foobar42/foo']
         baz_service.state = service_state
         components['service://foobar42/barservice'] = bar_service
         components['service://foobar42/bazservice'] = baz_service
