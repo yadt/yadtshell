@@ -41,7 +41,7 @@ name = 'yadtshell'
 license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
-version = '1.6.0'
+version = '1.7.0'
 
 default_task = ['generate_manpages', 'publish']
 

@@ -86,10 +86,27 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     for action in stop_plan.actions:
         stopped_services.add(action.uri)
 
+    def get_all_adjacent_needed_hosts(service_uri):
+        result = set()
+        service = components[service_uri]
+        for needed_uri in service.needs:
+            needed = components[needed_uri]
+            if needed.type == 'host':
+                result.add(needed.uri)
+                continue
+            if needed.type == 'service':
+                result.add(needed.host_uri)
+        return result
+
+    host_uris_with_update = map(str, hosts_with_update)
     for action in start_plan.actions:
         if action.uri in stopped_services:
-            host_uri = components[action.uri].host_uri
-            action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
+            for host_uri in get_all_adjacent_needed_hosts(action.uri):
+                if host_uri not in handled_hosts:
+                    continue
+                if host_uri not in host_uris_with_update:
+                    continue
+                action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
 
     update_actions = set()
     for host in hosts_with_reboot | hosts_with_update:
