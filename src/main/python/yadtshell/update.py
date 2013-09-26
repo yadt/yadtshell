@@ -43,9 +43,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     all_services = set([s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
 
     start_plan = yadtshell.metalogic.metalogic(yadtshell.settings.START, all_services, plan_post_handler=yadtshell.metalogic.identity)
-#    for action in start_plan.actions:
-#        host_uri = components[action.uri].host_uri
-#        action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
 
     hosts_with_update = set([h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
     if hosts_with_update:
@@ -70,10 +67,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 
     host_uris_with_reboot = set([h.uri for h in hosts_with_reboot])
 
-#    if not next_artefacts:
-#        yadtshell.util.dump_action_plan('update', start_plan)
-#        return 'update'
-
     current_artefacts = [components.get(yadtshell.uri.change_version(next_artefact, 'current'))
                          for next_artefact in next_artefacts]
     current_artefacts = set([current.uri for current in current_artefacts if current])
@@ -92,8 +85,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     stopped_services = set()
     for action in stop_plan.actions:
         stopped_services.add(action.uri)
-        #host_uri = components[action.uri].host_uri
-        #action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPDATE_NEEDED))
 
     for action in start_plan.actions:
         if action.uri in stopped_services:
