@@ -29,3 +29,11 @@ class DeferredPoolTests(unittest.TestCase):
         for wc in actual_worker_calls:
             self.assertEqual(wc, call('pool-name_worker%d' % worker_id, pool._next_task, pool._handle_error))
             worker_id += 1
+
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    def test_should_start_all_workers(self, started_workers):
+        DeferredPool('pool-name', queue=['something-to-do'], nr_workers=4)
+
+        started_worker_calls = [wc for wc in started_workers.call_args_list]
+
+        self.assertEqual(started_worker_calls, [call(), call(), call(), call()])
