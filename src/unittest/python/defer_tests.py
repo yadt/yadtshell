@@ -39,6 +39,15 @@ class DeferredPoolTests(unittest.TestCase):
 
         self.assertEqual(started_worker_calls, [call(), call(), call(), call()])
 
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.reactor')
+    def test_should_callback_when_queue_is_empty_and_no_errors_occurred(self, fake_reactor, _):
+        pool = DeferredPool('pool-name', queue=[])
+
+        pool._finish()
+
+        fake_reactor.callLater.assert_called_with(0, pool.callback)
+
     @patch('yadtshell.defer.logging')
     @patch('yadtshell.actions.ActionException')
     @patch('yadtshell.defer.DeferredPool.Worker.run')
@@ -53,3 +62,36 @@ class DeferredPoolTests(unittest.TestCase):
 
         fake_reactor.callLater.assert_called_with(0, pool.errback, action_exception.return_value)
         action_exception.assert_called_with('Could not execute 1 action(s)', 1)
+
+    @patch('yadtshell.defer.logging')
+    @patch('yadtshell.actions.ActionException')
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.reactor')
+    def test_should_errback_when_error_count_is_too_high(self, fake_reactor, _, action_exception, __):
+        pool = DeferredPool('pool-name', queue=['some-task'], nr_errors_tolerated=4)
+        pool.error_count = 5
+
+        pool._finish()
+
+        fake_reactor.callLater.assert_called_with(0, pool.errback, action_exception.return_value)
+        action_exception.assert_called_with('stops: error count too high, 5 > 4', 1)
+
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.reactor')
+    def test_should_callback_when_queue_is_empty_and_less_errors_than_allowed_occurred(self, fake_reactor, _):
+        pool = DeferredPool('pool-name', queue=[], nr_errors_tolerated=6)
+        pool.error_count = 5
+
+        pool._finish()
+
+        fake_reactor.callLater.assert_called_with(0, pool.callback)
+
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.reactor')
+    def test_should_callback_when_queue_is_empty_and_errors_occurred_equals_errors_allowed(self, fake_reactor, _):
+        pool = DeferredPool('pool-name', queue=[], nr_errors_tolerated=5)
+        pool.error_count = 5
+
+        pool._finish()
+
+        fake_reactor.callLater.assert_called_with(0, pool.callback)
