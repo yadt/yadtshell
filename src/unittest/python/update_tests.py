@@ -1,9 +1,45 @@
 import yadtshell
-from yadtshell.update import compare_versions
+from yadtshell.update import compare_versions, get_all_adjacent_needed_hosts
 from unittest_support import create_component_pool_for_one_host
 
 import unittest
 from mock import patch, Mock
+
+
+class AdjacentNeededHostsTests(unittest.TestCase):
+
+    def setUp(self):
+        yadtshell.settings.TARGET_SETTINGS = {
+            'name': 'test', 'original_hosts': ['thehost']}
+
+        self.components = yadtshell.components.ComponentDict()
+        self.host = yadtshell.components.Host('thehost')
+        self.service = yadtshell.components.Service('thehost', 'theservice', {})
+        self.components['host://thehost'] = self.host
+        self.components['service://thehost/theservice'] = self.service
+        self.components['host://otherhost'] = yadtshell.components.Host('otherhost')
+        self.components['service://otherhost/otherservice'] = yadtshell.components.Service('otherhost', 'otherservice', {})
+
+    def test_should_include_immediate_host_from_service(self):
+        self.service.needs = ['host://thehost']
+
+        adjacent_hosts = get_all_adjacent_needed_hosts(self.service.uri, self.components)
+
+        self.assertEqual(adjacent_hosts, set(['host://thehost']))
+
+    def test_should_include_adjacent_hosts_when_service_has_service_dependencies(self):
+        self.service.needs = ['service://otherhost/otherservice']
+
+        adjacent_hosts = get_all_adjacent_needed_hosts(self.service.uri, self.components)
+
+        self.assertEqual(adjacent_hosts, set(['host://otherhost']))
+
+    def test_should_include_hosts_from_host_and_service_dependencies(self):
+        self.service.needs = ['host://thehost', 'service://otherhost/otherservice']
+
+        adjacent_hosts = get_all_adjacent_needed_hosts(self.service.uri, self.components)
+
+        self.assertEqual(adjacent_hosts, set(['host://otherhost', 'host://thehost']))
 
 
 class UpdateTests(unittest.TestCase):

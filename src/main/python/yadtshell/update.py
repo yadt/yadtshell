@@ -24,6 +24,19 @@ import yadtshell
 logger = logging.getLogger('update')
 
 
+def get_all_adjacent_needed_hosts(service_uri, components):
+    result = set()
+    service = components[service_uri]
+    for needed_uri in service.needs:
+        needed = components[needed_uri]
+        if needed.type == 'host':
+            result.add(needed.uri)
+            continue
+        if needed.type == 'service':
+            result.add(needed.host_uri)
+    return result
+
+
 def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, parallel=None, **kwargs):
     components = yadtshell.util.restore_current_state()
     if not update_plan_post_handler:
@@ -86,22 +99,10 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     for action in stop_plan.actions:
         stopped_services.add(action.uri)
 
-    def get_all_adjacent_needed_hosts(service_uri):
-        result = set()
-        service = components[service_uri]
-        for needed_uri in service.needs:
-            needed = components[needed_uri]
-            if needed.type == 'host':
-                result.add(needed.uri)
-                continue
-            if needed.type == 'service':
-                result.add(needed.host_uri)
-        return result
-
     host_uris_with_update = map(str, hosts_with_update)
     for action in start_plan.actions:
         if action.uri in stopped_services:
-            for host_uri in get_all_adjacent_needed_hosts(action.uri):
+            for host_uri in get_all_adjacent_needed_hosts(action.uri, components):
                 if host_uri not in handled_hosts:
                     continue
                 if host_uri not in host_uris_with_update:
