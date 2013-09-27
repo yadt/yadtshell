@@ -1,8 +1,7 @@
-import yadtshell
 from yadtshell.defer import DeferredPool
 
 import unittest
-from mock import patch, call
+from mock import patch, call, Mock
 
 
 class DeferredPoolTests(unittest.TestCase):
@@ -95,3 +94,50 @@ class DeferredPoolTests(unittest.TestCase):
         pool._finish()
 
         fake_reactor.callLater.assert_called_with(0, pool.callback)
+
+    def test_next_task_should_return_nothing_when_pool_has_already_callbacked(self):
+        pool = DeferredPool('pool-name', queue=[])
+        pool.callback(Mock())
+
+        next_task = pool._next_task()
+
+        self.assertEqual(next_task, None)
+
+    def test_next_task_should_return_nothing_when_queue_is_empty_but_workers_are_still_running(self):
+        pool = DeferredPool('pool-name', queue=[])
+        pool.all_workers_idle = lambda: False
+
+        next_task = pool._next_task()
+
+        self.assertEqual(next_task, None)
+
+    @patch('yadtshell.defer.DeferredPool._stop_workers')
+    def test_next_task_should_return_nothing_and_stop_workers_when_queue_is_empty_and_workers_are_idle(self, stop_workers):
+        pool = DeferredPool('pool-name', queue=[])
+        pool.all_workers_idle = lambda: True
+
+        next_task = pool._next_task()
+
+        self.assertEqual(next_task, None)
+        stop_workers.assert_called_with()
+
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.DeferredPool._stop_workers')
+    def test_next_task_should_stop_workers_when_queue_is_not_empty_but_no_tasks_are_available_and_workers_are_idle(self, stop_workers, _):
+        pool = DeferredPool('pool-name', queue=['some-stuff'])
+        pool.all_workers_idle = lambda: True
+        pool.next_task_fun = lambda _: None
+
+        next_task = pool._next_task()
+
+        self.assertEqual(next_task, None)
+        stop_workers.assert_called_with()
+
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    def test_next_task_should_return_task_when_tasks_are_available(self, _):
+        pool = DeferredPool('pool-name', queue=['some-stuff'])
+        pool.all_workers_idle = lambda: False
+
+        next_task = pool._next_task()
+
+        self.assertEqual(next_task, 'some-stuff')
