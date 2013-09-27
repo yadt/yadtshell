@@ -1,3 +1,4 @@
+import yadtshell
 from yadtshell.defer import DeferredPool
 
 import unittest
@@ -37,3 +38,18 @@ class DeferredPoolTests(unittest.TestCase):
         started_worker_calls = [wc for wc in started_workers.call_args_list]
 
         self.assertEqual(started_worker_calls, [call(), call(), call(), call()])
+
+    @patch('yadtshell.defer.logging')
+    @patch('yadtshell.actions.ActionException')
+    @patch('yadtshell.defer.DeferredPool.Worker.run')
+    @patch('yadtshell.defer.reactor')
+    def test_should_errback_when_actions_could_not_be_executed(self, fake_reactor, _, action_exception, __):
+        task = lambda: None
+        task.action = lambda: None
+        task.action.dump = lambda: 'do something'
+        pool = DeferredPool('pool-name', queue=[task])
+
+        pool._finish()
+
+        fake_reactor.callLater.assert_called_with(0, pool.errback, action_exception.return_value)
+        action_exception.assert_called_with('Could not execute 1 action(s)', 1)
