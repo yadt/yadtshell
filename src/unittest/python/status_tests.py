@@ -7,6 +7,7 @@ class StatusTests(unittest.TestCase):
 
     def setUp(self):
         yadtshell.settings.ybc = Mock()
+        yadtshell.settings.SSH = 'ssh'
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'hosts': ['foobar42']}
 
