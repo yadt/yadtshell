@@ -48,3 +48,6 @@ class StatusTests(unittest.TestCase):
             'host://foobar42', '/usr/bin/yadt-status', None)
         spawn_process.assert_called_with(
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
+
+    def test_should_create_host_from_yaml(self):
+        pass

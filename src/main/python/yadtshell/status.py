@@ -54,6 +54,52 @@ def query_status(component, pi=None):
     return p.deferred
 
 
+def create_host(protocol, components, yaml_loader):
+    if isinstance(protocol, yadtshell.components.UnreachableHost):
+        unreachable_host = protocol
+        unreachable_host_uri = yadtshell.uri.create(
+            type=yadtshell.settings.HOST, host=unreachable_host.hostname)
+        components[unreachable_host_uri] = unreachable_host
+        return unreachable_host
+
+    def convert_string_to_host(data, host=None):
+        try:
+            return json.loads(data)
+        except Exception, e:
+            logger.debug(
+                '%s: %s, falling back to yaml parser' % (host, str(e)))
+            return yaml.load(data, Loader=yaml_loader)
+
+    host = None
+    data = convert_string_to_host(protocol.data, protocol.component)
+    if data == yadtshell.settings.DOWN:
+        host = yadtshell.components.Host(protocol.component)
+        host.state = yadtshell.settings.DOWN
+    elif data == yadtshell.settings.UNKNOWN:
+        host = yadtshell.components.Host(protocol.component)
+        host.state = yadtshell.settings.UNKNOWN
+    elif data is None:
+        logging.getLogger(protocol.component).warning(
+            'no data? strange...')
+    elif "hostname" not in protocol.data:
+        logging.getLogger(protocol.component).warning(
+            'no hostname? strange...')
+    else:
+        host = yadtshell.components.Host(data['hostname'])
+        for key, value in data.iteritems():
+            setattr(host, key, value)
+        host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
+    loc_type = yadtshell.util.determine_loc_type(host.hostname)
+    host.loc_type = loc_type
+    host.update_attributes_after_status()
+    host.next_artefacts = getattr(host, 'next_artefacts', [])
+    if host.next_artefacts is None:
+        host.next_artefacts = []
+    host.logger = logging.getLogger(host.uri)
+    components[host.uri] = host
+    return host
+
+
 def status(hosts=None, include_artefacts=True, **kwargs):
     try:
         from yaml import CLoader as Loader
@@ -97,51 +143,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
 
     components = yadtshell.components.ComponentDict()
-
-    def create_host(protocol):
-        if isinstance(protocol, yadtshell.components.UnreachableHost):
-            unreachable_host = protocol
-            unreachable_host_uri = yadtshell.uri.create(
-                type=yadtshell.settings.HOST, host=unreachable_host.hostname)
-            components[unreachable_host_uri] = unreachable_host
-            return unreachable_host
-
-        def convert_string_to_host(data, host=None):
-            try:
-                return json.loads(data)
-            except Exception, e:
-                logger.debug(
-                    '%s: %s, falling back to yaml parser' % (host, str(e)))
-                return yaml.load(data, Loader=Loader)
-
-        host = None
-        data = convert_string_to_host(protocol.data, protocol.component)
-        if data == yadtshell.settings.DOWN:
-            host = yadtshell.components.Host(protocol.component)
-            host.state = yadtshell.settings.DOWN
-        elif data == yadtshell.settings.UNKNOWN:
-            host = yadtshell.components.Host(protocol.component)
-            host.state = yadtshell.settings.UNKNOWN
-        elif data is None:
-            logging.getLogger(protocol.component).warning(
-                'no data? strange...')
-        elif "hostname" not in protocol.data:
-            logging.getLogger(protocol.component).warning(
-                'no hostname? strange...')
-        else:
-            host = yadtshell.components.Host(data['hostname'])
-            for key, value in data.iteritems():
-                setattr(host, key, value)
-            host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
-        loc_type = yadtshell.util.determine_loc_type(host.hostname)
-        host.loc_type = loc_type
-        host.update_attributes_after_status()
-        host.next_artefacts = getattr(host, 'next_artefacts', [])
-        if host.next_artefacts is None:
-            host.next_artefacts = []
-        host.logger = logging.getLogger(host.uri)
-        components[host.uri] = host
-        return host
 
     def store_service_up(protocol):
         protocol.component.state = yadtshell.settings.UP
@@ -454,7 +455,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     for host in hosts:
         deferred = query_status(host, pi)
         deferred.addErrback(report_connection_error)
-        deferred.addCallback(create_host)
+        deferred.addCallback(create_host, components, Loader)
 
         deferred.addCallback(initialize_services)
         deferred.addCallback(add_local_state)
