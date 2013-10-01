@@ -29,6 +29,8 @@ from yadtshell.actionmanager import ActionManager
 import yadtshell.twisted
 import yadtshell.defer
 
+import yadtshell.status as _status
+
 from yadtshell.status import status
 from yadtshell.info import info
 from yadtshell.dump import dump
