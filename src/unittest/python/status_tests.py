@@ -38,3 +38,13 @@ class StatusTests(unittest.TestCase):
         self.assertEqual(query_status.call_args_list, [
             call('foobar42', pi.return_value),
             call('foobar43', pi.return_value)])
+
+    @patch('yadtshell._status.os.environ')
+    @patch('yadtshell._status.reactor.spawnProcess')
+    @patch('yadtshell.twisted.YadtProcessProtocol')
+    def test_query_status_should_spawn_status_process(self, protocol, spawn_process, environment):
+        yadtshell._status.query_status(component='host://foobar42')
+        protocol.assert_called_with(
+            'host://foobar42', '/usr/bin/yadt-status', None)
+        spawn_process.assert_called_with(
+            protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
