@@ -70,9 +70,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             #  ssh multiplexing
             verify.called('ssh').at_least_with_arguments(
-                'host_with_dependent_service', '-O', 'check')
+                '-O', 'check')
             verify.called('ssh').at_least_with_arguments(
-                'host_with_updates', '-O', 'check')
+                '-O', 'check')
 
             #  stop services in correct order
             verify.called('ssh').at_least_with_arguments(
