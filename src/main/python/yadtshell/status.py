@@ -63,14 +63,17 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         hosts = [hosts]
 
     try:
-        os.remove(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+        os.remove(
+            os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
     except OSError:
         pass
 
     if hosts:
-        state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h) for h in hosts]
+        state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h)
+                       for h in hosts]
     else:
-        state_files = glob.glob(os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
+        state_files = glob.glob(
+            os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
     for state_file in state_files:
         logger.debug('removing old state %(state_file)s' % locals())
         try:
@@ -86,7 +89,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     components = yadtshell.components.ComponentDict()
 
     def query_status(component, pi=None):
-        p = yadtshell.twisted.YadtProcessProtocol(component, '/usr/bin/yadt-status', pi)
+        p = yadtshell.twisted.YadtProcessProtocol(
+            component, '/usr/bin/yadt-status', pi)
         p.deferred = defer.Deferred()
         p.deferred.name = component
         cmd = shlex.split(yadtshell.settings.SSH) + [component]
@@ -96,7 +100,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     def create_host(protocol):
         if isinstance(protocol, yadtshell.components.UnreachableHost):
             unreachable_host = protocol
-            unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST, host=unreachable_host.hostname)
+            unreachable_host_uri = yadtshell.uri.create(
+                type=yadtshell.settings.HOST, host=unreachable_host.hostname)
             components[unreachable_host_uri] = unreachable_host
             return unreachable_host
 
@@ -104,7 +109,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             try:
                 return json.loads(data)
             except Exception, e:
-                logger.debug('%s: %s, falling back to yaml parser' % (host, str(e)))
+                logger.debug(
+                    '%s: %s, falling back to yaml parser' % (host, str(e)))
                 return yaml.load(data, Loader=Loader)
 
         host = None
@@ -116,9 +122,11 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             host = yadtshell.components.Host(protocol.component)
             host.state = yadtshell.settings.UNKNOWN
         elif data is None:
-            logging.getLogger(protocol.component).warning('no data? strange...')
+            logging.getLogger(protocol.component).warning(
+                'no data? strange...')
         elif "hostname" not in protocol.data:
-            logging.getLogger(protocol.component).warning('no hostname? strange...')
+            logging.getLogger(protocol.component).warning(
+                'no hostname? strange...')
         else:
             host = yadtshell.components.Host(data['hostname'])
             for key, value in data.iteritems():
@@ -139,14 +147,17 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         return protocol
 
     def store_service_not_up(reason):
-        reason.value.component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(reason.value.exitCode, yadtshell.settings.UNKNOWN)
+        reason.value.component.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
+            reason.value.exitCode, yadtshell.settings.UNKNOWN)
         return protocol
 
     def query_local_service(service):
         cmd = service.status()
         if isinstance(cmd, defer.Deferred):
-            def store_service_state(state, service):    # TODO refactor: integrate all store_service_* cbs
-                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(state, yadtshell.settings.UNKNOWN)
+            # TODO refactor: integrate all store_service_* cbs
+            def store_service_state(state, service):
+                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
+                    state, yadtshell.settings.UNKNOWN)
             cmd.addCallback(store_service_state, service)
 
             def handle_service_state_failure(failure, service):
@@ -154,11 +165,14 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                              .format(service.uri, failure.value.exitCode))
             cmd.addErrback(handle_service_state_failure, service)
             return cmd
-        query_protocol = yadtshell.twisted.YadtProcessProtocol(service.uri, cmd)
+        query_protocol = yadtshell.twisted.YadtProcessProtocol(
+            service.uri, cmd)
         query_protocol.deferred = defer.Deferred()
-        reactor.spawnProcess(query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
+        reactor.spawnProcess(
+            query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
         query_protocol.component = service
-        query_protocol.deferred.addCallbacks(store_service_up, store_service_not_up)
+        query_protocol.deferred.addCallbacks(
+            store_service_up, store_service_not_up)
         return query_protocol.deferred
 
     def initialize_services(host):
@@ -189,7 +203,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                         service = clazz(host, name, settings)
                         break
             if not service:
-                host.logger.debug('%s not a standard service, searching class' % service_class)
+                host.logger.debug(
+                    '%s not a standard service, searching class' % service_class)
                 clazz = None
                 try:
                     host.logger.debug('fallback 1: checking loaded modules')
@@ -206,29 +221,36 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
                 if not clazz:
                     try:
-                        host.logger.debug('fallback 2: trying to load module myself')
+                        host.logger.debug(
+                            'fallback 2: trying to load module myself')
                         clazz = get_class(service_class)
                     except Exception, e:
                         host.logger.debug(e)
                 if not clazz:
                     try:
-                        host.logger.debug('fallback 3: trying to lookup %s in legacies' % service_class)
+                        host.logger.debug(
+                            'fallback 3: trying to lookup %s in legacies' % service_class)
                         import legacies
-                        mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(service_class, service_class)
+                        mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
+                            service_class, service_class)
                         clazz = get_class(mapped_service_class)
-                        host.logger.info('deprecation info: class %s was mapped to %s' % (service_class, mapped_service_class))
+                        host.logger.info(
+                            'deprecation info: class %s was mapped to %s' %
+                            (service_class, mapped_service_class))
                     except Exception, e:
                         host.logger.debug(e)
 
                 if not clazz:
-                    raise Exception('cannot find class %(service_class)s' % locals())
+                    raise Exception(
+                        'cannot find class %(service_class)s' % locals())
 
                 try:
                     service = clazz(host, name, settings)
                 except Exception, e:
                     host.logger.exception(e)
             if not service:
-                raise Exception('cannot instantiate class %(service_class)s' % locals())
+                raise Exception(
+                    'cannot instantiate class %(service_class)s' % locals())
             components[service.uri] = service
             service.fqdn = host.fqdn
             service.needs = getattr(service, 'needs', set())
@@ -244,7 +266,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                     service.prepare(host)
                 if hasattr(service, 'get_local_service_collector'):
                     global local_service_collector
-                    local_service_collector = service.get_local_service_collector()
+                    local_service_collector = service.get_local_service_collector(
+                    )
                 q = query_local_service(service)
                 local_state.append(q)
 
@@ -257,7 +280,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     def initialize_artefacts(host):
         try:
             for version in getattr(host, 'current_artefacts', []):
-                artefact = yadtshell.components.Artefact(host, version, version)
+                artefact = yadtshell.components.Artefact(
+                    host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 components[artefact.uri] = artefact
         except TypeError:
@@ -266,10 +290,13 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'current_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(
+                    yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(
+                    uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.CURRENT
-                current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.CURRENT)
+                current_uri = yadtshell.uri.create(
+                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.CURRENT)
                 components[uri] = artefact
                 components[current_uri] = artefact
         except TypeError:
@@ -277,7 +304,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'next_artefacts', set()):
-                artefact = yadtshell.components.Artefact(host, version, version)
+                artefact = yadtshell.components.Artefact(
+                    host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 artefact.revision = yadtshell.settings.NEXT
                 components[artefact.uri] = artefact
@@ -285,10 +313,13 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             pass
         try:
             for version in getattr(host, 'next_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(
+                    yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(
+                    uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.NEXT
-                next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.NEXT)
+                next_uri = yadtshell.uri.create(
+                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.NEXT)
                 components[uri] = artefact
                 components[next_uri] = artefact
                 host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
@@ -385,7 +416,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                 }
                 hosts.append(host)
             groups.append(hosts)
-        yadtshell.settings.ybc.sendFullUpdate(groups, tracking_id=yadtshell.settings.tracking_id)
+        yadtshell.settings.ybc.sendFullUpdate(
+            groups, tracking_id=yadtshell.settings.tracking_id)
 
         status_line = yadtshell.util.get_status_line(components)
         logger.debug('\nstatus: %s' % status_line)
@@ -402,14 +434,17 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     def report_connection_error(failure):
         if failure.value.exitCode == 255:
-            logger.critical('ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' % failure.value.component)
+            logger.critical(
+                'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
+                failure.value.component)
             return yadtshell.components.UnreachableHost(failure.value.component)
         return failure
 
     def notify_collector(ignored):
         global local_service_collector
         if local_service_collector:
-            logger.debug("collected services: %s " % ", ".join(local_service_collector.services))
+            logger.debug("collected services: %s " %
+                         ", ".join(local_service_collector.services))
             return local_service_collector.notify()
 
     pi = yadtshell.twisted.ProgressIndicator()
@@ -433,6 +468,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
     dl.addCallback(yadtshell.info, components=components)
-    dl.addErrback(yadtshell.twisted.report_error, logger.error, include_stacktrace=False)
+    dl.addErrback(yadtshell.twisted.report_error,
+                  logger.error, include_stacktrace=False)
 
     return dl

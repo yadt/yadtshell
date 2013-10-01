@@ -25,12 +25,14 @@ import yadtshell.twisted
 
 
 def next_in_queue(queue):
-    #return queue.popleft()
+    # return queue.popleft()
     return queue.pop(0)
 
 
 class DeferredPool(defer.Deferred):
+
     class Worker(object):
+
         def __init__(self, name, next_task_fun, handle_error_fun):
             self.next_task_fun = next_task_fun
             self.handle_error_fun = handle_error_fun
@@ -52,7 +54,8 @@ class DeferredPool(defer.Deferred):
                 return None
             self.idle = False
             self.logger.debug('starting %s(..)' % task.fun.__name__)
-            d = task.fun(plan=task.action, path=task.path)  # TODO: plan = action?
+            # TODO: plan = action?
+            d = task.fun(plan=task.action, path=task.path)
             d.addErrback(self.handle_error_fun)
             d.addErrback(yadtshell.twisted.report_error, self.logger.error)
             d.addBoth(self.run)
@@ -76,9 +79,11 @@ class DeferredPool(defer.Deferred):
         if not queue:
             reactor.callLater(0, self.callback)
             return
-        self.workers = [self.Worker('%s_worker%i' % (self.name, nr), self._next_task, self._handle_error) for nr in range(0, nr_workers)]
+        self.workers = [self.Worker('%s_worker%i' % (self.name, nr), self._next_task, self._handle_error)
+                        for nr in range(0, nr_workers)]
         if nr_workers > 1:
-            self.logger.debug('started: %i items in queue, %i parallel workers' % (len(queue), nr_workers))
+            self.logger.debug(
+                'started: %i items in queue, %i parallel workers' % (len(queue), nr_workers))
         else:
             self.logger.debug('started: %i items in queue' % len(queue))
         for worker in self.workers:
@@ -91,13 +96,16 @@ class DeferredPool(defer.Deferred):
                 'stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated), 1))
             return
         if self.queue:
-            self.logger.error('%i actions not executed, dump follows:' % len(self.queue))
+            self.logger.error(
+                '%i actions not executed, dump follows:' % len(self.queue))
             for task in self.queue:
                 for line in task.action.dump().splitlines():
                     self.logger.error(line)
-            reactor.callLater(0, self.errback, yadtshell.actions.ActionException('Could not execute %i action(s)' % len(self.queue), 1))
+            reactor.callLater(0, self.errback, yadtshell.actions.ActionException(
+                'Could not execute %i action(s)' % len(self.queue), 1))
             return
-        return self.callback(None)   # TODO refactor to something similar to deferredList
+        # TODO refactor to something similar to deferredList
+        return self.callback(None)
 
     def _handle_error(self, failure):
         self.error_count += 1
@@ -105,7 +113,9 @@ class DeferredPool(defer.Deferred):
             #self.logger.error('stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated))
             self._stop_workers()
             return failure
-        self.logger.warn('error encountered, error count: %i <= %i, continuing...' % (self.error_count, self.nr_errors_tolerated))
+        self.logger.warn(
+            'error encountered, error count: %i <= %i, continuing...' %
+            (self.error_count, self.nr_errors_tolerated))
         return failure.value.orig_protocol
 
     def _next_task(self):
@@ -114,14 +124,16 @@ class DeferredPool(defer.Deferred):
         if len(self.queue) == 0:
             if not self.all_workers_idle():
                 return None
-            self.logger.debug('Queue is empty and all worker are idle, thus closing pool instance.')
+            self.logger.debug(
+                'Queue is empty and all worker are idle, thus closing pool instance.')
             self._stop_workers()
             return None
         fun = self.next_task_fun
         task = fun(self.queue)
         if not task:
             if self.all_workers_idle():
-                self.logger.debug('Queue is not empty, but all workers are idle and no tasks are available. Thus stopping.')
+                self.logger.debug(
+                    'Queue is not empty, but all workers are idle and no tasks are available. Thus stopping.')
                 for worker in self.workers:
                     self.logger.debug("stopping %s" % worker)
                 self._stop_workers()

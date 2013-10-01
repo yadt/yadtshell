@@ -31,4 +31,3 @@ HOST_STATE_DESCRIPTIONS = {
 
 IGNORE = 'ignore'
 UNIGNORE = 'unignore'
-

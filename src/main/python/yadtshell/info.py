@@ -45,9 +45,11 @@ def _show_host_locking_or_unreachable(host):
         lock_owner = host.lockstate.get("owner", "Unknown")
         reason = host.lockstate.get("message", "--- no message given ---")
         if host.is_locked_by_me:
-            print(render_yellow('\n%10s is locked by me\n%10s %s\n' % (host.host, "reason", reason)))
+            print(render_yellow('\n%10s is locked by me\n%10s %s\n' %
+                  (host.host, "reason", reason)))
         elif host.is_locked_by_other:
-            print(render_red('\n%10s is locked by %s\n%10s %s\n' % (host.host, lock_owner, "reason", reason)))
+            print(render_red('\n%10s is locked by %s\n%10s %s\n' %
+                  (host.host, lock_owner, "reason", reason)))
 
 
 def info(logLevel=None, full=False, components=None, **kwargs):
@@ -60,12 +62,14 @@ def info(logLevel=None, full=False, components=None, **kwargs):
         result.append((component.uri, component.state))
 
     print()
-    print(yadtshell.settings.term.render('${BOLD}yadt info | %s${NORMAL}' % yadtshell.settings.TARGET_SETTINGS['name']))
+    print(yadtshell.settings.term.render(
+        '${BOLD}yadt info | %s${NORMAL}' % yadtshell.settings.TARGET_SETTINGS['name']))
 
     print()
     print('target status')
 
-    hosts = sorted([c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
+    hosts = sorted(
+        [c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
     for host in hosts:
         _show_host_locking_or_unreachable(host)
         if isinstance(host.next_artefacts, dict):
@@ -75,7 +79,8 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     print()
 
-    condensed = yadtshell.helper.condense_hosts2(yadtshell.helper.condense_hosts(result))
+    condensed = yadtshell.helper.condense_hosts2(
+        yadtshell.helper.condense_hosts(result))
     components_with_problems = [c for c in condensed
                                 if (c[0].startswith(yadtshell.settings.ARTEFACT) or c[0].startswith(yadtshell.settings.CONFIG))
                                 and yadtshell.util.not_up(c[1])]
@@ -87,12 +92,14 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     for missing_component in [c for c in components.values() if isinstance(c,
                               yadtshell.components.MissingComponent)]:
-        print(render_red('\nconfig problem: missing %s\n' % missing_component.uri))
+        print(render_red('\nconfig problem: missing %s\n' %
+              missing_component.uri))
 
     for service in [component for component in components.values()
                     if isinstance(component, yadtshell.components.Service)]:
         if getattr(service, 'service_artefact_problem', None):
-            print(render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service)))
+            print(
+                render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service)))
             print()
 
     render_services_matrix(components)
@@ -116,18 +123,22 @@ def _render_updates_based_on_name_schema(components, host, full):
         ]:
             artefact = host_artefacts.setdefault(current_artefact.name, {})
             artefact[yadtshell.settings.CURRENT] = current_artefact
-            next_artefact = components.get(yadtshell.uri.change_version(current_artefact.uri, 'next'))
+            next_artefact = components.get(
+                yadtshell.uri.change_version(current_artefact.uri, 'next'))
             if next_artefact:
                 artefact[yadtshell.settings.NEXT] = next_artefact
         for artefact in sorted(host_artefacts.keys()):
             variants = host_artefacts[artefact]
             current_version = variants[yadtshell.settings.CURRENT].version
             if full:
-                print('%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version))
+                print('%10s  %40s  %s' %
+                      (host.host, variants[yadtshell.settings.CURRENT].name, current_version))
             if yadtshell.settings.NEXT in variants:
                 if not full:
-                    print('%10s  %40s  %s' % (host.host, variants[yadtshell.settings.CURRENT].name, current_version))
-                next_version = components[variants[yadtshell.settings.NEXT]].version
+                    print('%10s  %40s  %s' %
+                          (host.host, variants[yadtshell.settings.CURRENT].name, current_version))
+                next_version = components[
+                    variants[yadtshell.settings.NEXT]].version
                 nd_display = []
                 for i in range(len(next_version)):
                     try:
@@ -136,20 +147,27 @@ def _render_updates_based_on_name_schema(components, host, full):
                             continue
                     except:
                         pass
-                    nd_display.append('${REVERSE}%s${NORMAL}' % next_version[i])
-                print('%10s  %40s  %s' % ('', '(next)', yadtshell.settings.term.render(''.join(nd_display))))
+                    nd_display.append(
+                        '${REVERSE}%s${NORMAL}' % next_version[i])
+                print('%10s  %40s  %s' %
+                      ('', '(next)', yadtshell.settings.term.render(''.join(nd_display))))
         if full:
             print()
 
 
 def _render_updates_based_on_key_value_schema(components, host, *args, **kwargs):
     for next_artefact_uri, old_artefact_uri in host.next_artefacts.iteritems():
-        next_artefact = components["artefact://%s/%s" % (host.host, next_artefact_uri)]  # TODO better as helper method in Uri?
-        old_artefact = components["artefact://%s/%s" % (host.host, old_artefact_uri)]
+        # TODO better as helper method in Uri?
+        next_artefact = components[
+            "artefact://%s/%s" % (host.host, next_artefact_uri)]
+        old_artefact = components[
+            "artefact://%s/%s" % (host.host, old_artefact_uri)]
         next_artefact_name = next_artefact.name if next_artefact.name != old_artefact.name else ''
-        print('%10s  %40s  %s' % (host.host, old_artefact.name, old_artefact.version))
+        print('%10s  %40s  %s' %
+              (host.host, old_artefact.name, old_artefact.version))
         print('%10s  %40s  %s' % ('',
-                                  '(next) ' + render_highlighted_differences(old_artefact.name, next_artefact_name),
+                                  '(next) ' + render_highlighted_differences(
+                                      old_artefact.name, next_artefact_name),
                                   render_highlighted_differences(old_artefact.version, next_artefact.version)))
     return
 
@@ -231,7 +249,8 @@ def _render_services_matrix(components, hosts, enable_legend=False):
             line = []
             for name in [host.host for host in hosts]:
                 line.append(name[start:end])
-            print('   %s' % separator.join(['%3s' % string for string in line]))
+            print('   %s' %
+                  separator.join(['%3s' % string for string in line]))
         print_3cols(0, 3)
         print_3cols(3, 6)
         print_3cols(6, 9)
@@ -262,7 +281,8 @@ def _render_services_matrix(components, hosts, enable_legend=False):
     for name in sorted(ranks, key=lambda x: ranks[x]):
         s = []
         for host in hosts:
-            uri = yadtshell.uri.create(yadtshell.settings.SERVICE, host.host, name)
+            uri = yadtshell.uri.create(
+                yadtshell.settings.SERVICE, host.host, name)
             service = components.get(uri, None)
             if service:
                 if getattr(service, 'ignored', False):
@@ -369,9 +389,15 @@ def render_legend():
     if 'color' in info_view_settings:
         icons = colorize(icons)
 
-    print('legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' % icons)
-    print('        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' % icons)
-    print('        %(REBOOT_AFTER_UPDATE)s%(REBOOT_NOW)s reboot needed (after update/due to new kernel)' % icons)
+    print(
+        'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' %
+        icons)
+    print(
+        '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' %
+        icons)
+    print(
+        '        %(REBOOT_AFTER_UPDATE)s%(REBOOT_NOW)s reboot needed (after update/due to new kernel)' %
+        icons)
     print()
 
 

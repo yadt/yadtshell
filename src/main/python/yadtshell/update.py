@@ -42,7 +42,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     if not update_plan_post_handler:
         update_plan_post_handler = yadtshell.metalogic.chop_minimal_related_chunks
 
-    all_hosts = set([c for c in components.values() if isinstance(c, yadtshell.components.Host)])
+    all_hosts = set(
+        [c for c in components.values() if isinstance(c, yadtshell.components.Host)])
 
     if hosts:
         handled_hosts = yadtshell.helper.expand_hosts(hosts)
@@ -53,16 +54,22 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         logger.debug('User requested update for all hosts.')
 
     # create the base rules for starting all services
-    all_services = set([s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
+    all_services = set(
+        [s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
 
-    start_plan = yadtshell.metalogic.metalogic(yadtshell.settings.START, all_services, plan_post_handler=yadtshell.metalogic.identity)
+    start_plan = yadtshell.metalogic.metalogic(
+        yadtshell.settings.START, all_services, plan_post_handler=yadtshell.metalogic.identity)
 
-    hosts_with_update = set([h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
+    hosts_with_update = set(
+        [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
     if hosts_with_update:
-        logger.debug('New artefacts found for %s' % ', '.join(h.uri for h in hosts_with_update))
+        logger.debug('New artefacts found for %s' %
+                     ', '.join(h.uri for h in hosts_with_update))
 
-        hosts_with_update = set([h for h in hosts_with_update if h.uri in handled_hosts])
-        logger.debug('Handling hosts with new artefacts: %s' % ', '.join(h.uri for h in hosts_with_update))
+        hosts_with_update = set(
+            [h for h in hosts_with_update if h.uri in handled_hosts])
+        logger.debug('Handling hosts with new artefacts: %s' %
+                     ', '.join(h.uri for h in hosts_with_update))
     else:
         logger.info('No hosts with pending updates.')
 
@@ -74,7 +81,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                           ])
 
     if yadtshell.settings.reboot_enabled:
-        hosts_with_reboot = set([h for h in all_hosts if h.reboot_required and h.uri in handled_hosts])
+        hosts_with_reboot = set(
+            [h for h in all_hosts if h.reboot_required and h.uri in handled_hosts])
     else:
         hosts_with_reboot = set()
 
@@ -82,7 +90,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 
     current_artefacts = [components.get(yadtshell.uri.change_version(next_artefact, 'current'))
                          for next_artefact in next_artefacts]
-    current_artefacts = set([current.uri for current in current_artefacts if current])
+    current_artefacts = set(
+        [current.uri for current in current_artefacts if current])
 
     logger.debug('next_artefacts: ' + ', '.join(next_artefacts))
     logger.debug('current_artefacts: ' + ', '.join(current_artefacts))
@@ -94,7 +103,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         yadtshell.util.dump_action_plan('update', start_plan)
         return 'update'
 
-    stop_plan = yadtshell.metalogic.metalogic(yadtshell.settings.STOP, diff, plan_post_handler=yadtshell.metalogic.identity)
+    stop_plan = yadtshell.metalogic.metalogic(
+        yadtshell.settings.STOP, diff, plan_post_handler=yadtshell.metalogic.identity)
     stopped_services = set()
     for action in stop_plan.actions:
         stopped_services.add(action.uri)
@@ -107,21 +117,25 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                     continue
                 if host_uri not in host_uris_with_update:
                     continue
-                action.preconditions.add(yadtshell.actions.TargetState(host_uri, 'state', yadtshell.settings.UPTODATE))
+                action.preconditions.add(yadtshell.actions.TargetState(
+                    host_uri, 'state', yadtshell.settings.UPTODATE))
 
     update_actions = set()
     for host in hosts_with_reboot | hosts_with_update:
-        action = yadtshell.actions.Action(yadtshell.settings.UPDATE, host.uri, 'state', yadtshell.settings.UPTODATE)
+        action = yadtshell.actions.Action(
+            yadtshell.settings.UPDATE, host.uri, 'state', yadtshell.settings.UPTODATE)
         for needs_host in [components.get(s) for s in stopped_services]:
             if needs_host.host_uri != host.uri:
                 continue
-            action.preconditions.add(yadtshell.actions.TargetState(needs_host, 'state', yadtshell.settings.DOWN))
+            action.preconditions.add(yadtshell.actions.TargetState(
+                needs_host, 'state', yadtshell.settings.DOWN))
         update_actions.add(action)
     for ua in update_actions:
         if ua.uri in host_uris_with_reboot:
             ua.kwargs[yadtshell.constants.REBOOT_REQUIRED] = True
 
-    all_actions = set(start_plan.actions) | set(stop_plan.actions) | update_actions
+    all_actions = set(start_plan.actions) | set(
+        stop_plan.actions) | update_actions
     all_plan = yadtshell.actions.ActionPlan('all', all_actions)
     all_plan = yadtshell.metalogic.chop_minimal_related_chunks(all_plan)
 
@@ -138,7 +152,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
             continue
         prestart_chunks.add(chunk)
 
-    plan = yadtshell.actions.ActionPlan('update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks), yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)], nr_workers=1)
+    plan = yadtshell.actions.ActionPlan(
+        'update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks), yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)], nr_workers=1)
     plan = yadtshell.metalogic.apply_instructions(plan, parallel)
     yadtshell.util.dump_action_plan('update', plan)
     return 'update'
