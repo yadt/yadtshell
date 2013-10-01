@@ -115,10 +115,9 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
             for host_uri in get_all_adjacent_needed_hosts(action.uri, components):
                 if host_uri not in handled_hosts:
                     continue
-                if host_uri not in host_uris_with_update:
-                    continue
-                action.preconditions.add(yadtshell.actions.TargetState(
-                    host_uri, 'state', yadtshell.settings.UPTODATE))
+                if host_uri in host_uris_with_update or host_uri in host_uris_with_reboot:
+                    action.preconditions.add(yadtshell.actions.TargetState(
+                        host_uri, 'state', yadtshell.settings.UPTODATE))
 
     update_actions = set()
     for host in hosts_with_reboot | hosts_with_update:
