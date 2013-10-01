@@ -44,6 +44,16 @@ def status_cb(protocol=None):
     return status()
 
 
+def query_status(component, pi=None):
+    p = yadtshell.twisted.YadtProcessProtocol(
+        component, '/usr/bin/yadt-status', pi)
+    p.deferred = defer.Deferred()
+    p.deferred.name = component
+    cmd = shlex.split(yadtshell.settings.SSH) + [component]
+    reactor.spawnProcess(p, cmd[0], cmd, os.environ)
+    return p.deferred
+
+
 def status(hosts=None, include_artefacts=True, **kwargs):
     try:
         from yaml import CLoader as Loader
@@ -87,15 +97,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
 
     components = yadtshell.components.ComponentDict()
-
-    def query_status(component, pi=None):
-        p = yadtshell.twisted.YadtProcessProtocol(
-            component, '/usr/bin/yadt-status', pi)
-        p.deferred = defer.Deferred()
-        p.deferred.name = component
-        cmd = shlex.split(yadtshell.settings.SSH) + [component]
-        reactor.spawnProcess(p, cmd[0], cmd, os.environ)
-        return p.deferred
 
     def create_host(protocol):
         if isinstance(protocol, yadtshell.components.UnreachableHost):
