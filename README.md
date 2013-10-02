@@ -46,4 +46,3 @@ cd target/dist/yadtshell-$VERSION
 pyb
 cat target/reports/coverage
 ```
-
