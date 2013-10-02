@@ -56,3 +56,53 @@ class StatusTests(unittest.TestCase):
 
         self.assertEqual(result, unreachable_host)
         self.assertEqual(components['host://foobar42'], unreachable_host)
+
+    def test_should_create_host_from_json(self):
+        components = {}
+        protocol_with_json_data = Mock()
+        protocol_with_json_data.component = 'host://foobar42'
+        protocol_with_json_data.data = '''{
+"hostname": "foobar42",
+"next_artefacts": {},
+"some_attribute": "some-value"
+}'''
+
+        result_host = yadtshell._status.create_host(protocol_with_json_data, components, None)
+
+        self.assertEqual(result_host.hostname, 'foobar42')
+        self.assertEqual(result_host.next_artefacts, {})
+        self.assertEqual(result_host.is_uptodate(), True)
+        self.assertEqual(result_host.some_attribute, "some-value")
+        self.assertEqual(result_host.loc_type, {'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
+
+    def test_should_create_host_with_update_needed_when_next_artefacts_is_not_empty(self):
+        components = {}
+        protocol_with_json_data = Mock()
+        protocol_with_json_data.component = 'host://foobar42'
+        protocol_with_json_data.data = '''{
+"hostname": "foobar42",
+"next_artefacts": {"some-artefact": "another-artefact"},
+"some_attribute": "some-value"
+}'''
+
+        result_host = yadtshell._status.create_host(protocol_with_json_data, components, None)
+
+        self.assertEqual(result_host.is_update_needed(), True)
+
+    def test_should_create_host_from_yaml(self):
+        components = {}
+        protocol_with_yaml_data = Mock()
+        protocol_with_yaml_data.component = 'host://foobar42'
+        protocol_with_yaml_data.data = '''
+hostname: foobar42
+next_artefacts: []
+some_attribute: some-value
+'''
+        from yaml import Loader
+        result_host = yadtshell._status.create_host(protocol_with_yaml_data, components, Loader)
+
+        self.assertEqual(result_host.hostname, 'foobar42')
+        self.assertEqual(result_host.next_artefacts, [])
+        self.assertEqual(result_host.is_uptodate(), True)
+        self.assertEqual(result_host.some_attribute, "some-value")
+        self.assertEqual(result_host.loc_type, {'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
