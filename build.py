@@ -58,7 +58,7 @@ def set_properties(project):
     project.build_depends_on('mockito')
     project.build_depends_on('mock')
 
-    project.set_property('integration_test_print_err', True)
+    project.set_property('integrationtest_parallel', True)
 
     project.set_property('manpage_source', 'man-yadtshell.md')
 
