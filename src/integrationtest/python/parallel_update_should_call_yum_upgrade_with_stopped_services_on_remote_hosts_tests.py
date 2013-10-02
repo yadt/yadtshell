@@ -77,55 +77,55 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
+                    'it01.domain')
                 verify.called('ssh').at_least_with_arguments(
                     'it01.domain', '-O', 'check')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-stop frontend-service').and_input('stop')
+                    'it01.domain', 'yadt-command yadt-service-stop frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status frontend-service').and_input('status')
+                    'it01.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-stop backend-service').and_input('stop')
+                    'it01.domain', 'yadt-command yadt-service-stop backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status backend-service').and_input('status')
+                    'it01.domain', 'yadt-command yadt-service-status backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-host-update yit-config-it01-0:0.0.1-2').and_input('update')
+                    'it01.domain', 'yadt-command yadt-host-update yit-config-it01-0:0.0.1-2')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-start backend-service').and_input('start')
+                    'it01.domain', 'yadt-command yadt-service-start backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status backend-service').and_input('status')
+                    'it01.domain', 'yadt-command yadt-service-status backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-start frontend-service').and_input('start')
+                    'it01.domain', 'yadt-command yadt-service-start frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status frontend-service').and_input('status')
+                    'it01.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments(
                     'it01.domain').and_input('/usr/bin/yadt-status')
 
             with complete_verify.filter_by_argument('it02.domain') as verify:
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain').and_input('/usr/bin/yadt-status')
+                    'it02.domain')
                 verify.called('ssh').at_least_with_arguments(
                     'it02.domain', '-O', 'check')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-stop frontend-service').and_input('stop')
+                    'it02.domain', 'yadt-command yadt-service-stop frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-status frontend-service').and_input('status')
+                    'it02.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-stop backend-service').and_input('stop')
+                    'it02.domain', 'yadt-command yadt-service-stop backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-status backend-service').and_input('status')
+                    'it02.domain', 'yadt-command yadt-service-status backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-host-update yit-config-it02-0:0.0.1-2').and_input('update')
+                    'it02.domain', 'yadt-command yadt-host-update yit-config-it02-0:0.0.1-2')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-start backend-service').and_input('start')
+                    'it02.domain', 'yadt-command yadt-service-start backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-status backend-service').and_input('status')
+                    'it02.domain', 'yadt-command yadt-service-status backend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-start frontend-service').and_input('start')
+                    'it02.domain', 'yadt-command yadt-service-start frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain', 'yadt-command yadt-service-status frontend-service').and_input('status')
+                    'it02.domain', 'yadt-command yadt-service-status frontend-service')
                 verify.called('ssh').at_least_with_arguments(
-                    'it02.domain').and_input('/usr/bin/yadt-status')
+                    'it02.domain')
 
             complete_verify.finished()
 
