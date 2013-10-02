@@ -50,9 +50,11 @@ class StatusTests(unittest.TestCase):
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
 
     def test_should_pass_through_unreachable_host_and_add_it_to_components(self):
-        unreachable_host = yadtshell.components.UnreachableHost('foobar42.domain.tld')
+        unreachable_host = yadtshell.components.UnreachableHost(
+            'foobar42.domain.tld')
         components = {}
-        result = yadtshell._status.create_host(unreachable_host, components, None)
+        result = yadtshell._status.create_host(
+            unreachable_host, components, None)
 
         self.assertEqual(result, unreachable_host)
         self.assertEqual(components['host://foobar42'], unreachable_host)
@@ -67,13 +69,15 @@ class StatusTests(unittest.TestCase):
 "some_attribute": "some-value"
 }'''
 
-        result_host = yadtshell._status.create_host(protocol_with_json_data, components, None)
+        result_host = yadtshell._status.create_host(
+            protocol_with_json_data, components, None)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, {})
         self.assertEqual(result_host.is_uptodate(), True)
         self.assertEqual(result_host.some_attribute, "some-value")
-        self.assertEqual(result_host.loc_type, {'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
+        self.assertEqual(result_host.loc_type, {
+                         'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
 
     def test_should_create_host_with_update_needed_when_next_artefacts_is_not_empty(self):
         components = {}
@@ -85,7 +89,8 @@ class StatusTests(unittest.TestCase):
 "some_attribute": "some-value"
 }'''
 
-        result_host = yadtshell._status.create_host(protocol_with_json_data, components, None)
+        result_host = yadtshell._status.create_host(
+            protocol_with_json_data, components, None)
 
         self.assertEqual(result_host.is_update_needed(), True)
 
@@ -99,10 +104,12 @@ next_artefacts: []
 some_attribute: some-value
 '''
         from yaml import Loader
-        result_host = yadtshell._status.create_host(protocol_with_yaml_data, components, Loader)
+        result_host = yadtshell._status.create_host(
+            protocol_with_yaml_data, components, Loader)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, [])
         self.assertEqual(result_host.is_uptodate(), True)
         self.assertEqual(result_host.some_attribute, "some-value")
-        self.assertEqual(result_host.loc_type, {'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
+        self.assertEqual(result_host.loc_type, {
+                         'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
