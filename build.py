@@ -32,7 +32,7 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
 description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts
 - updates artefacts in a safe manner
-- issues multiple commands in parallel on severall hosts
+- issues multiple commands in parallel on several hosts
 
 for more documentation, visit http://www.yadt-project.org/
 """
