@@ -28,7 +28,10 @@ use_plugin('python.distutils')
 use_plugin('copy_resources')
 use_plugin('filter_resources')
 
-authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com')]
+authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
+           Author('Marcel Wolf', 'marcel.wolf@immobilienscout24.de'),
+           Author('Maximilien Riehl', 'max@riehl.io')]
+
 description = """YADT - an Augmented Deployment Tool - The Shell Part
 - regards the dependencies between services, over different hosts
 - updates artefacts in a safe manner
@@ -59,6 +62,7 @@ def set_properties(project):
     project.build_depends_on('mock')
 
     project.set_property('integrationtest_parallel', True)
+    project.set_property('integrationtest_cpu_scaling_factor', 8)
 
     project.set_property('manpage_source', 'man-yadtshell.md')
 
