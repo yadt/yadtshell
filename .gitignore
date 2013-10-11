@@ -57,3 +57,6 @@ yadtshell.sublime*
 
 # MACOS specific files
 .DS_Store
+
+# Ninja IDE
+*.nja
