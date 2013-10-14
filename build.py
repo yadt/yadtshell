@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pybuilder.core import use_plugin, init, Author
+from pybuilder.core import use_plugin, init, Author, task
 
 use_plugin('python.core')
 use_plugin('python.integrationtest')
@@ -101,3 +101,15 @@ def set_properties_for_teamcity_builds(project):
     project.default_task = ['generate_manpages', 'install_build_dependencies', 'publish']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
     project.set_property('install_dependencies_use_mirrors', False)
+
+
+@task
+def clean(project, logger):
+    import os
+    import glob
+
+    for yadtshell_log_dir in os.listdir('/var/log/yadtshell'):
+        os.path.rmdir(yadtshell_log_dir)
+
+    for integrationtest_dir in glob.glob('/tmp/integrationtest*'):
+        os.path.rmdir(integrationtest_dir)
