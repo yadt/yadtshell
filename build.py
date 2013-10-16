@@ -105,11 +105,11 @@ def set_properties_for_teamcity_builds(project):
 
 @task
 def clean(project, logger):
-    import os
     import glob
+    import shutil
 
-    for yadtshell_log_dir in os.listdir('/var/log/yadtshell'):
-        os.path.rmdir(yadtshell_log_dir)
+    for yadtshell_log_dir in glob.glob('/var/log/yadtshell/*'):
+        shutil.rmtree(yadtshell_log_dir)
 
     for integrationtest_dir in glob.glob('/tmp/integrationtest*'):
-        os.path.rmdir(integrationtest_dir)
+        shutil.rmtree(integrationtest_dir)
