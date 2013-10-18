@@ -60,15 +60,21 @@ Locks the host(s), ensuring that only you can perform operations on it.
 Needs a message option.
 
 ## OPTIONS
+* --reboot :
+Reboots machines during an update, either if a pending artefact is configured to
+induce a reboot, or if the machine is running an outdated kernel.
+If a set of host URIs was passed to the update command, then only those hosts
+are eligible for a reboot.
+
 * -n :
-No operation: change nothing, just show what *would* be done (aka dryrun)
+No operation: change nothing, just show what *would* be done (aka dryrun).
 
 * -p *P-SPEC* :
 Runs eligible operations in parallel.
 See https://github.com/yadt/yadtshell/wiki/Wave-deployment-with-parallel-actions for more information.
 
 * --force :
-Ignores locks. Valid only for the `lock` command. This allows to taking over a lock
+Ignores locks. Valid only for the `lock` command. This allows for taking over a lock
 in order to release it.
 
 * -m *MESSAGE* :
@@ -76,7 +82,7 @@ Adds a message to a command. Valid only for the `lock` and `ignore` commands.
 
 * --no-final-status :
 Do not query and display the *status* of the target after an action that changed it
-(e.G. *start*, *update*, ...)
+(e.G. *start*, *update*, ...).
 
 ## EXAMPLES
 
@@ -88,6 +94,12 @@ stops all services
 
 * yadtshell update host://foo1 host://foo2 :
 updates both hosts
+
+* yadtshell update host://foo1 --reboot :
+updates or reboots (or possibly both) but only on foo1
+
+* yadtshell update --reboot :
+updates (and possibly reboots) all servers from the target
 
 * yadtshell updateartefact artefact://foo1/some-config :
 updates the package _some-config_ without regarding service dependencies
