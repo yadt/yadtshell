@@ -109,7 +109,9 @@ def clean(project, logger):
     import shutil
 
     for yadtshell_log_dir in glob.glob('/var/log/yadtshell/*'):
+        logger.info('Removing log directory {0}'.format(yadtshell_log_dir))
         shutil.rmtree(yadtshell_log_dir)
 
-    for integrationtest_dir in glob.glob('/tmp/integrationtest*'):
+    for integrationtest_dir in glob.glob('/tmp/integration-test*'):
+        logger.info('Removing IT directory {0}'.format(integrationtest_dir))
         shutil.rmtree(integrationtest_dir)
