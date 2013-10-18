@@ -149,6 +149,8 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     for chunk in all_plan.actions:
         if chunk in update_chunks:
             continue
+        prestart_actions_on_handled_hosts = [action for action in chunk.actions if components[action.uri].host_uri in handled_hosts]
+        chunk.actions = tuple(sorted(prestart_actions_on_handled_hosts))
         prestart_chunks.add(chunk)
 
     plan = yadtshell.actions.ActionPlan(

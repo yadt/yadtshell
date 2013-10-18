@@ -53,16 +53,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 filtered_verify.called('ssh').at_least_with_arguments(
                     'it01.domain', '-O', 'check')
 
-                # start backend-service -> frontend service on it01
-                filtered_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-start backend-service')
-                filtered_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status backend-service')
-                filtered_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-start frontend-service')
-                filtered_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', 'yadt-command yadt-service-status frontend-service')
-
                 filtered_verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
 
             with verify.filter_by_argument('it02.domain') as filtered_verify:
