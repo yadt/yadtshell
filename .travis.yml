@@ -11,8 +11,3 @@ install:
   - pip install pybuilder
   - pyb --debug install_dependencies
 script: "pyb --debug -v"
-notifications:
-  email:
-    - arne.hilmann@immobilienscout24.de
-    - michael.gruber@immobilienscout24.de
-    - maximilien.riehl@immobilienscout24.de
