@@ -66,7 +66,7 @@ def set_properties(project):
 
     project.set_property('manpage_source', 'man-yadtshell.md')
 
-    project.set_property('coverage_threshold_warn', 40)
+    project.set_property('coverage_threshold_warn', 50)
     project.set_property('coverage_break_build', False)
 
     project.set_property('integrationtest_inherit_environment', True)
