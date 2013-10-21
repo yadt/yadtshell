@@ -172,9 +172,3 @@ class ActionPlan(object):
         actions_on_handled_hosts = [
             action for action in self.actions if components[action.uri].host_uri in handled_hosts]
         self.actions = tuple(sorted(actions_on_handled_hosts))
-
-#        for action in [a for a in self.actions if isinstance(a, Action)]:
-#            yield action
-#        for plan in [p for p in self.actions if isinstance(p, ActionPlan)]:
-#            for a in plan.list_actions():
-#                yield a
