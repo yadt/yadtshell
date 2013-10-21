@@ -168,6 +168,11 @@ class ActionPlan(object):
             else:
                 yield plan_or_action
 
+    def remove_actions_on_unhandled_hosts(self, handled_hosts, components):
+        actions_on_handled_hosts = [
+            action for action in self.actions if components[action.uri].host_uri in handled_hosts]
+        self.actions = tuple(sorted(actions_on_handled_hosts))
+
 #        for action in [a for a in self.actions if isinstance(a, Action)]:
 #            yield action
 #        for plan in [p for p in self.actions if isinstance(p, ActionPlan)]:
