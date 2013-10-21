@@ -452,14 +452,6 @@ class Service(Component):
         tag = "ignore_%s" % self.name
         force = kwargs.get('force', False)
         return self.remote_call('yadt-service-ignore %s "%s"' % (self.name, message), tag, force)
-        # result = self._create_owner_file(
-        #    yadtshell.util.get_locking_user_info(),
-        # os.path.join(host.get_ignored_dir(), 'ignore.%s' % self.name),  # TODO extract method for filename
-        #    force=kwargs.get('force', False),
-        #    tag="ignore_%s" % self.name)
-        # if not result:
-        #    logger.warn("Could not ignore %s. Try --force" % self.uri)
-        # return result
 
     def unignore(self, **kwargs):
         tag = "unignore_%s" % self.name
