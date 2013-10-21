@@ -5,8 +5,11 @@ import yadtshell
 
 
 class ActionsTests(unittest.TestCase):
+
     def test_should_remove_actions_on_unhandled_hosts(self):
-        actions = [yadtshell.actions.Action('start', 'service://foobar/service1'), yadtshell.actions.Action('start', 'service://foobaz/service2')]
+        actions = [yadtshell.actions.Action(
+            'start', 'service://foobar/service1'),
+            yadtshell.actions.Action('start', 'service://foobaz/service2')]
         plan = yadtshell.actions.ActionPlan('plan', actions)
 
         mock_service1 = Mock()
