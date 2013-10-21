@@ -124,7 +124,7 @@ class HostTests(unittest.TestCase):
         mock_host.remote_call.assert_called_with(
             'yadt-host-update -r foo-1-2.3 bar-1-1.3/2', 'foobar42.domain_update')
 
-    def test_should_lock_host(self):
+    def test_should_force_lock_host(self):
         mock_host = Mock(yadtshell.components.Host)
         mock_host.hostname = 'foobar42.domain'
 
@@ -133,6 +133,16 @@ class HostTests(unittest.TestCase):
 
         mock_host.remote_call.assert_called_with(
             "yadt-host-lock 'lock me!'", 'lock_host', True)
+
+    def test_should_lock_host(self):
+        mock_host = Mock(yadtshell.components.Host)
+        mock_host.hostname = 'foobar42.domain'
+
+        yadtshell.components.Host.lock(
+            mock_host, message='lock me!', force=False)
+
+        mock_host.remote_call.assert_called_with(
+            "yadt-host-lock 'lock me!'", 'lock_host', False)
 
     @patch('yadtshell.util.get_locking_user_info')
     def test_remote_call_should_create_wrapping_command_with_adequate_environment(self, mock_lockinfo):
