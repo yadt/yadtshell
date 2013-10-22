@@ -4,7 +4,7 @@ from mock import Mock
 import yadtshell
 
 
-class ActionsPlanTests(unittest.TestCase):
+class ActionPlanTests(unittest.TestCase):
 
     def test_should_remove_actions_on_unhandled_hosts(self):
         actions = [
