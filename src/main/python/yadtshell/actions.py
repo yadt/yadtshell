@@ -17,6 +17,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+class PlanEmpty(BaseException):
+    pass
+
 class ActionException(Exception):
     def __init__(self, message, exitcode, rootcause=None):
         self.message = message
@@ -172,3 +175,5 @@ class ActionPlan(object):
         actions_on_handled_hosts = [
             action for action in self.actions if components[action.uri].host_uri in handled_hosts]
         self.actions = tuple(sorted(actions_on_handled_hosts))
+        if not self.actions:
+            raise PlanEmpty()

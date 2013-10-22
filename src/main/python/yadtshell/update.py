@@ -19,6 +19,7 @@
 import logging
 
 import yadtshell
+from yadtshell.actions import PlanEmpty
 
 
 logger = logging.getLogger('update')
@@ -146,11 +147,15 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
             continue
 
     prestart_chunks = set()
-    for chunk in all_plan.actions:
-        if chunk in update_chunks:
+    for possible_prestart_chunk in all_plan.actions:
+        if possible_prestart_chunk in update_chunks:
             continue
-        chunk.remove_actions_on_unhandled_hosts(handled_hosts, components)
-        prestart_chunks.add(chunk)
+        try:
+            possible_prestart_chunk.remove_actions_on_unhandled_hosts(
+                handled_hosts, components)
+        except PlanEmpty:
+            continue
+        prestart_chunks.add(possible_prestart_chunk)
 
     plan = yadtshell.actions.ActionPlan(
         'update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks), yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)], nr_workers=1)
