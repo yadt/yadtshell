@@ -17,10 +17,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class PlanEmpty(BaseException):
-    pass
-
 class ActionException(Exception):
+
     def __init__(self, message, exitcode, rootcause=None):
         self.message = message
         self.exitcode = exitcode
@@ -30,6 +28,7 @@ class ActionException(Exception):
 
 
 class TargetState(object):
+
     def __init__(self, uri, attr, target_value):
         self.uri = uri
         self.attr = attr
@@ -51,6 +50,7 @@ class State(object):
 
 
 class Action(object):
+
     def __init__(self, cmd, uri, attr=None, target_value=None, preconditions=None, args=None, kwargs=None):
         self.cmd = cmd
         self.uri = uri
@@ -108,6 +108,7 @@ class Action(object):
 
 
 class ActionPlan(object):
+
     def __init__(self, name, actions, nr_workers=None, nr_errors_tolerated=0):
         self.name = name
         if isinstance(actions, list):
@@ -171,9 +172,15 @@ class ActionPlan(object):
             else:
                 yield plan_or_action
 
+    @property
+    def is_empty(self):
+        return len(self.actions) == 0
+
+    @property
+    def is_not_empty(self):
+        return not self.is_empty
+
     def remove_actions_on_unhandled_hosts(self, handled_hosts, components):
         actions_on_handled_hosts = [
             action for action in self.actions if components[action.uri].host_uri in handled_hosts]
         self.actions = tuple(sorted(actions_on_handled_hosts))
-        if not self.actions:
-            raise PlanEmpty()

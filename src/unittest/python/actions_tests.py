@@ -2,10 +2,9 @@ import unittest
 from mock import Mock
 
 import yadtshell
-from yadtshell.actions import PlanEmpty
 
 
-class ActionsTests(unittest.TestCase):
+class ActionsPlanTests(unittest.TestCase):
 
     def test_should_remove_actions_on_unhandled_hosts(self):
         actions = [
@@ -50,13 +49,16 @@ class ActionsTests(unittest.TestCase):
         self.assertEqual(plan.actions[0].uri, 'service://foobar/service1')
         self.assertEqual(plan.actions[1].uri, 'service://foobaz/service2')
 
-    def test_should_raise_exception_when_plan_becomes_empty(self):
-        actions = [yadtshell.actions.Action('start', 'service://foobar/service1')]
+    def test_should_not_be_empty_when_actions_in_plan(self):
+        actions = [yadtshell.actions.Action(
+            'start', 'service://foobar/service1'),
+            yadtshell.actions.Action('start', 'service://foobaz/service2')]
         plan = yadtshell.actions.ActionPlan('plan', actions)
 
-        mock_service1 = Mock()
-        mock_service1.host_uri = 'host://foobar'
-        components = {'service://foobar/service1': mock_service1}
+        self.assertEqual(plan.is_not_empty, True)
 
-        handled_hosts = []
-        self.assertRaises(PlanEmpty, plan.remove_actions_on_unhandled_hosts, handled_hosts, components)
+    def test_should_be_empty_when_no_actions_in_plan(self):
+        actions = []
+        plan = yadtshell.actions.ActionPlan('plan', actions)
+
+        self.assertEqual(plan.is_empty, True)
