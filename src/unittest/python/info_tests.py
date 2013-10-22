@@ -21,9 +21,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
             self.assert_in = assert_in
 
     def setUp(self):
-        self.he_patcher = patch('yadtshell._info.hostexpand.HostExpander.HostExpander')
+        self.he_patcher = patch(
+            'yadtshell._info.hostexpand.HostExpander.HostExpander')
         self.he = self.he_patcher.start()
-        self.he.return_value.expand  = lambda hosts: [hosts]
+        self.he.return_value.expand = lambda hosts: [hosts]
 
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
