@@ -21,6 +21,10 @@ class InfoMatrixRenderingTests(unittest.TestCase):
             self.assert_in = assert_in
 
     def setUp(self):
+        self.he_patcher = patch('yadtshell._info.hostexpand.HostExpander.HostExpander')
+        self.he = self.he_patcher.start()
+        self.he.return_value.expand  = lambda hosts: [hosts]
+
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
         yadtshell.settings.VIEW_SETTINGS = {}
@@ -30,6 +34,9 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         yadtshell.settings.term.render = self.mock_render
 
         self._patch_assert_in()
+
+    def tearDown(self):
+        self.he_patcher.stop()
 
     @patch('yadtshell.util.get_mtime_of_current_state')
     @patch('__builtin__.print')

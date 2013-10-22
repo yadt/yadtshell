@@ -30,6 +30,7 @@ import yadtshell.twisted
 import yadtshell.defer
 
 import yadtshell.status as _status
+import yadtshell.info as _info
 
 from yadtshell.status import status
 from yadtshell.info import info
