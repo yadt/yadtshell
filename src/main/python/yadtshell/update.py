@@ -158,7 +158,9 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         prestart_chunks.add(possible_prestart_chunk)
 
     plan = yadtshell.actions.ActionPlan(
-        'update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks), yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)], nr_workers=1)
+        'update', [yadtshell.actions.ActionPlan('prestart', prestart_chunks),
+                   yadtshell.actions.ActionPlan('stopupdatestart', update_chunks)
+                   ], nr_workers=1)
     plan = yadtshell.metalogic.apply_instructions(plan, parallel)
     yadtshell.util.dump_action_plan('update', plan)
     return 'update'
