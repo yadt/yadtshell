@@ -63,6 +63,7 @@ def set_properties(project):
 
     project.set_property('integrationtest_parallel', True)
     project.set_property('integrationtest_cpu_scaling_factor', 8)
+    project.set_property('integrationtest_inherit_environment', True)
 
     project.set_property('manpage_source', 'man-yadtshell.md')
 
@@ -71,17 +72,13 @@ def set_properties(project):
     project.set_property('coverage_threshold_warn', 50)
     project.set_property('coverage_break_build', False)
 
-    project.set_property('integrationtest_inherit_environment', True)
-
-    project.set_property('copy_resources_target', '$dir_dist')
-    project.get_property('copy_resources_glob').append('setup.cfg')
-    project.get_property('copy_resources_glob').append('docs/man/yadtshell.1.gz')
-
     project.rpm_release = '0'
     project.install_file('share/man/man1/', 'docs/man/yadtshell.1.gz')
 
-    project.get_property('filter_resources_glob').append('**/yadtshell/__init__.py')
-    project.get_property('filter_resources_glob').append('**/setup.cfg')
+    project.set_property('copy_resources_target', '$dir_dist')
+    project.get_property('copy_resources_glob').extend(['setup.cfg', 'docs/man/yadtshell.1.gz'])
+
+    project.get_property('filter_resources_glob').extend(['**/yadtshell/__init__.py', '**/setup.cfg'])
 
     project.set_property('dir_dist_scripts', 'scripts')
 
