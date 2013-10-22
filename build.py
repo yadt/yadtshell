@@ -77,9 +77,12 @@ def set_properties(project):
     project.get_property('copy_resources_glob').append('setup.cfg')
     project.get_property('copy_resources_glob').append('docs/man/yadtshell.1.gz')
 
+    project.rpm_release = '0'
     project.install_file('share/man/man1/', 'docs/man/yadtshell.1.gz')
 
     project.get_property('filter_resources_glob').append('**/yadtshell/__init__.py')
+    project.get_property('filter_resources_glob').append('**/setup.cfg')
+
     project.set_property('dir_dist_scripts', 'scripts')
 
     project.get_property('distutils_commands').append('bdist_egg')
@@ -103,6 +106,7 @@ def set_properties_for_teamcity_builds(project):
     project.default_task = ['generate_manpages', 'install_build_dependencies', 'publish']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
     project.set_property('install_dependencies_use_mirrors', False)
+    project.rpm_release = 'is24'
 
 
 @task
