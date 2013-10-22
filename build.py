@@ -106,7 +106,7 @@ def set_properties_for_teamcity_builds(project):
     project.default_task = ['generate_manpages', 'install_build_dependencies', 'publish']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
     project.set_property('install_dependencies_use_mirrors', False)
-    project.rpm_release = 'is24'
+    project.rpm_release = os.environ.get('RPM_RELEASE', 0)
 
 
 @task
