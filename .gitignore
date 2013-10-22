@@ -1,7 +1,8 @@
 *.py[co]
 
 # Python cProfile
-profile.pstats
+profiling_*
+output.pstats
 
 # Packages
 *.egg
