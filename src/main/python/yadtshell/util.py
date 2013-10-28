@@ -32,6 +32,7 @@ from twisted.internet import defer, reactor
 import yadtshell.settings
 import yadtshell.components
 
+from yadtshell.constants import STANDALONE_SERVICE_RANK
 
 logger = logging.getLogger('util')
 
@@ -243,23 +244,27 @@ def stop_ssh_multiplexed(ignored, hosts=None):
     return dl
 
 
-def inbound_deps(service, components):
-    inbound_services = [s for s in service.needed_by]
+def inbound_deps_on_same_host(service, components):
+    inbound_services = [s for s in service.needed_by if 'service://%s' % service.host in s]
     for dependent_service in service.needed_by:
-        inbound_services.extend(inbound_deps(components[dependent_service], components))
+        inbound_services.extend(inbound_deps_on_same_host(components[dependent_service], components))
     return inbound_services
 
 
-def outbound_deps(service, components):
-    outbound_services = [s for s in service.needs if 'service://' in s]
-    for needed_service in [s for s in service.needs if 'service://' in s]:
-        outbound_services.extend(outbound_deps(components[needed_service], components))
+def outbound_deps_on_same_host(service, components):
+    needed_services = [s for s in service.needs if 'service://%s' % service.host in s]
+    outbound_services = needed_services
+    for needed_service in [s for s in service.needs if 'service://%s' % service.host in s]:
+        outbound_services.extend(outbound_deps_on_same_host(components[needed_service], components))
     return outbound_services
 
 
 def compute_dependency_scores(components):
     servicedefs = dict((component.uri, component) for component in components.values() if isinstance(component, yadtshell.components.Service))
     for service, servicedef in servicedefs.iteritems():
-        outbound_edges = len(outbound_deps(servicedef, components))
-        inbound_edges = len(inbound_deps(servicedef, components))
-        servicedef.dependency_score = inbound_edges - outbound_edges
+        outbound_edges = len(outbound_deps_on_same_host(servicedef, components))
+        inbound_edges = len(inbound_deps_on_same_host(servicedef, components))
+        if outbound_edges == inbound_edges == 0:
+            servicedef.dependency_score = STANDALONE_SERVICE_RANK
+        else:
+            servicedef.dependency_score = inbound_edges - outbound_edges
