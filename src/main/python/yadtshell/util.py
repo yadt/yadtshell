@@ -241,3 +241,25 @@ def stop_ssh_multiplexed(ignored, hosts=None):
 
     dl.addCallback(lambda _: ignored)
     return dl
+
+
+def inbound_deps(service, components):
+    inbound_services = [s for s in service.needed_by]
+    for dependent_service in service.needed_by:
+        inbound_services.extend(inbound_deps(components[dependent_service], components))
+    return inbound_services
+
+
+def outbound_deps(service, components):
+    outbound_services = [s for s in service.needs if 'service://' in s]
+    for needed_service in [s for s in service.needs if 'service://' in s]:
+        outbound_services.extend(outbound_deps(components[needed_service], components))
+    return outbound_services
+
+
+def compute_dependency_scores(components):
+    servicedefs = dict((component.uri, component) for component in components.values() if isinstance(component, yadtshell.components.Service))
+    for service, servicedef in servicedefs.iteritems():
+        outbound_edges = len(outbound_deps(servicedef, components))
+        inbound_edges = len(inbound_deps(servicedef, components))
+        servicedef.dependency_score = inbound_edges - outbound_edges

@@ -188,31 +188,6 @@ def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
 
 
-def inbound_deps(service, components):
-    inbound_services = [s for s in service.needed_by]
-    for dependent_service in service.needed_by:
-        inbound_services.extend(inbound_deps(components[dependent_service], components))
-    return inbound_services
-
-
-def outbound_deps(service, components):
-    outbound_services = [s for s in service.needs if 'service://' in s]
-    for needed_service in [s for s in service.needs if 'service://' in s]:
-        outbound_services.extend(outbound_deps(components[needed_service], components))
-    return outbound_services
-
-
-def compute_dependency_scores(components):
-    servicedefs = dict((component.uri, component) for component in components.values() if isinstance(component, yadtshell.components.Service))
-    for service, servicedef in servicedefs.iteritems():
-        # print('%s is needed by %s' % (service, inbound_deps(servicedef, components)))
-        # print ('%s needs %s' % (service, outbound_deps(servicedef, components)))
-
-        outbound_edges = len(outbound_deps(servicedef, components))
-        inbound_edges = len(inbound_deps(servicedef, components))
-        servicedef.dependency_score = inbound_edges - outbound_edges
-
-
 def render_services_matrix(components=None, **kwargs):
     if not components:
         components = yadtshell.util.restore_current_state()
@@ -242,7 +217,6 @@ def _render_services_matrix(components, hosts, enable_legend=False):
 
     ranks = {}
     services = []
-    compute_dependency_scores(components)
     for host in hosts:
         for servicedef in getattr(host, 'services', []):
             try:

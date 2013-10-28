@@ -34,6 +34,8 @@ from twisted.internet import defer
 
 from hostexpand.HostExpander import HostExpander
 import yadtshell
+from yadtshell.util import compute_dependency_scores
+
 
 logger = logging.getLogger('status')
 
@@ -369,6 +371,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                     dependent_component.needs.add(component.uri)
                 except KeyError, ke:
                     logger.warning("unknown dependent key " + str(ke))
+
+        compute_dependency_scores(components)
 
         def _open_component_file(component_type):
             return open(os.path.join(yadtshell.settings.OUT_DIR, component_type), 'w')
