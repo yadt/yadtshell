@@ -9,6 +9,8 @@ from yadtshell.util import (inbound_deps,
 class ServiceOrderingTests(unittest.TestCase):
 
     def setUp(self):
+        yadtshell.settings.TARGET_SETTINGS = {
+            'name': 'test', 'hosts': ['foobar42']}
         self.components = yadtshell.components.ComponentDict()
         self.bar_service = yadtshell.components.Service(
             'foobar42', 'barservice', {})
