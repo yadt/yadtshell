@@ -26,7 +26,8 @@ class ServiceOrderingTests(unittest.TestCase):
 
     def test_inbound_deps_should_return_empty_list_when_service_is_not_needed(self):
 
-        self.assertEqual(inbound_deps_on_same_host(self.bar_service, self.components), [])
+        self.assertEqual(inbound_deps_on_same_host(
+            self.bar_service, self.components), [])
 
     def test_inbound_deps_should_return_needing_service(self):
         self.bar_service.needed_by = ['service://foobar42/bazservice']
@@ -35,7 +36,8 @@ class ServiceOrderingTests(unittest.TestCase):
             inbound_deps_on_same_host(self.bar_service, self.components), ['service://foobar42/bazservice'])
 
     def test_outbound_deps_should_return_empty_list_when_service_needs_nothing(self):
-        self.assertEqual(outbound_deps_on_same_host(self.bar_service, self.components), [])
+        self.assertEqual(outbound_deps_on_same_host(
+            self.bar_service, self.components), [])
 
     def test_outbound_deps_should_return_needed_service(self):
         self.bar_service.needs = ['service://foobar42/bazservice']
@@ -59,7 +61,8 @@ class ServiceOrderingTests(unittest.TestCase):
 
     def test_should_label_standalone_services(self):
         compute_dependency_scores(self.components)
-        self.assertEqual(self.baz_service.dependency_score, STANDALONE_SERVICE_RANK)
+        self.assertEqual(
+            self.baz_service.dependency_score, STANDALONE_SERVICE_RANK)
 
     def test_should_increase_dependency_score_when_ingoing_edge_found(self):
         self.bar_service.needed_by = ['service://foobar42/bazservice']
@@ -80,3 +83,17 @@ class ServiceOrderingTests(unittest.TestCase):
         compute_dependency_scores(self.components)
 
         self.assertEqual(self.bar_service.dependency_score, -1)
+
+    def test_should_ignore_cross_host_inward_dependencies(self):
+        self.components['service://otherhost/foo'] = yadtshell.components.Service(
+            'otherhost', 'foo', {})
+        self.bar_service.needed_by = ['service://otherhost/foo']
+        compute_dependency_scores(self.components)
+
+    def test_should_ignore_cross_host_outward_dependencies(self):
+        self.components['service://otherhost/foo'] = yadtshell.components.Service(
+            'otherhost', 'foo', {})
+        self.bar_service.needs = ['service://otherhost/foo']
+        compute_dependency_scores(self.components)
+        self.assertEqual(
+            self.bar_service.dependency_score, STANDALONE_SERVICE_RANK)
