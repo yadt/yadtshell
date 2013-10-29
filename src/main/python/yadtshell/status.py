@@ -399,7 +399,11 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             for hostname in he.expand(grouped_hosts):
                 services = []
                 host = components['host://%s' % hostname]
-                for service in getattr(host, 'defined_services', []):
+
+                host_services = getattr(host, 'defined_services', [])
+                host_services.sort(key=lambda s: s.dependency_score)
+
+                for service in host_services:
                     services.append({
                         'uri': service.uri,
                         'name': service.name,
