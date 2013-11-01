@@ -1,6 +1,6 @@
 # [YADTSHELL](http://yadt-project.org) [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell)
 
-The yadtshell controls hosts with a _yadt-client_ or _yadt-minion_ via ssh, handles service dependencies and package updates.
+The yadtshell controls hosts with a _yadt-minion_ via ssh, handles service dependencies and package updates.
 
 ## Installation with pip
 It is considered good practice to install all packages available via pip & easy_install in a
@@ -15,7 +15,7 @@ pip install yadtshell
 ```
 
 ## Developer setup
-This module uses the [pybuilder](http://pybuilder.github.com).
+This module uses the [pybuilder](http://pybuilder.github.io).
 ```bash
 git clone https://github.com/yadt/yadtshell
 cd yadtshell
@@ -43,6 +43,6 @@ cd target/dist/yadtshell-$VERSION
 
 ## Looking at the coverage
 ```bash
-pyb
+pyb analyze
 cat target/reports/coverage
 ```
