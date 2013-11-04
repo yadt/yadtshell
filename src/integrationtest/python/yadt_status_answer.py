@@ -86,6 +86,7 @@ artefacts_query_epoch: $timestamp
 state: uptodate
 query_time: 1
 reboot_required_to_activate_latest_kernel: $reboot_required_to_activate_latest_kernel
+ssh_poll_max_seconds: 1
 """)
 
 STATUS_TEMPLATE_WITH_UNSATISFIABLE_DEPENDENCIES = string.Template("""

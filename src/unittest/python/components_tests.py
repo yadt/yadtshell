@@ -117,6 +117,7 @@ class HostTests(unittest.TestCase):
         mock_host.hostname = 'foobar42.domain'
         mock_host.remote_call.return_value = 'remote call'
         mock_host.reboot_required = True
+        mock_host.ssh_poll_max_seconds = 42
         mock_host.kwargs = {'reboot_required': True}
 
         yadtshell.components.Host.update(mock_host, reboot_required=True)
