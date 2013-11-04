@@ -288,7 +288,8 @@ class Host(Component):
                                                   task.deferLater(reactor,
                                                                   yadtshell.constants.SSH_POLL_DELAY,
                                                                   poll_rebooting_machine,
-                                                                  count + 1))
+                                                                  count + 1,
+                                                                  ssh_poll_max_seconds=ssh_poll_max_seconds))
             cmdline = shlex.split(poll_protocol.cmd)
             reactor.spawnProcess(poll_protocol, cmdline[0], cmdline, None)
 
@@ -299,8 +300,8 @@ class Host(Component):
 
         def display_reboot_info(protocol):
             if hasattr(protocol, 'ssh_poll_count'):
-                logger.info('Reboot took %d seconds' %
-                            (protocol.ssh_poll_count * yadtshell.constants.SSH_POLL_DELAY))
+                logger.info('%s: reboot took %d seconds' %
+                            (self.uri, protocol.ssh_poll_count * yadtshell.constants.SSH_POLL_DELAY))
             return protocol
         p.deferred.addCallback(display_reboot_info)
 
