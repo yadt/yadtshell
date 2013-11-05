@@ -1,10 +1,15 @@
 import unittest
 
+from mock import Mock, patch
+
 import yadtshell
 from yadtshell.util import (inbound_deps_on_same_host,
                             outbound_deps_on_same_host,
                             compute_dependency_scores,
-                            calculate_max_tries_for_interval_and_delay)
+                            calculate_max_tries_for_interval_and_delay,
+                            render_state,
+                            restore_current_state,
+                            get_mtime_of_current_state)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
 
 
@@ -121,3 +126,60 @@ class IntervalAndDelayConversionTests(unittest.TestCase):
         max_tries = calculate_max_tries_for_interval_and_delay(0, 5)
 
         self.assertEqual(max_tries, 0)
+
+
+class ServiceRenderingTests(unittest.TestCase):
+
+    @patch('yadtshell.settings.term.render')
+    def test_should_render_red_when_state_is_down(self, render):
+        render_state(yadtshell.settings.DOWN, width=0)
+
+        render.assert_called_with('${RED}${BOLD}down${NORMAL}')
+
+    @patch('yadtshell.settings.term.render')
+    def test_should_render_green_when_state_is_up(self, render):
+        render_state(yadtshell.settings.UP, width=0)
+
+        render.assert_called_with('${GREEN}${BOLD}up${NORMAL}')
+
+    @patch('yadtshell.settings.term.render')
+    def test_should_adjust_left_by_default(self, render):
+        render_state(yadtshell.settings.UP, width=4)
+
+        render.assert_called_with('${GREEN}${BOLD}up  ${NORMAL}')
+
+    @patch('yadtshell.settings.term.render')
+    def test_should_adjust_right(self, render):
+        render_state(yadtshell.settings.UP, width=6, just='right')
+
+        render.assert_called_with('${GREEN}${BOLD}    up${NORMAL}')
+
+
+class CurrentStateTests(unittest.TestCase):
+
+    def setUp(self):
+        yadtshell.settings.OUT_DIR = '/out/dir/'
+
+    @patch('yadtshell.util.os.path.getmtime')
+    def test_should_return_mtime_of_current_state(self, mtime_function):
+        get_mtime_of_current_state()
+
+        mtime_function.assert_called_with('/out/dir/current_state.components')
+
+    @patch('yadtshell.util.restore')
+    def test_should_restore_current_state(self, restore_function):
+        restore_current_state()
+
+        restore_function.assert_called_with('/out/dir/current_state.components')
+
+    @patch('yadtshell.util.logger')
+    @patch('yadtshell.util.restore')
+    @patch('yadtshell.util.sys')
+    def test_should_exit_when_restore_fails(self, sys, restore, _):
+        def fail(_):
+            raise IOError()
+        restore.side_effect = fail
+
+        restore_current_state()
+
+        sys.exit.assert_called_with(1)

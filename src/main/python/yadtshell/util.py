@@ -89,17 +89,20 @@ def dump_action_plan(flavor, plan):
     dump_plan(flavor + '-action', plan)
 
 
+def current_state():
+    return os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components')
+
+
 def restore_current_state():
     try:
-        return restore(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+        return restore(current_state())
     except IOError:
         logger.warning('no current state stored, try "status" first')
         sys.exit(1)
 
 
 def get_mtime_of_current_state():
-    # TODO combine this with prev method
-    return os.path.getmtime(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+    return os.path.getmtime(current_state())
 
 
 def is_up(state):
@@ -108,8 +111,6 @@ def is_up(state):
 
 def not_up(state):
     return not is_up(state)
-    # return state in [None, settings.UNKNOWN, settings.DOWN,
-    # settings.MISSING, settings.UPDATE_NEEDED]
 
 
 def render_state(state, just='left', width=10):
