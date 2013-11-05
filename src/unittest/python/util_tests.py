@@ -132,8 +132,7 @@ class ServiceRenderingTests(unittest.TestCase):
 
     def setUp(self):
         self.mock_term = Mock()
-        self.mock_render = Mock()
-        self.mock_render.side_effect = lambda unrendered: unrendered
+        self.mock_render = Mock(side_effect=lambda unrendered: unrendered)
         yadtshell.settings.term = self.mock_term
         yadtshell.settings.term.render = self.mock_render
 
