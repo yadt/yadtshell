@@ -26,6 +26,8 @@ import yaml
 import shlex
 
 from twisted.internet import defer, reactor, task
+
+from yadtshell.util import calculate_max_tries_for_interval_and_delay
 import yadtshell
 
 
@@ -274,7 +276,8 @@ class Host(Component):
             return failure
 
         def poll_rebooting_machine(count=1, ssh_poll_max_seconds=yadtshell.constants.SSH_POLL_MAX_SECONDS_DEFAULT):
-            max_tries = (ssh_poll_max_seconds + yadtshell.constants.SSH_POLL_DELAY - 1) / yadtshell.constants.SSH_POLL_DELAY
+            max_tries = calculate_max_tries_for_interval_and_delay(interval=ssh_poll_max_seconds,
+                                                                   delay=yadtshell.constants.SSH_POLL_DELAY)
             logger.info("%s: polling for ssh connect, try %i of %i" %
                         (self.uri, count, max_tries))
             poll_command = self.remote_call(

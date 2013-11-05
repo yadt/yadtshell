@@ -98,7 +98,8 @@ def restore_current_state():
 
 
 def get_mtime_of_current_state():
-    return os.path.getmtime(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))  # TODO combine this with prev method
+    # TODO combine this with prev method
+    return os.path.getmtime(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
 
 
 def is_up(state):
@@ -107,7 +108,8 @@ def is_up(state):
 
 def not_up(state):
     return not is_up(state)
-    #return state in [None, settings.UNKNOWN, settings.DOWN, settings.MISSING, settings.UPDATE_NEEDED]
+    # return state in [None, settings.UNKNOWN, settings.DOWN,
+    # settings.MISSING, settings.UPDATE_NEEDED]
 
 
 def render_state(state, just='left', width=10):
@@ -206,15 +208,19 @@ def start_ssh_multiplexed(hosts=None):
 
     def start_ssh(protocol, host):
         logger.debug('start_ssh %s' % host)
-        start_multiplexing_call = shlex.split('%s -fN -o ControlMaster=yes %s' % (yadtshell.settings.SSH, host))
-        p = yadtshell.twisted.YadtProcessProtocol(host, 'start_ssh', wait_for_io=False)
+        start_multiplexing_call = shlex.split(
+            '%s -fN -o ControlMaster=yes %s' % (yadtshell.settings.SSH, host))
+        p = yadtshell.twisted.YadtProcessProtocol(
+            host, 'start_ssh', wait_for_io=False)
         p.deferred = defer.Deferred()
         logger.debug('cmd: %s' % start_multiplexing_call)
-        reactor.spawnProcess(p, start_multiplexing_call[0], start_multiplexing_call, None)
+        reactor.spawnProcess(
+            p, start_multiplexing_call[0], start_multiplexing_call, None)
         return protocol
 
     def check_ssh(host):
-        ssh_check_cmds = shlex.split('%s -O check %s' % (yadtshell.settings.SSH, host))
+        ssh_check_cmds = shlex.split(
+            '%s -O check %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(host, 'check_ssh')
         p.deferred = defer.Deferred()
         logger.debug('cmd: %s' % ssh_check_cmds)
@@ -228,11 +234,13 @@ def start_ssh_multiplexed(hosts=None):
 def stop_ssh_multiplexed(ignored, hosts=None):
 
     def stop_ssh(host):
-        ssh_stop_cmds = shlex.split('%s -O exit %s' % (yadtshell.settings.SSH, host))
+        ssh_stop_cmds = shlex.split(
+            '%s -O exit %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(host, 'stop_ssh')
         p.deferred = defer.Deferred()
         logger.debug('cmd: %s' % ssh_stop_cmds)
-        reactor.spawnProcess(p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={2: 3})
+        reactor.spawnProcess(
+            p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={2: 3})
         return p.deferred
 
     if not hosts:
@@ -245,26 +253,36 @@ def stop_ssh_multiplexed(ignored, hosts=None):
 
 
 def inbound_deps_on_same_host(service, components):
-    inbound_services = [s for s in service.needed_by if 'service://%s' % service.host in s]
+    inbound_services = [
+        s for s in service.needed_by if 'service://%s' % service.host in s]
     for dependent_service in service.needed_by:
-        inbound_services.extend(inbound_deps_on_same_host(components[dependent_service], components))
+        inbound_services.extend(
+            inbound_deps_on_same_host(components[dependent_service], components))
     return inbound_services
 
 
 def outbound_deps_on_same_host(service, components):
-    needed_services = [s for s in service.needs if 'service://%s' % service.host in s]
+    needed_services = [
+        s for s in service.needs if 'service://%s' % service.host in s]
     outbound_services = needed_services
     for needed_service in [s for s in service.needs if 'service://%s' % service.host in s]:
-        outbound_services.extend(outbound_deps_on_same_host(components[needed_service], components))
+        outbound_services.extend(
+            outbound_deps_on_same_host(components[needed_service], components))
     return outbound_services
 
 
 def compute_dependency_scores(components):
-    servicedefs = dict((component.uri, component) for component in components.values() if isinstance(component, yadtshell.components.Service))
+    servicedefs = dict((component.uri, component)
+                       for component in components.values() if isinstance(component, yadtshell.components.Service))
     for service, servicedef in servicedefs.iteritems():
-        outbound_edges = len(outbound_deps_on_same_host(servicedef, components))
+        outbound_edges = len(
+            outbound_deps_on_same_host(servicedef, components))
         inbound_edges = len(inbound_deps_on_same_host(servicedef, components))
         if outbound_edges == inbound_edges == 0:
             servicedef.dependency_score = STANDALONE_SERVICE_RANK
         else:
             servicedef.dependency_score = inbound_edges - outbound_edges
+
+
+def calculate_max_tries_for_interval_and_delay(interval, delay):
+    return (interval + delay - 1) / delay

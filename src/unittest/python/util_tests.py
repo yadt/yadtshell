@@ -3,7 +3,8 @@ import unittest
 import yadtshell
 from yadtshell.util import (inbound_deps_on_same_host,
                             outbound_deps_on_same_host,
-                            compute_dependency_scores)
+                            compute_dependency_scores,
+                            calculate_max_tries_for_interval_and_delay)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
 
 
@@ -97,3 +98,26 @@ class ServiceOrderingTests(unittest.TestCase):
         compute_dependency_scores(self.components)
         self.assertEqual(
             self.bar_service.dependency_score, STANDALONE_SERVICE_RANK)
+
+
+class IntervalAndDelayConversionTests(unittest.TestCase):
+
+    def test_should_return_divisor_when_division_without_remainder_is_possible(self):
+        max_tries = calculate_max_tries_for_interval_and_delay(10, 5)
+
+        self.assertEqual(max_tries, 2)
+
+    def test_should_increase_interval_when_remainder_found(self):
+        max_tries = calculate_max_tries_for_interval_and_delay(10, 6)
+
+        self.assertEqual(max_tries, 2)  # now waits 12 seconds instead of 10
+
+    def test_should_at_least_make_one_try_when_delay_is_longer_than_interval(self):
+        max_tries = calculate_max_tries_for_interval_and_delay(1, 5)
+
+        self.assertEqual(max_tries, 1)
+
+    def test_should_not_make_tries_when_interval_is_zero(self):
+        max_tries = calculate_max_tries_for_interval_and_delay(0, 5)
+
+        self.assertEqual(max_tries, 0)
