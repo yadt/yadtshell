@@ -130,29 +130,32 @@ class IntervalAndDelayConversionTests(unittest.TestCase):
 
 class ServiceRenderingTests(unittest.TestCase):
 
-    @patch('yadtshell.settings.term.render')
-    def test_should_render_red_when_state_is_down(self, render):
+    def setUp(self):
+        self.mock_term = Mock()
+        self.mock_render = Mock()
+        self.mock_render.side_effect = lambda unrendered: unrendered
+        yadtshell.settings.term = self.mock_term
+        yadtshell.settings.term.render = self.mock_render
+
+    def test_should_render_red_when_state_is_down(self):
         render_state(yadtshell.settings.DOWN, width=0)
 
-        render.assert_called_with('${RED}${BOLD}down${NORMAL}')
+        self.mock_render.assert_called_with('${RED}${BOLD}down${NORMAL}')
 
-    @patch('yadtshell.settings.term.render')
-    def test_should_render_green_when_state_is_up(self, render):
+    def test_should_render_green_when_state_is_up(self):
         render_state(yadtshell.settings.UP, width=0)
 
-        render.assert_called_with('${GREEN}${BOLD}up${NORMAL}')
+        self.mock_render.assert_called_with('${GREEN}${BOLD}up${NORMAL}')
 
-    @patch('yadtshell.settings.term.render')
-    def test_should_adjust_left_by_default(self, render):
+    def test_should_adjust_left_by_default(self):
         render_state(yadtshell.settings.UP, width=4)
 
-        render.assert_called_with('${GREEN}${BOLD}up  ${NORMAL}')
+        self.mock_render.assert_called_with('${GREEN}${BOLD}up  ${NORMAL}')
 
-    @patch('yadtshell.settings.term.render')
-    def test_should_adjust_right(self, render):
+    def test_should_adjust_right(self):
         render_state(yadtshell.settings.UP, width=6, just='right')
 
-        render.assert_called_with('${GREEN}${BOLD}    up${NORMAL}')
+        self.mock_render.assert_called_with('${GREEN}${BOLD}    up${NORMAL}')
 
 
 class CurrentStateTests(unittest.TestCase):
