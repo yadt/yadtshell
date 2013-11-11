@@ -195,7 +195,7 @@ def load_settings(log_to_file=True):
                      VIEW_SETTINGS)
 
     hosts_condensed_file = open(os.path.join(OUT_DIR, 'hosts_condensed'), 'w')
-    print >> hosts_condensed_file, ', '.join(condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
+    print >> hosts_condensed_file, ' '.join(condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
     hosts_condensed_file.close()
 
     def list_selected_hosts():

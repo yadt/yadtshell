@@ -145,7 +145,7 @@ def condense_hosts2(words):
         if len(variables) <= 1:
             condensed = constant[0] + variables[0] + constant[1]
         else:
-            condensed = constant[0] + '[' + ','.join(variables) + ']' + constant[1]
+            condensed = constant[0] + '{' + ','.join(variables) + '}' + constant[1]
         if constant[2] is None:
             result.append(condensed)
         else:
