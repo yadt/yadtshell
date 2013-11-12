@@ -112,11 +112,9 @@ def _load_target_file(target_settings_file, visited=None):
     for include in target_settings.get('includes', []):
         subtarget_settings = _load_target_file(include, visited)
         for host in subtarget_settings.get('hosts', []):
-            if host not in target_settings.get('hosts', []):
-                try:
-                    target_settings['hosts'].append(host)
-                except KeyError:
-                    target_settings['hosts'] = [host]
+            target_hosts = target_settings.get('hosts', [])
+            if host not in target_hosts:
+                target_settings.setdefault('hosts', target_hosts).append(host)
     return target_settings
 
 
