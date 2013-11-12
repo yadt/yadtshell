@@ -117,6 +117,7 @@ def _load_target_file(target_settings_file, visited=None):
 
     return target_settings
 
+
 def load_target_file(target_settings_file):
     target_settings = _load_target_file(target_settings_file)
     target_settings.setdefault('name', os.path.basename(os.getcwd()))

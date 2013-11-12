@@ -6,24 +6,33 @@ from StringIO import StringIO
 
 class SettingsTests(unittest.TestCase):
 
-    @patch('yadtshell.settings.os.getcwd')
-    @patch('yadtshell.settings.open', create=True)
-    def test_should_load_target_file(self, mock_open, getcwd):
+    def setUp(self):
+        self.open_patcher = patch('yadtshell.settings.open', create=True)
+        self.mock_open = self.open_patcher.start()
+
+        self.getcwd_patcher = patch('yadtshell.settings.os.getcwd')
+        self.getcwd = self.getcwd_patcher.start()
+
+        self.getcwd.return_value = '/foo/bar/foobaz42'
+
+    def tearDown(self):
+        self.open_patcher.stop()
+        self.getcwd_patcher.stop()
+
+    def test_should_load_target_file(self):
         content = """
 hosts:
     - foobar
 """
-        mock_open.return_value = MagicMock(spec=file, wraps=StringIO(content))
-        getcwd.return_value = '/foo/bar/foobaz42'
+        self.mock_open.return_value = MagicMock(
+            spec=file, wraps=StringIO(content))
 
         result = yadtshell.settings.load_target_file("useless_name")
         expect = dict(name='foobaz42',
                       hosts=['foobar'])
         self.assertEqual(result, expect)
 
-    @patch('yadtshell.settings.os.getcwd')
-    @patch('yadtshell.settings.open', create=True)
-    def test_should_load_meta_target_file(self, mock_open, getcwd):
+    def test_should_load_meta_target_file(self):
         content = """
 hosts:
     - foobar01
@@ -40,8 +49,7 @@ hosts:
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
-        mock_open.side_effect = my_open
-        getcwd.return_value = '/foo/bar/foobaz42'
+        self.mock_open.side_effect = my_open
 
         result = yadtshell.settings.load_target_file('root-target')
         expect = dict(name='foobaz42',
@@ -49,9 +57,7 @@ hosts:
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
-    @patch('yadtshell.settings.os.getcwd')
-    @patch('yadtshell.settings.open', create=True)
-    def test_should_load_recursed_meta_target_files(self, mock_open, getcwd):
+    def test_should_load_recursed_meta_target_files(self):
         content = """
 hosts:
     - foobar01
@@ -77,8 +83,7 @@ hosts:
 
             return MagicMock(spec=file, wraps=StringIO(subsubcontent))
 
-        mock_open.side_effect = my_open
-        getcwd.return_value = '/foo/bar/foobaz42'
+        self.mock_open.side_effect = my_open
 
         result = yadtshell.settings.load_target_file('root-target')
         expect = dict(name='foobaz42',
@@ -86,9 +91,7 @@ hosts:
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
-    @patch('yadtshell.settings.os.getcwd')
-    @patch('yadtshell.settings.open', create=True)
-    def test_should_load_recursed_meta_target_files_once(self, mock_open, getcwd):
+    def test_should_load_recursed_meta_target_files_once(self):
         content = """
 hosts:
     - foobar01
@@ -107,8 +110,7 @@ includes:
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
-        mock_open.side_effect = my_open
-        getcwd.return_value = '/foo/bar/foobaz42'
+        self.mock_open.side_effect = my_open
 
         result = yadtshell.settings.load_target_file('root-target')
         expect = dict(name='foobaz42',
@@ -116,9 +118,7 @@ includes:
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
-    @patch('yadtshell.settings.os.getcwd')
-    @patch('yadtshell.settings.open', create=True)
-    def test_should_add_hosts_only_once(self, mock_open, getcwd):
+    def test_should_add_hosts_only_once(self):
         content = """
 hosts:
     - foobar01
@@ -127,7 +127,7 @@ includes:
 """
         subcontent = """
 hosts:
-    - foobar42 
+    - foobar42
     - foobar01
 """
 
@@ -136,8 +136,7 @@ hosts:
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
-        mock_open.side_effect = my_open
-        getcwd.return_value = '/foo/bar/foobaz42'
+        self.mock_open.side_effect = my_open
 
         result = yadtshell.settings.load_target_file('root-target')
         expect = dict(name='foobaz42',
