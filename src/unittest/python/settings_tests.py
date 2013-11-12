@@ -101,7 +101,6 @@ hosts:
 includes:
     - root-target
 """
-        
 
         def my_open(filename):
             if filename == 'root-target':
@@ -116,7 +115,6 @@ includes:
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
-
 
     @patch('yadtshell.settings.os.getcwd')
     @patch('yadtshell.settings.open', create=True)

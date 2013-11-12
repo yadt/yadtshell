@@ -4,18 +4,19 @@ import logging
 from mockito import when, unstub, verify, mock, any as any_value
 
 from unittest_support import FileNameTestCase
-from yadtshell.loggingtools import (create_next_log_file_name_with_command_arguments_as_tag,
-                                    create_next_log_file_name,
-                                    _get_command_counter_and_increment,
-                                    _strip_special_characters,
-                                    _strip_dashes,
-                                    _switch_characters_to_lower_case,
-                                    _trim_underscores,
-                                    _replace_uri_specific_characters_with_underscores,
-                                    _replace_blanks_with_underscores,
-                                    ErrorFilter,
-                                    InfoFilter,
-                                    configure_logger_output_stream_by_level)
+from yadtshell.loggingtools import (
+    create_next_log_file_name_with_command_arguments_as_tag,
+    create_next_log_file_name,
+    _get_command_counter_and_increment,
+    _strip_special_characters,
+    _strip_dashes,
+    _switch_characters_to_lower_case,
+    _trim_underscores,
+    _replace_uri_specific_characters_with_underscores,
+    _replace_blanks_with_underscores,
+    ErrorFilter,
+    InfoFilter,
+    configure_logger_output_stream_by_level)
 import yadtshell.loggingtools
 
 
@@ -37,44 +38,48 @@ class LoggerConfigurationTests(unittest.TestCase):
         verify(stdout_handler).addFilter(info_filter)
 
 
-
-
 class CreateNextLogFileNameTests(FileNameTestCase):
 
     def setUp(self):
         when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
         self.actual_file_name = create_next_log_file_name(
-                log_dir='/var/log/test',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                tag='status'
+            log_dir='/var/log/test',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            tag='status'
         )
 
     def tearDown(self):
         unstub()
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
-        self._assert(self.actual_file_name)._element_at(0)._is_equal_to('/var/log/test/yadtshell')
+        self._assert(self.actual_file_name)._element_at(
+            0)._is_equal_to('/var/log/test/yadtshell')
 
     def test_should_use_target_name_as_second_element(self):
-        self._assert(self.actual_file_name)._element_at(1)._is_equal_to('target-name')
+        self._assert(self.actual_file_name)._element_at(
+            1)._is_equal_to('target-name')
 
     def test_should_use_current_timestamp_as_third_element(self):
-        self._assert(self.actual_file_name)._element_at(2)._is_equal_to('2013-01-31--11-27-56')
+        self._assert(self.actual_file_name)._element_at(
+            2)._is_equal_to('2013-01-31--11-27-56')
 
     def test_should_use_user_name_as_fourth_element(self):
-        self._assert(self.actual_file_name)._element_at(3)._is_equal_to('user-name')
+        self._assert(self.actual_file_name)._element_at(
+            3)._is_equal_to('user-name')
 
     def test_should_use_command_counter_as_fifth_element(self):
         self._assert(self.actual_file_name)._element_at(4)._is_equal_to('123')
 
     def test_should_use_host_name_as_sixth_element(self):
-        self._assert(self.actual_file_name)._element_at(5)._is_equal_to('host-name')
+        self._assert(self.actual_file_name)._element_at(
+            5)._is_equal_to('host-name')
 
     def test_should_use_command_argument_as_seventh_element(self):
-        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
+        self._assert(self.actual_file_name)._element_at(
+            6)._is_equal_to('status')
 
 
 class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
@@ -87,89 +92,115 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
     def test_should_use_command_argument_as_seventh_element(self):
         self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='log-directory',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                command_arguments=['yadtshell', 'status']
+            log_dir='log-directory',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            command_arguments=['yadtshell', 'status']
         )
-        self._assert(self.actual_file_name)._element_at(6)._is_equal_to('status')
+        self._assert(self.actual_file_name)._element_at(
+            6)._is_equal_to('status')
 
     def test_should_call_create_next_log_file_name_using_given_arguments(self):
-        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+        when(
+            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
+                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='log-directory',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                command_arguments=['yadtshell', 'status']
+            log_dir='log-directory',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            command_arguments=['yadtshell', 'status']
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
+        verify(
+            yadtshell.loggingtools).create_next_log_file_name('log-directory',
+                                                              'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
 
     def test_should_join_arguments_using_underscore(self):
-        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+        when(
+            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
+                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='log-directory',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                command_arguments=['/usr/bin/yadtshell', 'abc', 'def', 'ghi', 'jkl']
+            log_dir='log-directory',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            command_arguments=[
+                    '/usr/bin/yadtshell', 'abc', 'def', 'ghi', 'jkl']
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
+        verify(
+            yadtshell.loggingtools).create_next_log_file_name('log-directory',
+                                                              'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
 
     def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self):
-        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+        when(
+            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
+                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='log-directory',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                command_arguments=['foobar', 'abc', 'def', 'ghi', 'jkl']
+            log_dir='log-directory',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            command_arguments=['foobar', 'abc', 'def', 'ghi', 'jkl']
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
+        verify(
+            yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name',
+                                                              '2013-01-31--11-27-56', 'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
 
     def test_should_prepare_string_as_expected(self):
 
-        when(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(any_value()).thenReturn('replaced uri specific characters')
-        when(yadtshell.loggingtools)._strip_dashes(any_value()).thenReturn('stripped dashes')
-        when(yadtshell.loggingtools)._strip_special_characters(any_value()).thenReturn('stripped special characters')
-        when(yadtshell.loggingtools)._trim_underscores(any_value()).thenReturn('trimmed underscores')
-        when(yadtshell.loggingtools)._replace_blanks_with_underscores(any_value()).thenReturn('replaced blanks with underscores')
+        when(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(
+            any_value()).thenReturn('replaced uri specific characters')
+        when(yadtshell.loggingtools)._strip_dashes(
+            any_value()).thenReturn('stripped dashes')
+        when(yadtshell.loggingtools)._strip_special_characters(
+            any_value()).thenReturn('stripped special characters')
+        when(yadtshell.loggingtools)._trim_underscores(
+            any_value()).thenReturn('trimmed underscores')
+        when(yadtshell.loggingtools)._replace_blanks_with_underscores(
+            any_value()).thenReturn('replaced blanks with underscores')
 
-        when(yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(), any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+        when(
+            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
+                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
-                log_dir='log-directory',
-                target_name='target-name',
-                command_start_timestamp='2013-01-31--11-27-56',
-                user_name='user-name',
-                source_host='host-name',
-                command_arguments=['yadtshell', 'arg1', 'arg2']
+            log_dir='log-directory',
+            target_name='target-name',
+            command_start_timestamp='2013-01-31--11-27-56',
+            user_name='user-name',
+            source_host='host-name',
+            command_arguments=['yadtshell', 'arg1', 'arg2']
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores('arg1_arg2')
-        verify(yadtshell.loggingtools)._strip_dashes('replaced uri specific characters')
-        verify(yadtshell.loggingtools)._strip_special_characters('stripped dashes')
-        verify(yadtshell.loggingtools)._trim_underscores('stripped special characters')
-        verify(yadtshell.loggingtools)._replace_blanks_with_underscores('trimmed underscores')
+        verify(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(
+            'arg1_arg2')
+        verify(yadtshell.loggingtools)._strip_dashes(
+            'replaced uri specific characters')
+        verify(yadtshell.loggingtools)._strip_special_characters(
+            'stripped dashes')
+        verify(yadtshell.loggingtools)._trim_underscores(
+            'stripped special characters')
+        verify(yadtshell.loggingtools)._replace_blanks_with_underscores(
+            'trimmed underscores')
 
-        verify(yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='replaced blanks with underscores')
-
-
+        verify(
+            yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name',
+                                                              '2013-01-31--11-27-56', 'user-name', 'host-name', tag='replaced blanks with underscores')
 
 
 class GetCommandCounterAndIncrementTests(unittest.TestCase):
@@ -190,7 +221,6 @@ class GetCommandCounterAndIncrementTests(unittest.TestCase):
         self.assertEqual(2, _get_command_counter_and_increment())
 
 
-
 class StripSpecialCharactersTest(unittest.TestCase):
 
     def test_should_strip_special_character_colon(self):
@@ -209,7 +239,8 @@ class StripSpecialCharactersTest(unittest.TestCase):
         self.assertEqual('', _strip_special_characters("'"))
 
     def test_should_not_strip_normal_characters(self):
-        self.assertEqual('foobar', _strip_special_characters(':*[]foo:*[]bar:*[]'))
+        self.assertEqual(
+            'foobar', _strip_special_characters(':*[]foo:*[]bar:*[]'))
 
     def test_should_not_strip_simple_string(self):
         self.assertEqual('foobar', _strip_special_characters('foobar'))
@@ -245,22 +276,27 @@ class StripDashesTests(unittest.TestCase):
 class ReplaceUriSpecificCharactersWithUnderscoresTests(unittest.TestCase):
 
     def test_should_return_given_string(self):
-        self.assertEqual('foobar', _replace_uri_specific_characters_with_underscores('foobar'))
+        self.assertEqual(
+            'foobar', _replace_uri_specific_characters_with_underscores('foobar'))
 
     def test_should_return_string_with_replaced_colon_slash_slash(self):
-        self.assertEqual('foo_bar', _replace_uri_specific_characters_with_underscores('foo://bar'))
+        self.assertEqual(
+            'foo_bar', _replace_uri_specific_characters_with_underscores('foo://bar'))
 
     def test_should_return_string_with_replaced_slash(self):
-        self.assertEqual('bar_boo', _replace_uri_specific_characters_with_underscores('bar/boo'))
+        self.assertEqual(
+            'bar_boo', _replace_uri_specific_characters_with_underscores('bar/boo'))
 
     def test_should_return_string_with_replaced_uri_characters(self):
-        self.assertEqual('foo_bar_boo', _replace_uri_specific_characters_with_underscores('foo://bar/boo'))
+        self.assertEqual(
+            'foo_bar_boo', _replace_uri_specific_characters_with_underscores('foo://bar/boo'))
 
 
 class ReplaceBlanksWithUnderscoresTest(unittest.TestCase):
 
     def test_should_return_given_string(self):
-        self.assertEqual('spameggs', _replace_blanks_with_underscores('spameggs'))
+        self.assertEqual(
+            'spameggs', _replace_blanks_with_underscores('spameggs'))
 
     def test_should_replace_one_blank_with_one_underscore(self):
         self.assertEqual('_', _replace_blanks_with_underscores(' '))
@@ -269,7 +305,8 @@ class ReplaceBlanksWithUnderscoresTest(unittest.TestCase):
         self.assertEqual('a_', _replace_blanks_with_underscores('a '))
 
     def test_should_replace_blank_between_words_with_underscore(self):
-        self.assertEqual('spam_eggs', _replace_blanks_with_underscores('spam eggs'))
+        self.assertEqual(
+            'spam_eggs', _replace_blanks_with_underscores('spam eggs'))
 
 
 class SwitchCharactersToLowerCase(unittest.TestCase):
@@ -286,6 +323,7 @@ class SwitchCharactersToLowerCase(unittest.TestCase):
     def test_should_return_lower_case_string_of_string_with_capital_letters(self):
         self.assertEqual('foobar', _switch_characters_to_lower_case('FooBar'))
 
+
 class ErrorFilterTests(unittest.TestCase):
     LOG_RECORD = 1
     DO_NOT_LOG_RECORD = 0
@@ -296,36 +334,42 @@ class ErrorFilterTests(unittest.TestCase):
     def test_should_log_errors(self):
         error_record = mock()
         error_record.levelno = logging.ERROR
-        self.assertEqual(self.error_filter.filter(error_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.error_filter.filter(error_record), self.LOG_RECORD)
 
     def test_should_log_warnings(self):
         warning_record = mock()
         warning_record.levelno = logging.WARN
-        self.assertEqual(self.error_filter.filter(warning_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.error_filter.filter(warning_record), self.LOG_RECORD)
 
         warning_record.levelno = logging.WARNING
-        self.assertEqual(self.error_filter.filter(warning_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.error_filter.filter(warning_record), self.LOG_RECORD)
 
     def test_should_log_criticals(self):
         critical_record = mock()
         critical_record.levelno = logging.CRITICAL
-        self.assertEqual(self.error_filter.filter(critical_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.error_filter.filter(critical_record), self.LOG_RECORD)
 
     def test_should_log_fatals(self):
         fatal_record = mock()
         fatal_record.levelno = logging.FATAL
-        self.assertEqual(self.error_filter.filter(fatal_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.error_filter.filter(fatal_record), self.LOG_RECORD)
 
     def test_should_not_log_infos(self):
         info_record = mock()
         info_record.levelno = logging.INFO
-        self.assertEqual(self.error_filter.filter(info_record), self.DO_NOT_LOG_RECORD)
-
+        self.assertEqual(self.error_filter.filter(
+            info_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_debugs(self):
         debug_record = mock()
         debug_record.levelno = logging.DEBUG
-        self.assertEqual(self.error_filter.filter(debug_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.error_filter.filter(
+            debug_record), self.DO_NOT_LOG_RECORD)
 
 
 class InfoFilterTests(unittest.TestCase):
@@ -338,33 +382,38 @@ class InfoFilterTests(unittest.TestCase):
     def test_should_not_log_errors(self):
         error_record = mock()
         error_record.levelno = logging.ERROR
-        self.assertEqual(self.info_filter.filter(error_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.info_filter.filter(
+            error_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_warnings(self):
         warning_record = mock()
         warning_record.levelno = logging.WARN
-        self.assertEqual(self.info_filter.filter(warning_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.info_filter.filter(
+            warning_record), self.DO_NOT_LOG_RECORD)
 
         warning_record.levelno = logging.WARNING
-        self.assertEqual(self.info_filter.filter(warning_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.info_filter.filter(
+            warning_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_criticals(self):
         critical_record = mock()
         critical_record.levelno = logging.CRITICAL
-        self.assertEqual(self.info_filter.filter(critical_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.info_filter.filter(
+            critical_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_fatals(self):
         fatal_record = mock()
         fatal_record.levelno = logging.FATAL
-        self.assertEqual(self.info_filter.filter(fatal_record), self.DO_NOT_LOG_RECORD)
+        self.assertEqual(self.info_filter.filter(
+            fatal_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_log_infos(self):
         info_record = mock()
         info_record.levelno = logging.INFO
         self.assertEqual(self.info_filter.filter(info_record), self.LOG_RECORD)
 
-
     def test_should_log_debugs(self):
         debug_record = mock()
         debug_record.levelno = logging.DEBUG
-        self.assertEqual(self.info_filter.filter(debug_record), self.LOG_RECORD)
+        self.assertEqual(
+            self.info_filter.filter(debug_record), self.LOG_RECORD)

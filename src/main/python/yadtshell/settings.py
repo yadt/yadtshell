@@ -44,11 +44,8 @@ root_logger.setLevel(logging.DEBUG)
 
 message_formatter = logging.Formatter('%(levelname)-8s %(message)s')
 # DO NOT USE A KWARG : it's 'strm' in python<2.6 and has
+# been renamed to 'stream' in 2.7 with NO DOCUMENTATION...
 console_stdout_handler = logging.StreamHandler(sys.stdout)
-                                                            # been renamed to
-                                                            # 'stream' in 2.7
-                                                            # with NO
-                                                            # DOCUMENTATION...
 console_stderr_handler = logging.StreamHandler(sys.stderr)
 configure_logger_output_stream_by_level(
     console_stderr_handler, console_stdout_handler)
@@ -62,7 +59,7 @@ logger = logging.getLogger('settings')
 
 
 try:
-    from loggingconf import *
+    from loggingconf import *  # NOQA
 except Exception, e:
     root_logger.debug(e)
     LOG_DIR_PREFIX = '/var/log/yadtshell'
@@ -91,7 +88,7 @@ def initialize_broadcast_client():
     broadcasterconf_imported = False
     try:
         sys.path.append("/etc/yadtbroadcast-client/")
-        import broadcasterconf
+        import broadcasterconf  # NOQA
         sys.path.pop()
         broadcasterconf_imported = True
     except Exception, e:
