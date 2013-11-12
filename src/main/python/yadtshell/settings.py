@@ -99,7 +99,12 @@ def initialize_broadcast_client():
         logger.warn(e)
 
 
-def load_target_file(target_settings_file, first_run=True):
+def load_target_file(target_settings_file, visited=None):
+    if not visited:
+        visited = []
+    if target_settings_file in visited:
+        return {}
+    visited.append(target_settings_file)
     try:
         settings_file = open(target_settings_file)
     except IOError:
@@ -107,13 +112,12 @@ def load_target_file(target_settings_file, first_run=True):
         sys.exit(1)
     target_settings = yaml.load(settings_file)
     settings_file.close()
-
-    for inc in target_settings.get('includes', []):
-        subtarget_settings = load_target_file(inc, False)
+    for include in target_settings.get('includes', []):
+        subtarget_settings = load_target_file(include, visited)
         target_settings['hosts'].extend(subtarget_settings.get('hosts', []))
 
-    if first_run:
-        target_settings.setdefault('name', os.path.basename(os.getcwd()))
+    target_settings.setdefault('name', os.path.basename(os.getcwd()))
+
     return target_settings
 
 
