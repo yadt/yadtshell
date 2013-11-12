@@ -99,7 +99,7 @@ def initialize_broadcast_client():
         logger.warn(e)
 
 
-def load_target_file(target_settings_file, visited=None):
+def _load_target_file(target_settings_file, visited=None):
     if not visited:
         visited = []
     if target_settings_file in visited:
@@ -113,11 +113,16 @@ def load_target_file(target_settings_file, visited=None):
     target_settings = yaml.load(settings_file)
     settings_file.close()
     for include in target_settings.get('includes', []):
-        subtarget_settings = load_target_file(include, visited)
-        target_settings['hosts'].extend(subtarget_settings.get('hosts', []))
+        subtarget_settings = _load_target_file(include, visited)
+        for host in subtarget_settings.get('hosts', []):
+            if host not in target_settings['hosts']:
+                target_settings['hosts'].append(host)
 
+    return target_settings
+
+def load_target_file(target_settings_file):
+    target_settings = _load_target_file(target_settings_file)
     target_settings.setdefault('name', os.path.basename(os.getcwd()))
-
     return target_settings
 
 

@@ -116,3 +116,33 @@ includes:
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
+
+
+    @patch('yadtshell.settings.os.getcwd')
+    @patch('yadtshell.settings.open', create=True)
+    def test_should_add_hosts_only_once(self, mock_open, getcwd):
+        content = """
+hosts:
+    - foobar01
+includes:
+    - sub-target
+"""
+        subcontent = """
+hosts:
+    - foobar42 
+    - foobar01
+"""
+
+        def my_open(filename):
+            if filename == 'root-target':
+                return MagicMock(spec=file, wraps=StringIO(content))
+            return MagicMock(spec=file, wraps=StringIO(subcontent))
+
+        mock_open.side_effect = my_open
+        getcwd.return_value = '/foo/bar/foobaz42'
+
+        result = yadtshell.settings.load_target_file('root-target')
+        expect = dict(name='foobaz42',
+                      hosts=['foobar01', 'foobar42'],
+                      includes=['sub-target'])
+        self.assertEqual(result, expect)
