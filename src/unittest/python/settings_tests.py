@@ -45,13 +45,13 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
@@ -76,16 +76,16 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
-            if filename == 'sub-target':
+            if filename == '../sub-target/target':
                 return MagicMock(spec=file, wraps=StringIO(subcontent))
 
             return MagicMock(spec=file, wraps=StringIO(subsubcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42', 'foobar4242'],
                       includes=['sub-target'])
@@ -102,17 +102,17 @@ includes:
 hosts:
     - foobar42
 includes:
-    - root-target
+    - target
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
@@ -132,13 +132,13 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
@@ -158,13 +158,13 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42 foobar23'],
                       includes=['sub-target'])
@@ -182,13 +182,13 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'root-target':
+            if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
         self.mock_open.side_effect = my_open
 
-        result = yadtshell.settings.load_target_file('root-target')
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
