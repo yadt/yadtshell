@@ -43,10 +43,15 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
 message_formatter = logging.Formatter('%(levelname)-8s %(message)s')
-console_stdout_handler = logging.StreamHandler(sys.stdout)  # DO NOT USE A KWARG : it's 'strm' in python<2.6 and has
-                                                            # been renamed to 'stream' in 2.7 with NO DOCUMENTATION...
+# DO NOT USE A KWARG : it's 'strm' in python<2.6 and has
+console_stdout_handler = logging.StreamHandler(sys.stdout)
+                                                            # been renamed to
+                                                            # 'stream' in 2.7
+                                                            # with NO
+                                                            # DOCUMENTATION...
 console_stderr_handler = logging.StreamHandler(sys.stderr)
-configure_logger_output_stream_by_level(console_stderr_handler, console_stdout_handler)
+configure_logger_output_stream_by_level(
+    console_stderr_handler, console_stdout_handler)
 console_stdout_handler.setFormatter(message_formatter)
 console_stderr_handler.setFormatter(message_formatter)
 root_logger.addHandler(console_stdout_handler)
@@ -67,6 +72,7 @@ def initialize_broadcast_client():
     global DummyBroadcaster, broadcasterconf_imported, broadcasterconf, e
 
     class DummyBroadcaster(object):
+
         def addOnSessionOpenHandler(self, *args, **kwargs):
             pass
 
@@ -92,23 +98,31 @@ def initialize_broadcast_client():
         logger.warn('no broadcaster config found')
         logger.warn(e)
 
-def load_target_file(target_settings_file):
+
+def load_target_file(target_settings_file, first_run=True):
     try:
         settings_file = open(target_settings_file)
     except IOError:
         root_logger.critical('cannot find target definition file, aborting')
         sys.exit(1)
-    global TARGET_SETTINGS
-    TARGET_SETTINGS = yaml.load(settings_file)
+    target_settings = yaml.load(settings_file)
     settings_file.close()
 
-    TARGET_SETTINGS.setdefault('name', os.path.basename(os.getcwd()))
-    return TARGET_SETTINGS
+    for inc in target_settings.get('includes', []):
+        subtarget_settings = load_target_file(inc, False)
+        target_settings['hosts'].extend(subtarget_settings.get('hosts', []))
+
+    if first_run:
+        target_settings.setdefault('name', os.path.basename(os.getcwd()))
+    return target_settings
+
 
 def load_settings(log_to_file=True):
     TARGET_SETTINGS_FILE = 'target'
+
+    global TARGET_SETTINGS
     TARGET_SETTINGS = load_target_file(TARGET_SETTINGS_FILE)
-    
+
     initialize_broadcast_client()
 
     os.umask(2)
@@ -157,7 +171,8 @@ def load_settings(log_to_file=True):
         command_arguments=sys.argv
     )
 
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
+    formatter = logging.Formatter(
+        '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s', '%Y%m%d-%H%M%S')
 
     if log_to_file:
         file_handler = logging.FileHandler(log_file)
@@ -169,7 +184,8 @@ def load_settings(log_to_file=True):
     logger.debug('Called "{0}"'.format(' '.join(sys.argv)))
     logger.debug('output dir is %s' % OUTPUT_DIR)
 
-    he = hostexpand.HostExpander.HostExpander(outputformat=hostexpand.HostExpander.HostExpander.FQDN)
+    he = hostexpand.HostExpander.HostExpander(
+        outputformat=hostexpand.HostExpander.HostExpander.FQDN)
     TARGET_SETTINGS['original_hosts'] = TARGET_SETTINGS['hosts']
     TARGET_SETTINGS['hosts'] = he.expand(TARGET_SETTINGS['hosts'])
 
@@ -179,7 +195,8 @@ def load_settings(log_to_file=True):
     except OSError:
         changed = True
     if changed:
-        logger.info('target settings have changed since last call, thus cleaning cached data')
+        logger.info(
+            'target settings have changed since last call, thus cleaning cached data')
         shutil.rmtree(OUT_DIR)
         os.makedirs(OUT_DIR)
         shutil.copy2(TARGET_SETTINGS_FILE, OUT_TARGET_FILE)
@@ -193,16 +210,21 @@ def load_settings(log_to_file=True):
         view_file.close()
 
     except:
-        logger.debug('"view" file not found, falling back to default values: %s' %
-                     VIEW_SETTINGS)
+        logger.debug(
+            '"view" file not found, falling back to default values: %s' %
+            VIEW_SETTINGS)
 
     hosts_condensed_file = open(os.path.join(OUT_DIR, 'hosts_condensed'), 'w')
-    print >> hosts_condensed_file, ' '.join(condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
+    print >> hosts_condensed_file, ' '.join(
+        condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
     hosts_condensed_file.close()
 
     def list_selected_hosts():
         return 'You are working now on %s\n\nas full list: %s\n' % (
-            term.render('${BOLD}') + ', '.join(condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts']))) + term.render('${NORMAL}'),
+            term.render('${BOLD}') + ', '.join(
+                condense_hosts2(
+                    condense_hosts(
+                        TARGET_SETTINGS['hosts']))) + term.render('${NORMAL}'),
             ', '.join(TARGET_SETTINGS['hosts']),
         )
 
@@ -222,7 +244,8 @@ def load_settings(log_to_file=True):
     except OSError:
         pass
     global SSH
-    SSH = 'ssh -o ControlPath=%s -A %s -T -o ConnectTimeout=4 -o BatchMode=yes -o CheckHostIP=no -o StrictHostKeyChecking=no -q' % (SSH_CONTROL_PATH, credentials)
+    SSH = 'ssh -o ControlPath=%s -A %s -T -o ConnectTimeout=4 -o BatchMode=yes -o CheckHostIP=no -o StrictHostKeyChecking=no -q' % (
+        SSH_CONTROL_PATH, credentials)
 
     global tracking_id
     tracking_id = None
