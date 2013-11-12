@@ -56,14 +56,17 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('host_with_updates') \
                 .then_return(0)
 
-        update_return_code = self.execute_command('yadtshell update --no-final-status --reboot')
+        update_return_code = self.execute_command(
+            'yadtshell update --no-final-status --reboot')
 
         self.assertEqual(0, update_return_code)
 
         with self.verify() as verify:
             #  yadt status before update
-            verify.called('ssh').at_least_with_arguments('-o').and_input('/usr/bin/yadt-status')
-            verify.called('ssh').at_least_with_arguments('-o').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments(
+                '-o').and_input('/usr/bin/yadt-status')
+            verify.called('ssh').at_least_with_arguments(
+                '-o').and_input('/usr/bin/yadt-status')
 
             #  ssh multiplexing
             verify.called('ssh').at_least_with_arguments(
@@ -87,7 +90,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments(
                 'host_with_reboot_required', 'yadt-command yadt-host-update -r ')
             verify.called('ssh').at_least_with_arguments(
-            #  start services in correct order
+                #  start services in correct order
                 'host_with_reboot_required', 'yadt-command yadt-service-start service2')
             verify.called('ssh').at_least_with_arguments(
                 'host_with_reboot_required', 'yadt-command yadt-service-status service2')

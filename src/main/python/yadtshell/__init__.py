@@ -24,17 +24,17 @@ import yadtshell.metalogic
 import yadtshell.helper
 import yadtshell.update
 import yadtshell.uri
-from yadtshell.actionmanager import ActionManager
+from yadtshell.actionmanager import ActionManager  # NOQA
 
 import yadtshell.twisted
-import yadtshell.defer
+import yadtshell.defer  # NOQA
 
-import yadtshell.status as _status
-import yadtshell.info as _info
+import yadtshell.status as _status  # NOQA
+import yadtshell.info as _info  # NOQA
 
-from yadtshell.status import status
-from yadtshell.info import info
-from yadtshell.dump import dump
+from yadtshell.status import status  # NOQA
+from yadtshell.info import info  # NOQA
+from yadtshell.dump import dump  # NOQA
 
 
 VERSION = '${version}'
