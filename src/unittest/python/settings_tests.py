@@ -101,7 +101,6 @@ hosts:
 includes:
     - root-target
 """
-        
 
         def my_open(filename):
             if filename == 'root-target':
