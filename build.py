@@ -46,7 +46,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.7.0'
 
-default_task = ['generate_manpages', 'publish']
+default_task = ['analyze', 'generate_manpages', 'publish']
 
 
 @init
@@ -66,6 +66,8 @@ def set_properties(project):
     project.set_property('integrationtest_inherit_environment', True)
 
     project.set_property('manpage_source', 'man-yadtshell.md')
+
+    project.set_property('flake8_include_test_sources', True)
 
     project.set_property('verbose', True)
 
