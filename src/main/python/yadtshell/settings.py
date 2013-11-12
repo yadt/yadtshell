@@ -92,9 +92,23 @@ def initialize_broadcast_client():
         logger.warn('no broadcaster config found')
         logger.warn(e)
 
+def load_target_file(target_settings_file):
+    try:
+        settings_file = open(target_settings_file)
+    except IOError:
+        root_logger.critical('cannot find target definition file, aborting')
+        sys.exit(1)
+    global TARGET_SETTINGS
+    TARGET_SETTINGS = yaml.load(settings_file)
+    settings_file.close()
+
+    TARGET_SETTINGS.setdefault('name', os.path.basename(os.getcwd()))
+    return TARGET_SETTINGS
 
 def load_settings(log_to_file=True):
-
+    TARGET_SETTINGS_FILE = 'target'
+    TARGET_SETTINGS = load_target_file(TARGET_SETTINGS_FILE)
+    
     initialize_broadcast_client()
 
     os.umask(2)
@@ -117,18 +131,6 @@ def load_settings(log_to_file=True):
 
     global term
     term = yadtshell.TerminalController.TerminalController()
-
-    TARGET_SETTINGS_FILE = 'target'
-    try:
-        settings_file = open(TARGET_SETTINGS_FILE)
-    except IOError:
-        root_logger.critical('cannot find target definition file, aborting')
-        sys.exit(1)
-    global TARGET_SETTINGS
-    TARGET_SETTINGS = yaml.load(settings_file)
-    settings_file.close()
-
-    TARGET_SETTINGS.setdefault('name', os.path.basename(os.getcwd()))
 
     global ybc
     if broadcasterconf_imported:
