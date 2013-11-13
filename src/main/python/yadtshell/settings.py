@@ -110,7 +110,8 @@ def _load_target_file(target_settings_file, default_setting_file, visited=None):
     target_settings = yaml.load(settings_file)
     settings_file.close()
     for include in target_settings.get('includes', []):
-        target = os.path.join('..', include, default_setting_file)
+        targets_dir = os.getenv("TARGETS_DIR", os.path.join(os.getcwd(), ".."))
+        target = os.path.join(targets_dir, include, default_setting_file)
         subtarget_settings = _load_target_file(
             target, default_setting_file, visited)
         for host in subtarget_settings.get('hosts', []):

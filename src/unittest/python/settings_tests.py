@@ -80,7 +80,7 @@ hosts:
         def my_open(filename):
             if filename == 'target':
                 return MagicMock(spec=file, wraps=StringIO(content))
-            if filename == '../sub-target/target':
+            if filename == '/foo/bar/foobaz42/../sub-target/target':
                 return MagicMock(spec=file, wraps=StringIO(subcontent))
 
             return MagicMock(spec=file, wraps=StringIO(subsubcontent))
