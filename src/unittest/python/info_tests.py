@@ -3,7 +3,7 @@ from mock import Mock, patch
 
 import yadtshell
 from yadtshell.info import (
-    highlight_differences, calculate_info_view_settings)
+    highlight_differences, calculate_info_view_settings, calculate_matrix_width)
 
 from unittest_support import (create_component_pool_for_one_host,
                               render_info_matrix_to_string)
@@ -17,6 +17,13 @@ class CalculateInfoViewSettings(unittest.TestCase):
             "info-view": ['matrix', 'color', 'maxcols']}
         expected = ['matrix', 'color', 'maxcols']
         result = calculate_info_view_settings()
+        self.assertEqual(result, expected)
+
+    def test_calculate_width(self):
+        original_hosts = [
+            'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
+        expected = 3
+        result = calculate_matrix_width(original_hosts)
         self.assertEqual(result, expected)
 
 

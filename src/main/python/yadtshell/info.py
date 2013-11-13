@@ -188,6 +188,10 @@ def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
 
 
+def calculate_matrix_width(original_hosts):
+    return max([len(row.split()) for row in original_hosts])
+
+
 def calculate_info_view_settings():
     return yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
 
