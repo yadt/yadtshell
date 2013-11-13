@@ -2,10 +2,22 @@ import unittest
 from mock import Mock, patch
 
 import yadtshell
-from yadtshell.info import (highlight_differences)
+from yadtshell.info import (
+    highlight_differences, calculate_info_view_settings)
 
 from unittest_support import (create_component_pool_for_one_host,
                               render_info_matrix_to_string)
+
+
+class CalculateInfoViewSettings(unittest.TestCase):
+
+    @patch('yadtshell.settings')
+    def test_are_settings_complete(self, mock_settings):
+        mock_settings.VIEW_SETTINGS = {
+            "info-view": ['matrix', 'color', 'maxcols']}
+        expected = ['matrix', 'color', 'maxcols']
+        result = calculate_info_view_settings()
+        self.assertEqual(result, expected)
 
 
 class InfoMatrixRenderingTests(unittest.TestCase):

@@ -188,6 +188,10 @@ def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
 
 
+def calculate_info_view_settings():
+    return yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
+
+
 def render_services_matrix(components=None, **kwargs):
     if not components:
         components = yadtshell.util.restore_current_state()
@@ -224,13 +228,14 @@ def _render_services_matrix(components, hosts, enable_legend=False):
             except:
                 service = servicedef
             if not service in services:
-                rank = components[yadtshell.uri.create(yadtshell.settings.SERVICE, host.hostname, service)].dependency_score
+                rank = components[yadtshell.uri.create(
+                    yadtshell.settings.SERVICE, host.hostname, service)].dependency_score
                 services.append((rank, service))
 
     for rank, name in services:
         ranks[name] = rank
 
-    info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
+    info_view_settings = calculate_info_view_settings()
 
     icons = get_icons()
     separator = ''
