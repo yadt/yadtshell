@@ -124,6 +124,15 @@ def load_target_file(target_settings_file):
     target_settings = _load_target_file(
         target_settings_file, target_settings_file)
     target_settings.setdefault('name', os.path.basename(os.getcwd()))
+    target_settings = expand_hosts(target_settings)
+    return target_settings
+
+
+def expand_hosts(target_settings):
+    he = hostexpand.HostExpander.HostExpander(
+        outputformat=hostexpand.HostExpander.HostExpander.FQDN)
+    target_settings['original_hosts'] = target_settings['hosts']
+    target_settings['hosts'] = he.expand(target_settings['hosts'])
     return target_settings
 
 
@@ -193,11 +202,6 @@ def load_settings(log_to_file=True):
     logger.debug(yaml.dump(USER_INFO, default_flow_style=False))
     logger.debug('Called "{0}"'.format(' '.join(sys.argv)))
     logger.debug('output dir is %s' % OUTPUT_DIR)
-
-    he = hostexpand.HostExpander.HostExpander(
-        outputformat=hostexpand.HostExpander.HostExpander.FQDN)
-    TARGET_SETTINGS['original_hosts'] = TARGET_SETTINGS['hosts']
-    TARGET_SETTINGS['hosts'] = he.expand(TARGET_SETTINGS['hosts'])
 
     OUT_TARGET_FILE = os.path.join(OUT_DIR, TARGET_SETTINGS_FILE)
     try:

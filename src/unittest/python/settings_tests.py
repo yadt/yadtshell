@@ -29,7 +29,8 @@ hosts:
 
         result = yadtshell.settings.load_target_file("useless_name")
         expect = dict(name='foobaz42',
-                      hosts=['foobar'])
+                      hosts=['foobar'],
+                      original_hosts=['foobar'])
         self.assertEqual(result, expect)
 
     def test_should_load_meta_target_file(self):
@@ -54,6 +55,7 @@ hosts:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
@@ -88,6 +90,7 @@ hosts:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42', 'foobar4242'],
+                      original_hosts=['foobar01', 'foobar42', 'foobar4242'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
@@ -115,6 +118,7 @@ includes:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
@@ -141,6 +145,7 @@ hosts:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
@@ -166,7 +171,8 @@ hosts:
 
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
-                      hosts=['foobar01', 'foobar42 foobar23'],
+                      hosts=['foobar01', 'foobar23', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42 foobar23'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
@@ -191,5 +197,6 @@ hosts:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
