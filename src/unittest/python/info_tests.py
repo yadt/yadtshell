@@ -21,27 +21,27 @@ class CalculateInfoViewSettings(unittest.TestCase):
         result = calculate_info_view_settings()
         self.assertEqual(result, expected)
 
-    @patch('subprocess.check_output')
+    @patch('subprocess.Popen.communicate')
     def test_calculate_width_maxcols(self, subprocess_mock):
-        subprocess_mock.return_value = '999 999'
+        subprocess_mock.return_value = ('999 999', 0)
         original_hosts = [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
         expected = 'maxcols'
         result = calculate_matrix_width(original_hosts)
         self.assertEqual(result, expected)
 
-    @patch('subprocess.check_output')
+    @patch('subprocess.Popen.communicate')
     def test_calculate_width_3cols(self, subprocess_mock):
-        subprocess_mock.return_value = '999 52'
+        subprocess_mock.return_value = ('999 52', 0)
         original_hosts = [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
         expected = '3cols'
         result = calculate_matrix_width(original_hosts)
         self.assertEqual(result, expected)
 
-    @patch('subprocess.check_output')
+    @patch('subprocess.Popen.communicate')
     def test_calculate_width_1col(self, subprocess_mock):
-        subprocess_mock.return_value = '999 1'
+        subprocess_mock.return_value = ('999 1', 0)
         original_hosts = [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
         expected = '1col'

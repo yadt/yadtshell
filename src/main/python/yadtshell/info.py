@@ -18,7 +18,7 @@
 from __future__ import print_function
 import logging
 import time
-import subprocess
+from subprocess import Popen, PIPE
 
 import hostexpand
 import yadtshell
@@ -190,7 +190,7 @@ def render_highlighted_differences(*args):
 
 
 def calculate_matrix_width(original_hosts):
-    stty = subprocess.check_output(['/bin/stty', 'size'])
+    stty = Popen(["/bin/stty", "size"], stdout=PIPE).communicate()[0]
     cols = int(stty.split()[1])
     max_row_length = max([len(row.split()) for row in original_hosts])
     if max_row_length * 10 + 40 <= cols:
