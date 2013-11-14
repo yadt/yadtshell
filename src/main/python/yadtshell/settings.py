@@ -34,6 +34,7 @@ from yadtshell.loggingtools import configure_logger_output_stream_by_level
 
 sys.path.append('/etc/yadtshell')
 
+DEFAULT_LOG_DIR = '/tmp/logs/yadtshell'
 USER_INFO = get_user_info()
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
@@ -62,7 +63,9 @@ try:
     from loggingconf import *  # NOQA
 except Exception, e:
     root_logger.debug(e)
-    LOG_DIR_PREFIX = '/var/log/yadtshell'
+    if not os.path.isdir(DEFAULT_LOG_DIR):
+        os.makedirs(DEFAULT_LOG_DIR)
+    LOG_DIR_PREFIX = DEFAULT_LOG_DIR
 
 
 def initialize_broadcast_client():
