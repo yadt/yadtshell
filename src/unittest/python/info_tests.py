@@ -51,7 +51,7 @@ class CalculateInfoViewSettings(unittest.TestCase):
     @patch('yadtshell._info.hostexpand.HostExpander.HostExpander.expand')
     @patch('subprocess.Popen.communicate')
     def test_calculate_width_when_regular_expr_is_in_orig_hosts(self, subprocess_mock, he_mock):
-        he_mock.return_value = xrange(0,40)
+        he_mock.return_value = xrange(0, 40)
         subprocess_mock.return_value = ('999 80', 0)
         original_hosts = [
             'foo01', 'foo02 foo03', 'foo[4..44]', 'foo45 foo46']
