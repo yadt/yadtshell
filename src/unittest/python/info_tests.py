@@ -69,7 +69,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
-        yadtshell.settings.VIEW_SETTINGS = {}
+        yadtshell._info.calculate_info_view_settings = lambda: {}
         self.mock_term = Mock()
         self.mock_render = lambda unrendered: unrendered
         yadtshell.settings.term = self.mock_term

@@ -404,7 +404,7 @@ def colorize(icons):
 
 
 def render_legend():
-    info_view_settings = yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
+    info_view_settings = calculate_info_view_settings()
 
     icons = get_icons()
     if 'color' in info_view_settings:
