@@ -46,7 +46,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.7.0'
 
-default_task = ['analyze', 'generate_manpages', 'publish']
+default_task = ['analyze', 'publish']
 
 
 @init
