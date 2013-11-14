@@ -190,8 +190,11 @@ def render_highlighted_differences(*args):
 
 
 def calculate_matrix_width(original_hosts):
-    stty = Popen(["/bin/stty", "size"], stdout=PIPE).communicate()[0]
-    cols = int(stty.split()[1])
+    try:
+        stty = Popen("stty size", stdout=PIPE, shell=True).communicate()[0]
+        cols = int(stty.split()[1])
+    except:
+        cols = 80
     max_row_length = max([len(row.split()) for row in original_hosts])
     if max_row_length * 10 + 40 <= cols:
         return 'maxcols'
