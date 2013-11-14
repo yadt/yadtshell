@@ -18,6 +18,7 @@
 from __future__ import print_function
 import logging
 import time
+import subprocess
 
 import hostexpand
 import yadtshell
@@ -189,11 +190,20 @@ def render_highlighted_differences(*args):
 
 
 def calculate_matrix_width(original_hosts):
-    return max([len(row.split()) for row in original_hosts])
+    stty = subprocess.check_output(['/bin/stty', 'size'])
+    cols = int(stty.split()[1])
+    max_row_length = max([len(row.split()) for row in original_hosts])
+    if max_row_length * 10 + 40 <= cols:
+        return 'maxcols'
+    if max_row_length * 4 + 40 <= cols:
+        return '3cols'
+    return '1col'
 
 
 def calculate_info_view_settings():
-    return yadtshell.settings.VIEW_SETTINGS.get('info-view', [])
+    original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
+    width = calculate_matrix_width(original_hosts)
+    return ['matrix', 'color', width]
 
 
 def render_services_matrix(components=None, **kwargs):

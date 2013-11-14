@@ -11,18 +11,40 @@ from unittest_support import (create_component_pool_for_one_host,
 
 class CalculateInfoViewSettings(unittest.TestCase):
 
+    @patch('yadtshell._info.calculate_matrix_width')
     @patch('yadtshell.settings')
-    def test_are_settings_complete(self, mock_settings):
+    def test_are_settings_complete(self, mock_settings, width_mock):
+        width_mock.return_value = 'maxcols'
         mock_settings.VIEW_SETTINGS = {
             "info-view": ['matrix', 'color', 'maxcols']}
         expected = ['matrix', 'color', 'maxcols']
         result = calculate_info_view_settings()
         self.assertEqual(result, expected)
 
-    def test_calculate_width(self):
+    @patch('subprocess.check_output')
+    def test_calculate_width_maxcols(self, subprocess_mock):
+        subprocess_mock.return_value = '999 999'
         original_hosts = [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
-        expected = 3
+        expected = 'maxcols'
+        result = calculate_matrix_width(original_hosts)
+        self.assertEqual(result, expected)
+
+    @patch('subprocess.check_output')
+    def test_calculate_width_3cols(self, subprocess_mock):
+        subprocess_mock.return_value = '999 52'
+        original_hosts = [
+            'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
+        expected = '3cols'
+        result = calculate_matrix_width(original_hosts)
+        self.assertEqual(result, expected)
+
+    @patch('subprocess.check_output')
+    def test_calculate_width_1col(self, subprocess_mock):
+        subprocess_mock.return_value = '999 1'
+        original_hosts = [
+            'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']
+        expected = '1col'
         result = calculate_matrix_width(original_hosts)
         self.assertEqual(result, expected)
 
