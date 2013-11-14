@@ -195,7 +195,10 @@ def calculate_matrix_width(original_hosts):
         cols = int(stty.split()[1])
     except:
         cols = 80
-    max_row_length = max([len(row.split()) for row in original_hosts])
+
+    he = hostexpand.HostExpander.HostExpander()
+    max_row_length = max([len(he.expand(hosts)) for hosts in original_hosts])
+
     if max_row_length * 10 + 40 <= cols:
         return 'maxcols'
     if max_row_length * 4 + 40 <= cols:
