@@ -189,7 +189,8 @@ def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
 
 
-def calculate_matrix_width(original_hosts):
+def calculate_info_view_settings():
+    original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
     try:
         stty = Popen("stty size", stdout=PIPE, shell=True).communicate()[0]
         cols = int(stty.split()[1])
@@ -199,16 +200,16 @@ def calculate_matrix_width(original_hosts):
     he = hostexpand.HostExpander.HostExpander()
     max_row_length = max([len(he.expand(hosts)) for hosts in original_hosts])
 
-    if max_row_length * 10 + 40 <= cols:
-        return 'maxcols'
-    if max_row_length * 4 + 40 <= cols:
-        return '3cols'
-    return '1col'
+    width = '1col'
+    # this is the the offset we add expecting the information show right of the
+    # matrix:
+    RIGHT_MARGIN_OFFSET = 40
 
+    if max_row_length * 4 + RIGHT_MARGIN_OFFSET <= cols:
+        width = '3cols'
+    if max_row_length * 10 + RIGHT_MARGIN_OFFSET <= cols:
+        width = 'maxcols'
 
-def calculate_info_view_settings():
-    original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
-    width = calculate_matrix_width(original_hosts)
     return ['matrix', 'color', width]
 
 
