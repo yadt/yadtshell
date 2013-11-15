@@ -216,13 +216,15 @@ def calculate_info_view_settings():
 def render_services_matrix(components=None, **kwargs):
     if not components:
         components = yadtshell.util.restore_current_state()
+    info_view_settings = calculate_info_view_settings()
     he = hostexpand.HostExpander.HostExpander()
     for hosts in yadtshell.settings.TARGET_SETTINGS['original_hosts']:
-        _render_services_matrix(components, he.expand(hosts), *kwargs)
-    render_legend()
+        _render_services_matrix(
+            components, he.expand(hosts), info_view_settings, *kwargs)
+    render_legend(info_view_settings)
 
 
-def _render_services_matrix(components, hosts, enable_legend=False):
+def _render_services_matrix(components, hosts, info_view_settings, enable_legend=False):
     host_components = set()
     for host in hosts:
         found = components.get(host)
@@ -255,8 +257,6 @@ def _render_services_matrix(components, hosts, enable_legend=False):
 
     for rank, name in services:
         ranks[name] = rank
-
-    info_view_settings = calculate_info_view_settings()
 
     icons = get_icons()
     separator = ''
@@ -371,7 +371,7 @@ def _render_services_matrix(components, hosts, enable_legend=False):
     print()
 
     if enable_legend:
-        render_legend()
+        render_legend(info_view_settings)
 
 
 def get_icons():
@@ -410,9 +410,7 @@ def colorize(icons):
     return icons
 
 
-def render_legend():
-    info_view_settings = calculate_info_view_settings()
-
+def render_legend(info_view_settings):
     icons = get_icons()
     if 'color' in info_view_settings:
         icons = colorize(icons)
