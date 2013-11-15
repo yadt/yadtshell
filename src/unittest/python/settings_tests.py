@@ -229,3 +229,21 @@ hosts:
                       original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
+
+    @patch('yadtshell.settings.root_logger.critical')
+    def test_should_raise_exception_when_loading_non_existing_file(self, mock_logger):
+        content = """
+hosts:
+    - foobar01
+includes:
+    - sub-target
+"""
+
+        def my_open(filename):
+            if filename == 'target':
+                return MagicMock(spec=file, wraps=StringIO(content))
+            raise IOError
+
+        self.mock_open.side_effect = my_open
+        with self.assertRaises(SystemExit):
+            yadtshell.settings.load_target_file('target')
