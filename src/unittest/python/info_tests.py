@@ -13,6 +13,16 @@ class CalculateInfoViewSettings(unittest.TestCase):
 
     @patch('yadtshell.settings')
     @patch('subprocess.Popen.communicate')
+    def test_calculate_width_when_stty_fails(self, subprocess_mock, settings_mock):
+        subprocess_mock.return_value = (None, 1)
+        settings_mock.TARGET_SETTINGS = {'original_hosts': [
+            'foo01 foo02 foo03 foo04 foo05 foo06 foo07 foo08']}
+        expected = ['matrix', 'color', '3cols']
+        result = calculate_info_view_settings()
+        self.assertEqual(result, expected)
+
+    @patch('yadtshell.settings')
+    @patch('subprocess.Popen.communicate')
     def test_calculate_width_maxcols(self, subprocess_mock, settings_mock):
         subprocess_mock.return_value = ('999 999', 0)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
