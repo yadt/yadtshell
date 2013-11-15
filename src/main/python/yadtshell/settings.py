@@ -114,7 +114,8 @@ def _load_target_file(target_settings_file, default_setting_file, visited=None):
     try:
         settings_file = open(target)
     except IOError:
-        root_logger.critical('cannot find target definition file, aborting')
+        root_logger.critical(
+            'cannot find target definition file %s, aborting' % target)
         sys.exit(1)
     target_settings = yaml.load(settings_file)
     settings_file.close()
