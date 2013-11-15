@@ -105,13 +105,13 @@ includes:
 hosts:
     - foobar42
 includes:
-    - target
+    - foobaz42
 """
 
         def my_open(filename):
-            if filename == 'target':
-                return MagicMock(spec=file, wraps=StringIO(content))
-            return MagicMock(spec=file, wraps=StringIO(subcontent))
+            if filename == '/foo/bar/foobaz42/../sub-target/target':
+                return MagicMock(spec=file, wraps=StringIO(subcontent))
+            return MagicMock(spec=file, wraps=StringIO(content))
 
         self.mock_open.side_effect = my_open
 
@@ -172,7 +172,8 @@ hosts:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar23', 'foobar42'],
-                      original_hosts=['foobar01', 'foobar42 foobar23', 'foobar01'],
+                      original_hosts=[
+                          'foobar01', 'foobar42 foobar23', 'foobar01'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
