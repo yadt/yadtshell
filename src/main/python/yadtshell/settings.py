@@ -105,6 +105,7 @@ def _load_target_file(target_settings_file, default_setting_file, visited=None):
     if target_settings_file in visited:
         return {}
     visited.append(target_settings_file)
+    logger.info(visited)
     try:
         settings_file = open(target_settings_file)
     except IOError:
