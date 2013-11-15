@@ -122,6 +122,34 @@ includes:
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
+    def test_should_load_recursed_meta_target_files_once_with_same_host(self):
+        content = """
+hosts:
+    - foobar01
+includes:
+    - sub-target
+"""
+        subcontent = """
+hosts:
+    - foobar01
+includes:
+    - foobaz42
+"""
+
+        def my_open(filename):
+            if filename == '/foo/bar/foobaz42/../sub-target/target':
+                return MagicMock(spec=file, wraps=StringIO(subcontent))
+            return MagicMock(spec=file, wraps=StringIO(content))
+
+        self.mock_open.side_effect = my_open
+
+        result = yadtshell.settings.load_target_file('target')
+        expect = dict(name='foobaz42',
+                      hosts=['foobar01'],
+                      original_hosts=['foobar01', 'foobar01'],
+                      includes=['sub-target'])
+        self.assertEqual(result, expect)
+
     def test_should_add_hosts_only_once(self):
         content = """
 hosts:
