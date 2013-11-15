@@ -100,24 +100,27 @@ def initialize_broadcast_client():
 
 
 def _load_target_file(target_settings_file, default_setting_file, visited=None):
-    if not visited:
-        visited = []
-    if target_settings_file in visited:
-        return {}
-    visited.append(target_settings_file)
-    logger.info(visited)
+    if visited:
+        if target_settings_file in visited:
+            return {}
+        targets_dir = os.getenv("TARGETS_DIR", os.path.join(os.getcwd(), ".."))
+        target = os.path.join(
+            targets_dir, target_settings_file, default_setting_file)
+        visited.append(target_settings_file)
+    else:
+        target = target_settings_file
+        visited = [os.path.basename(os.getcwd())]
+
     try:
-        settings_file = open(target_settings_file)
+        settings_file = open(target)
     except IOError:
         root_logger.critical('cannot find target definition file, aborting')
         sys.exit(1)
     target_settings = yaml.load(settings_file)
     settings_file.close()
     for include in target_settings.get('includes', []):
-        targets_dir = os.getenv("TARGETS_DIR", os.path.join(os.getcwd(), ".."))
-        target = os.path.join(targets_dir, include, default_setting_file)
         subtarget_settings = _load_target_file(
-            target, default_setting_file, visited)
+            include, default_setting_file, visited)
         for host in subtarget_settings.get('hosts', []):
             target_hosts = target_settings.get('hosts', [])
             target_settings.setdefault('hosts', target_hosts).append(host)
