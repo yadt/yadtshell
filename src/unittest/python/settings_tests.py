@@ -245,5 +245,5 @@ includes:
             raise IOError
 
         self.mock_open.side_effect = my_open
-        with self.assertRaises(SystemExit):
-            yadtshell.settings.load_target_file('target')
+        self.assertRaises(
+            SystemExit, yadtshell.settings.load_target_file, 'target')
