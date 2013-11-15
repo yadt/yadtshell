@@ -64,11 +64,11 @@ try:
 except Exception, e:
     root_logger.debug(e)
     if not os.path.isdir(DEFAULT_LOG_DIR):
-        os.makedirs(DEFAULT_LOG_DIR)
+        os.makedirs(DEFAULT_LOG_DIR)  # pragma: no cover
     LOG_DIR_PREFIX = DEFAULT_LOG_DIR
 
 
-def initialize_broadcast_client():
+def initialize_broadcast_client():  # pragma: no cover
     global DummyBroadcaster, broadcasterconf_imported, broadcasterconf, e
 
     class DummyBroadcaster(object):
