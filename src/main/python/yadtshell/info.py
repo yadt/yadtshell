@@ -393,7 +393,7 @@ def get_icons():
     }
 
 
-def colorize(icons):
+def colorize(icons):  # pragma: no cover
     icons['REBOOT_AFTER_UPDATE'] = render_yellow(icons['REBOOT_AFTER_UPDATE'])
     icons['REBOOT_NOW'] = render_red(icons['REBOOT_NOW'])
     icons['UP'] = render_green(icons['UP'])
@@ -412,7 +412,7 @@ def colorize(icons):
 
 def render_legend(info_view_settings):
     icons = get_icons()
-    if 'color' in info_view_settings:
+    if 'color' in info_view_settings:  # pragma: no cover
         icons = colorize(icons)
 
     print(
@@ -427,7 +427,7 @@ def render_legend(info_view_settings):
     print()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma: no cover
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('', '--full', action='store_true',
