@@ -118,7 +118,7 @@ includes:
         result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar01', 'foobar42'],
-                      original_hosts=['foobar01', 'foobar42', 'foobar42'],
+                      original_hosts=['foobar01', 'foobar42'],
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
