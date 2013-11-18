@@ -118,6 +118,8 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
 
 def _render_updates_based_on_name_schema(components, host, full):
+        # DEPRECATED: is used for old BASH client only.
+
         host_artefacts = {}
         for current_artefact in [
             c for c in components.values() if c.host == host.hostname and c.revision == yadtshell.settings.CURRENT
