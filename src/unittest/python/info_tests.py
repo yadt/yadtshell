@@ -11,10 +11,16 @@ from unittest_support import (create_component_pool_for_one_host,
 
 class CalculateInfoViewSettings(unittest.TestCase):
 
+    def setUp(self):
+        self.popen_patcher = patch('yadtshell._info.Popen')
+        self.popen = self.popen_patcher.start()
+
+    def tearDown(self):
+        self.popen_patcher.stop()
+
     @patch('yadtshell.settings')
-    @patch('subprocess.Popen.communicate')
-    def test_calculate_width_when_stty_fails(self, subprocess_mock, settings_mock):
-        subprocess_mock.return_value = (None, 1)
+    def test_calculate_width_when_stty_fails(self, settings_mock):
+        self.popen.return_value.communicate.return_value = (None, 1)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
             'foo01 foo02 foo03 foo04 foo05 foo06 foo07 foo08']}
         expected = ['matrix', 'color', '3cols']
@@ -22,9 +28,8 @@ class CalculateInfoViewSettings(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch('yadtshell.settings')
-    @patch('subprocess.Popen.communicate')
-    def test_calculate_width_maxcols(self, subprocess_mock, settings_mock):
-        subprocess_mock.return_value = ('999 999', 0)
+    def test_calculate_width_maxcols(self, settings_mock):
+        self.popen.return_value.communicate.return_value = ('999 999', 0)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']}
         expected = ['matrix', 'color', 'maxcols']
@@ -32,9 +37,8 @@ class CalculateInfoViewSettings(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch('yadtshell.settings')
-    @patch('subprocess.Popen.communicate')
-    def test_calculate_width_3cols(self, subprocess_mock, settings_mock):
-        subprocess_mock.return_value = ('999 52', 0)
+    def test_calculate_width_3cols(self, settings_mock):
+        self.popen.return_value.communicate.return_value = ('999 52', 0)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']}
         expected = ['matrix', 'color', '3cols']
@@ -42,9 +46,8 @@ class CalculateInfoViewSettings(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch('yadtshell.settings')
-    @patch('subprocess.Popen.communicate')
-    def test_calculate_width_1col(self, subprocess_mock, settings_mock):
-        subprocess_mock.return_value = ('999 1', 0)
+    def test_calculate_width_1col(self, settings_mock):
+        self.popen.return_value.communicate.return_value = ('999 1', 0)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
             'foo01', 'foo02 foo03', 'foo04 foo05 foo06', 'foo07 foo08']}
         expected = ['matrix', 'color', '1col']
@@ -53,10 +56,9 @@ class CalculateInfoViewSettings(unittest.TestCase):
 
     @patch('yadtshell.settings')
     @patch('yadtshell._info.hostexpand.HostExpander.HostExpander.expand')
-    @patch('subprocess.Popen.communicate')
-    def test_calculate_width_when_regular_expr_is_in_orig_hosts(self, subprocess_mock, he_mock, settings_mock):
+    def test_calculate_width_when_regular_expr_is_in_orig_hosts(self, he_mock, settings_mock):
         he_mock.return_value = xrange(0, 40)
-        subprocess_mock.return_value = ('999 80', 0)
+        self.popen.return_value.communicate.return_value = ('999 80', 0)
         settings_mock.TARGET_SETTINGS = {'original_hosts': [
             'foo01', 'foo02 foo03', 'foo[4..44]', 'foo45 foo46']}
         expected = ['matrix', 'color', '1col']

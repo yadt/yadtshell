@@ -194,7 +194,7 @@ def render_highlighted_differences(*args):
 def calculate_info_view_settings():
     original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
     try:
-        stty = Popen("stty size", stdout=PIPE, shell=True).communicate()[0]
+        stty = Popen(['stty', 'size'], stdout=PIPE).communicate()[0]
         cols = int(stty.split()[1])
     except:
         cols = 80
