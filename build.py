@@ -22,7 +22,6 @@ use_plugin('python.install_dependencies')
 use_plugin('python.unittest')
 use_plugin('python.coverage')
 use_plugin('python.flake8')
-use_plugin('ronn_manpage')
 
 use_plugin('python.distutils')
 use_plugin('copy_resources')
@@ -46,7 +45,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.7.0'
 
-default_task = ['analyze', 'generate_manpages', 'publish']
+default_task = ['analyze', 'publish']
 
 
 @init
@@ -64,8 +63,6 @@ def set_properties(project):
     project.set_property('integrationtest_parallel', True)
     project.set_property('integrationtest_cpu_scaling_factor', 8)
     project.set_property('integrationtest_inherit_environment', True)
-
-    project.set_property('manpage_source', 'man-yadtshell.md')
 
     project.set_property('flake8_verbose_output', True)
     project.set_property('flake8_include_test_sources', True)
@@ -123,3 +120,15 @@ def clean(project, logger):
     for integrationtest_dir in glob.glob('/tmp/integration-test*'):
         logger.info('Removing IT directory {0}'.format(integrationtest_dir))
         shutil.rmtree(integrationtest_dir)
+
+
+@task
+def generate_manpage_with_pandoc(project, logger):
+    import subprocess
+    subprocess.check_output('pandoc -s -t man man-yadtshell.md -o docs/man/yadtshell.1.gz', shell=True)
+
+
+@task
+def generate_manpage_with_ronn(project, logger):
+    import subprocess
+    subprocess.check_output('ronn -r --pipe man-yadtshell.md | gzip -9 > docs/man/yadtshell.1.gz', shell=True)
