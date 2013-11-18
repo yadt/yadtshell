@@ -1,6 +1,6 @@
-% PANDOC(1) Pandoc User Manuals
-% John MacFarlane
-% January 8, 2008
+% YADTshell(1) YADTshell User Manuals
+% The YADT project team
+% November 18, 2013
 
 # NAME
 

@@ -15,6 +15,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from pybuilder.core import use_plugin, init, Author, task
+from pybuilder.utils import assert_can_execute
 
 use_plugin('python.core')
 use_plugin('python.integrationtest')
@@ -124,5 +125,6 @@ def clean(project, logger):
 
 @task
 def generate_manpage_with_pandoc(project, logger):
+    assert_can_execute(['pandoc', '-v'], 'pandoc', 'generate_manpage_with_pandoc')
     import subprocess
     subprocess.check_output('pandoc -s -t man man-yadtshell.md -o docs/man/yadtshell.1.gz', shell=True)

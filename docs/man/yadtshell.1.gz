@@ -1,4 +1,4 @@
-.TH PANDOC 1 "January 8, 2008" "Pandoc User Manuals"
+.TH YADTshell 1 "November 18, 2013" "YADTshell User Manuals"
 .SH NAME
 .PP
 yadtshell \- yadt, an augmented deployment tool: the shell part
@@ -112,4 +112,4 @@ puppet, chef
 Licensed under the GNU General Public License (GPL), see
 http://www.gnu.org/licenses/gpl.txt for full license text.
 .SH AUTHORS
-John MacFarlane.
+The YADT project team.
