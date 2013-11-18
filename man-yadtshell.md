@@ -1,22 +1,23 @@
-YADTSHELL(1) YadtShell User Manuals
-===================================
+% PANDOC(1) Pandoc User Manuals
+% John MacFarlane
+% January 8, 2008
 
-## NAME
+# NAME
 
 yadtshell - yadt, an augmented deployment tool: the shell part
 
-## SYNOPSIS
+# SYNOPSIS
 
 yadtshell *command* [*options*] [*component*]...
 
-## DESCRIPTION
+# DESCRIPTION
 
 yadtshell allows you to control services and deployments, regarding
 the dependencies across the whole data center.
 The hosts to handle are taken from the *target* file in the current
 directory.
 
-## COMPONENTS
+# COMPONENTS
 * services :
 service://*host*/*servicename*
 
@@ -28,7 +29,7 @@ host://*host*
 
 (Wildcards `*` and `?`, and ranges `[start..end]` allowed)
 
-## COMMANDS
+# COMMANDS
 
 * status :
 Retrieves the actual state of all target hosts
@@ -59,7 +60,7 @@ updates the specified artefacts, but _disregarding any service dependencies_
 Locks the host(s), ensuring that only you can perform operations on it.
 Needs a message option.
 
-## OPTIONS
+# OPTIONS
 * --reboot :
 Reboots machines during an update, either if a pending artefact is configured to
 induce a reboot, or if the machine is running an outdated kernel.
@@ -84,7 +85,7 @@ Adds a message to a command. Valid only for the `lock` and `ignore` commands.
 Do not query and display the *status* of the target after an action that changed it
 (e.G. *start*, *update*, ...).
 
-## EXAMPLES
+# EXAMPLES
 
 * yadtshell status:
 retrieves the current state of your target
@@ -104,7 +105,7 @@ updates (and possibly reboots) all servers from the target
 * yadtshell updateartefact artefact://foo1/some-config :
 updates the package _some-config_ without regarding service dependencies
 
-## SEE ALSO
+# SEE ALSO
 
 the yadt project
 :   http://www.yadt-project.org/
@@ -115,6 +116,6 @@ sources at github
 Alternatives
 :   puppet, chef
 
-## LICENSE
+# LICENSE
 
 Licensed under the GNU General Public License (GPL), see http://www.gnu.org/licenses/gpl.txt for full license text.

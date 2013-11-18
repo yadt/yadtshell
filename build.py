@@ -126,9 +126,3 @@ def clean(project, logger):
 def generate_manpage_with_pandoc(project, logger):
     import subprocess
     subprocess.check_output('pandoc -s -t man man-yadtshell.md -o docs/man/yadtshell.1.gz', shell=True)
-
-
-@task
-def generate_manpage_with_ronn(project, logger):
-    import subprocess
-    subprocess.check_output('ronn -r --pipe man-yadtshell.md | gzip -9 > docs/man/yadtshell.1.gz', shell=True)
