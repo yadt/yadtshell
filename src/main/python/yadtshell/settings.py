@@ -55,6 +55,7 @@ console_stderr_handler.setFormatter(message_formatter)
 root_logger.addHandler(console_stdout_handler)
 root_logger.addHandler(console_stderr_handler)
 
+
 class SettingsError(BaseException):
     pass
 
