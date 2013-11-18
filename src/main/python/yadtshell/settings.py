@@ -110,9 +110,10 @@ def _load_target_file(target_filename, targets_dir, target_basename, visited=Non
     visited.append(target_filename)
 
     try:
-        settings_file = open(target)
-    except IOError:
-        raise SettingsError('cannot find target definition file %s, aborting' % target)
+        settings_file = open(target_filename)
+    except EnvironmentError:
+        raise SettingsError(
+            'cannot find target definition file %s, aborting' % target_filename)
     target_settings = yaml.load(settings_file)
     settings_file.close()
 
