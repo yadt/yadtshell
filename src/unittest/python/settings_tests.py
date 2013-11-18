@@ -2,7 +2,7 @@ import yadtshell
 import unittest
 from mock import patch, MagicMock
 from StringIO import StringIO
-
+from yadtshell.settings import SettingsError
 
 class SettingsTests(unittest.TestCase):
 
@@ -230,8 +230,7 @@ hosts:
                       includes=['sub-target'])
         self.assertEqual(result, expect)
 
-    @patch('yadtshell.settings.root_logger.critical')
-    def test_should_raise_exception_when_loading_non_existing_file(self, mock_logger):
+    def test_should_raise_exception_when_loading_non_existing_file(self):
         content = """
 hosts:
     - foobar01
@@ -246,4 +245,4 @@ includes:
 
         self.mock_open.side_effect = my_open
         self.assertRaises(
-            SystemExit, yadtshell.settings.load_target_file, 'target')
+            SettingsError, yadtshell.settings.load_target_file, 'target')

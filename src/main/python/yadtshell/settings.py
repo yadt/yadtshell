@@ -55,9 +55,10 @@ console_stderr_handler.setFormatter(message_formatter)
 root_logger.addHandler(console_stdout_handler)
 root_logger.addHandler(console_stderr_handler)
 
+class SettingsError(BaseException):
+    pass
 
 logger = logging.getLogger('settings')
-
 
 try:
     from loggingconf import *  # NOQA
@@ -114,9 +115,7 @@ def _load_target_file(target_settings_file, default_setting_file, visited=None):
     try:
         settings_file = open(target)
     except IOError:
-        root_logger.critical(
-            'cannot find target definition file %s, aborting' % target)
-        sys.exit(1)
+        raise SettingsError('cannot find target definition file %s, aborting' % target)
     target_settings = yaml.load(settings_file)
     settings_file.close()
     for include in target_settings.get('includes', []):
