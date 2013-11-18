@@ -53,6 +53,8 @@ from yadtshell.commandline import (EXIT_CODE_CANCELED_BY_USER,
                                    determine_command_from_arguments,
                                    infer_options_from_arguments)
 
+from yadtshell.settings import SettingsError
+
 from docopt import docopt
 arguments = docopt(__doc__)
 
@@ -69,7 +71,12 @@ observer.start()
 import yadtshell
 logger = logging.getLogger('yadtshell')
 
-yadtshell.settings.load_settings(log_to_file=(cmd not in ['dump', 'info']))
+try:
+    yadtshell.settings.load_settings(log_to_file=(cmd not in ['dump', 'info']))
+except SettingsError, e:
+    logger.critical(e)
+    sys.exit(1)
+
 if opts.get('tracking_id'):
     yadtshell.settings.tracking_id = opts.get('tracking_id')
 

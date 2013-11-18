@@ -4,6 +4,7 @@ from mock import patch, MagicMock
 from StringIO import StringIO
 from yadtshell.settings import SettingsError
 
+
 class SettingsTests(unittest.TestCase):
 
     def setUp(self):
@@ -27,7 +28,7 @@ hosts:
         self.mock_open.return_value = MagicMock(
             spec=file, wraps=StringIO(content))
 
-        result = yadtshell.settings.load_target_file("useless_name")
+        result = yadtshell.settings.load_target_file('target')
         expect = dict(name='foobaz42',
                       hosts=['foobar'],
                       original_hosts=['foobar'])
@@ -46,7 +47,7 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
@@ -78,9 +79,9 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
-            if filename == '/foo/bar/foobaz42/../sub-target/target':
+            if filename == '/foo/bar/sub-target/target':
                 return MagicMock(spec=file, wraps=StringIO(subcontent))
 
             return MagicMock(spec=file, wraps=StringIO(subsubcontent))
@@ -109,7 +110,7 @@ includes:
 """
 
         def my_open(filename):
-            if filename == '/foo/bar/foobaz42/../sub-target/target':
+            if filename == '/foo/bar/sub-target/target':
                 return MagicMock(spec=file, wraps=StringIO(subcontent))
             return MagicMock(spec=file, wraps=StringIO(content))
 
@@ -164,7 +165,7 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
@@ -191,7 +192,7 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
@@ -217,7 +218,7 @@ hosts:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             return MagicMock(spec=file, wraps=StringIO(subcontent))
 
@@ -239,7 +240,7 @@ includes:
 """
 
         def my_open(filename):
-            if filename == 'target':
+            if filename == '/foo/bar/foobaz42/target':
                 return MagicMock(spec=file, wraps=StringIO(content))
             raise IOError
 

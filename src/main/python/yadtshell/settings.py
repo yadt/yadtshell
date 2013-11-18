@@ -100,17 +100,14 @@ def initialize_broadcast_client():  # pragma: no cover
         logger.warn(e)
 
 
-def _load_target_file(target_settings_file, default_setting_file, visited=None):
-    if visited:
-        if target_settings_file in visited:
-            return {}
-        targets_dir = os.getenv("TARGETS_DIR", os.path.join(os.getcwd(), ".."))
-        target = os.path.join(
-            targets_dir, target_settings_file, default_setting_file)
-        visited.append(target_settings_file)
-    else:
-        target = target_settings_file
-        visited = [os.path.basename(os.getcwd())]
+def _load_target_file(target_filename, targets_dir, target_basename, visited=None):
+    if not visited:
+        visited = []
+
+    if target_filename in visited:
+        return {}
+
+    visited.append(target_filename)
 
     try:
         settings_file = open(target)
@@ -118,19 +115,25 @@ def _load_target_file(target_settings_file, default_setting_file, visited=None):
         raise SettingsError('cannot find target definition file %s, aborting' % target)
     target_settings = yaml.load(settings_file)
     settings_file.close()
+
     for include in target_settings.get('includes', []):
+        subtarget_filename = os.path.join(
+            targets_dir, include, target_basename)
         subtarget_settings = _load_target_file(
-            include, default_setting_file, visited)
+            subtarget_filename, targets_dir, target_basename, visited)
         for host in subtarget_settings.get('hosts', []):
             target_hosts = target_settings.get('hosts', [])
             target_settings.setdefault('hosts', target_hosts).append(host)
     return target_settings
 
 
-def load_target_file(target_settings_file):
+def load_target_file(target_basename):
+    targets_dir = os.getenv("TARGETS_DIR", os.path.dirname(os.getcwd()))
+    target_name = os.path.basename(os.getcwd())
+    target_filename = os.path.join(targets_dir, target_name, target_basename)
     target_settings = _load_target_file(
-        target_settings_file, target_settings_file)
-    target_settings.setdefault('name', os.path.basename(os.getcwd()))
+        target_filename, targets_dir, target_basename)
+    target_settings.setdefault('name', target_name)
     target_settings = expand_hosts(target_settings)
     return target_settings
 
@@ -144,10 +147,10 @@ def expand_hosts(target_settings):
 
 
 def load_settings(log_to_file=True):
-    TARGET_SETTINGS_FILE = 'target'
+    TARGET_BASENAME = 'target'
 
     global TARGET_SETTINGS
-    TARGET_SETTINGS = load_target_file(TARGET_SETTINGS_FILE)
+    TARGET_SETTINGS = load_target_file(TARGET_BASENAME)
 
     initialize_broadcast_client()
 
@@ -210,9 +213,9 @@ def load_settings(log_to_file=True):
     logger.debug('Called "{0}"'.format(' '.join(sys.argv)))
     logger.debug('output dir is %s' % OUTPUT_DIR)
 
-    OUT_TARGET_FILE = os.path.join(OUT_DIR, TARGET_SETTINGS_FILE)
+    OUT_TARGET_FILE = os.path.join(OUT_DIR, TARGET_BASENAME)
     try:
-        changed = not filecmp.cmp(TARGET_SETTINGS_FILE, OUT_TARGET_FILE)
+        changed = not filecmp.cmp(TARGET_BASENAME, OUT_TARGET_FILE)
     except OSError:
         changed = True
     if changed:
@@ -220,7 +223,7 @@ def load_settings(log_to_file=True):
             'target settings have changed since last call, thus cleaning cached data')
         shutil.rmtree(OUT_DIR)
         os.makedirs(OUT_DIR)
-        shutil.copy2(TARGET_SETTINGS_FILE, OUT_TARGET_FILE)
+        shutil.copy2(TARGET_BASENAME, OUT_TARGET_FILE)
 
     global VIEW_SETTINGS
     VIEW_SETTINGS = {'info-view': ['matrix', 'color', 'maxcols']}
