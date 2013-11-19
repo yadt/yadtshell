@@ -203,13 +203,12 @@ def calculate_info_view_settings():
     max_row_length = max([len(he.expand(hosts)) for hosts in original_hosts])
 
     width = '1col'
-    # this is the the offset we add expecting the information show right of the
-    # matrix:
-    RIGHT_MARGIN_OFFSET = 40
 
-    if max_row_length * 4 + RIGHT_MARGIN_OFFSET <= cols:
+    RIGHT_MARGIN_WIDTH = 40
+
+    if max_row_length * 4 + RIGHT_MARGIN_WIDTH <= cols:
         width = '3cols'
-    if max_row_length * 10 + RIGHT_MARGIN_OFFSET <= cols:
+    if max_row_length * 10 + RIGHT_MARGIN_WIDTH <= cols:
         width = 'maxcols'
 
     return ['matrix', 'color', width]
@@ -395,7 +394,7 @@ def get_icons():
     }
 
 
-def colorize(icons):  # pragma: no cover
+def colorize(icons):
     icons['REBOOT_AFTER_UPDATE'] = render_yellow(icons['REBOOT_AFTER_UPDATE'])
     icons['REBOOT_NOW'] = render_red(icons['REBOOT_NOW'])
     icons['UP'] = render_green(icons['UP'])
@@ -414,7 +413,7 @@ def colorize(icons):  # pragma: no cover
 
 def render_legend(info_view_settings):
     icons = get_icons()
-    if 'color' in info_view_settings:  # pragma: no cover
+    if 'color' in info_view_settings:
         icons = colorize(icons)
 
     print(
@@ -429,7 +428,7 @@ def render_legend(info_view_settings):
     print()
 
 
-if __name__ == "__main__":   # pragma: no cover
+if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('', '--full', action='store_true',
