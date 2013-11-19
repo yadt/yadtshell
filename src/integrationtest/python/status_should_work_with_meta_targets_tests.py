@@ -17,8 +17,6 @@
 __author__ = 'Daniel Clerc'
 
 import os
-import subprocess
-import sys
 import unittest
 
 from os.path import join
@@ -61,11 +59,16 @@ class Test(integrationtest_support.IntegrationTestSupport):
         return_code = self.execute_command('yadtshell status -v')
 
         self.assertEqual(0, return_code)
-        with self.verify() as verify:
-            verify.called('ssh').at_least_with_arguments(
-                'foo.bar01').and_input('/usr/bin/yadt-status')
-            verify.called('ssh').at_least_with_arguments(
-                'foo.bar02').and_input('/usr/bin/yadt-status')
+        with self.verify() as complete_verify:
+
+            with complete_verify.filter_by_argument('foo.bar01') as verify:
+                verify.called('ssh').at_least_with_arguments(
+                    'foo.bar01').and_input('/usr/bin/yadt-status')
+            with complete_verify.filter_by_argument('foo.bar02') as verify:
+                verify.called('ssh').at_least_with_arguments(
+                    'foo.bar02').and_input('/usr/bin/yadt-status')
+
+            complete_verify.finished()
 
 
 if __name__ == '__main__':
