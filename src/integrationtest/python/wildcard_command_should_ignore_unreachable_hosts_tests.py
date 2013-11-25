@@ -51,9 +51,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
                 it01_verify.called('ssh').at_least_with_arguments(
                     'it01.domain', "yadt-command yadt-host-lock 'locking the hosts'")
-
-                it01_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
             verify.finished()
 
 if __name__ == '__main__':
