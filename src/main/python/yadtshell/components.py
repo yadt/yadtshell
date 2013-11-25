@@ -376,8 +376,7 @@ class UnreachableHost(Component):
     def __init__(self, name):
         self.fqdn = name
         self.hostname = self.fqdn.split('.')[0]
-        self.name = self.hostname
-        Component.__init__(self, yadtshell.settings.HOST, self.name)
+        Component.__init__(self, yadtshell.settings.HOST, name)
 
     def is_reachable(self):
         return False

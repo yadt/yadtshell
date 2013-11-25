@@ -95,6 +95,14 @@ if uris:
     components = yadtshell.util.restore_current_state()
     uris = yadtshell.helper.expand_hosts(uris)
     uris = yadtshell.helper.glob_hosts(components, uris)
+
+    def is_a_valid_host_uri_or_other_uri(uri):
+        if 'host://' not in uri:
+            return True
+        component = components[uri]
+        return component.is_reachable()
+    uris = filter(is_a_valid_host_uri_or_other_uri, uris)
+
     if not uris:
         logger.error(
             'Could not resolve URIs. Check for typos or syntax issues.')
@@ -208,5 +216,4 @@ else:
     print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED${NORMAL}' % cmd.upper())
     logger.critical('exit code: %i' % reactor.return_code)
     logger.info('For details see: "{0}"'.format(yadtshell.settings.log_file))
-
 sys.exit(reactor.return_code)
