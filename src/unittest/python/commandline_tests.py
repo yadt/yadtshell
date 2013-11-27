@@ -203,46 +203,48 @@ class NormalizeOptionsTests(unittest.TestCase):
     def tearDown(self):
         unstub()
 
-    def test_should_execute_normalize_message_when_message_option_is_given(self):
-        when(yadtshell.commandline).normalize_message(
-            any_value()).thenReturn('normalized message')
+    @patch('yadtshell.commandline.normalize_message')
+    def test_should_execute_normalize_message_when_message_option_is_given(self, normalize_message):
+        normalize_message.return_value = 'normalized message'
+
         options_with_message = self.MockedOptions()
         options_with_message.message = 'some message'
 
         actual_options = normalize_options(options_with_message)
 
-        verify(yadtshell.commandline).normalize_message('some message')
+        normalize_message.assert_called_with('some message')
         self.assertEqual(actual_options.message, 'normalized message')
 
-    def test_should_not_execute_normalize_message_when_message_option_is_none(self):
-        when(yadtshell.commandline).normalize_message(
-            any_value()).thenReturn('normalized message')
+    @patch('yadtshell.commandline.normalize_message')
+    def test_should_not_execute_normalize_message_when_message_option_is_none(self, normalize_message):
+        normalize_message.return_value = 'normalized message'
+
         options_with_none_message = self.MockedOptions()
         options_with_none_message.message = None
 
         actual_options = normalize_options(options_with_none_message)
 
-        verify(yadtshell.commandline, never).normalize_message(None)
+        normalize_message.assert_not_called()
         self.assertEqual(actual_options.message, None)
 
-    def test_should_not_execute_normalize_message_when_message_option_is_not_given(self):
-        when(yadtshell.commandline).normalize_message(
-            any_value()).thenReturn('normalized message')
+    @patch('yadtshell.commandline.normalize_message')
+    def test_should_not_execute_normalize_message_when_message_option_is_not_given(self, normalize_message):
+        normalize_message.return_value = 'normalized message'
         options_without_message = object()
 
         normalize_options(options_without_message)
 
-        verify(yadtshell.commandline, never).normalize_message('some message')
+        normalize_message.assert_not_called()
 
-    def test_should_not_perform_mutation_on_options_when_normalize_options_is_called(self):
-        when(yadtshell.commandline).normalize_message(
-            any_value()).thenReturn('normalized message')
+    @patch('yadtshell.commandline.normalize_message')
+    def test_should_not_perform_mutation_on_options_when_normalize_options_is_called(self, normalize_message):
+        normalize_message.return_value = 'normalized message'
         options_with_message = self.MockedOptions()
         options_with_message.message = 'some message'
 
         actual_options = normalize_options(options_with_message)
 
-        verify(yadtshell.commandline).normalize_message('some message')
+        normalize_message.assert_called_with('some message')
         self.assertTrue(actual_options is not options_with_message,
                         'performed mutation on the options instead of creating a new object')
 
