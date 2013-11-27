@@ -1,6 +1,6 @@
 import unittest
-from mockito import mock, when, verify, unstub, any as any_value, never
-from mock import Mock
+from mockito import when, verify, unstub, any as any_value, never
+from mock import Mock, patch
 
 import yadtshell
 from yadtshell.commandline import (ensure_command_has_required_arguments,
@@ -109,29 +109,29 @@ class UserConfirmationTests(unittest.TestCase):
 class ValidateCommandLineOptionsTest(unittest.TestCase):
 
     def tearDown(self):
-        unstub()
+        self.log_patcher.stop()
 
     def setUp(self):
         self._show_help_callback_has_been_called = False
-        when(yadtshell.commandline.LOGGER).error(any_value).thenReturn(None)
+        self.log_patcher = patch('yadtshell.commandline.LOGGER.error')
+        self.log_patcher.start()
 
     def fake_show_help_callback(self):
         self._show_help_callback_has_been_called = True
 
-    def test_should_exit_with_appropriate_code_when_command_is_lock_and_no_message_was_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_exit_with_appropriate_code_when_command_is_lock_and_no_message_was_given(self, mock_exit):
+        options = Mock()
         options.message = None
 
         validate_command_line_options(
             'lock', options, self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
-            EXIT_CODE_MISSING_MESSAGE_OPTION)
+        mock_exit.assert_called_with(EXIT_CODE_MISSING_MESSAGE_OPTION)
 
-    def test_should_execute_show_help_callback_when_no_lock_message_is_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_execute_show_help_callback_when_no_lock_message_is_given(self, _):
+        options = Mock()
         options.message = None
 
         validate_command_line_options(
@@ -139,31 +139,29 @@ class ValidateCommandLineOptionsTest(unittest.TestCase):
 
         self.assertTrue(self._show_help_callback_has_been_called)
 
-    def test_should_not_exit_when_command_is_lock_and_message_is_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_not_exit_when_command_is_lock_and_message_is_given(self, mock_exit):
+        options = Mock()
         options.message = 'lock message'
 
         validate_command_line_options(
             'lock', options, self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys, never).exit(
-            EXIT_CODE_MISSING_MESSAGE_OPTION)
+        mock_exit.assert_not_called()
 
-    def test_should_exit_with_appropriate_code_when_command_is_ignore_and_no_message_was_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_exit_with_appropriate_code_when_command_is_ignore_and_no_message_was_given(self, mock_exit):
+        options = Mock()
         options.message = None
 
         validate_command_line_options(
             'ignore', options, self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
-            EXIT_CODE_MISSING_MESSAGE_OPTION)
+        mock_exit.assert_called_with(EXIT_CODE_MISSING_MESSAGE_OPTION)
 
-    def test_should_execute_show_help_callback_when_no_ignore_message_is_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_execute_show_help_callback_when_no_ignore_message_is_given(self, _):
+        options = Mock()
         options.message = None
 
         validate_command_line_options(
@@ -171,16 +169,15 @@ class ValidateCommandLineOptionsTest(unittest.TestCase):
 
         self.assertTrue(self._show_help_callback_has_been_called)
 
-    def test_should_not_exit_when_command_is_ignore_and_message_is_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-        options = mock()
+    @patch('yadtshell.commandline.sys.exit')
+    def test_should_not_exit_when_command_is_ignore_and_message_is_given(self, mock_exit):
+        options = Mock()
         options.message = 'ignore message'
 
         validate_command_line_options(
             'ignore', options, self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys, never).exit(
-            EXIT_CODE_MISSING_MESSAGE_OPTION)
+        mock_exit.assert_not_called()
 
 
 class NormalizeMessageTests(unittest.TestCase):

@@ -1,7 +1,6 @@
 import unittest
-from mockito import when, unstub, any as any_value, mock
+from mock import patch
 
-from yadtshell import metalogic
 from yadtshell.metalogic import apply_instructions
 from yadtshell.actions import ActionPlan, Action
 
@@ -9,10 +8,11 @@ from yadtshell.actions import ActionPlan, Action
 class MetalogicTests(unittest.TestCase):
 
     def setUp(self):
-        when(metalogic.logging).getLogger(any_value()).thenReturn(mock())
+        self.log_patcher = patch('yadtshell.metalogic.logging.getLogger')
+        self.log_patcher.start()
 
     def tearDown(self):
-        unstub()
+        self.log_patcher.stop()
 
     def test_apply_instructions_should_augment_plan_with_multiple_workers(self):
         actions = [Action('sudo service bar stop', 'service://foo/bar'),
