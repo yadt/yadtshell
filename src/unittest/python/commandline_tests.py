@@ -1,5 +1,4 @@
 import unittest
-from mockito import when, verify, unstub, any as any_value, never
 from mock import Mock, patch
 
 import yadtshell
@@ -200,9 +199,6 @@ class NormalizeOptionsTests(unittest.TestCase):
         def __init__(self, **keywords):
             self.__dict__.update(keywords)
 
-    def tearDown(self):
-        unstub()
-
     @patch('yadtshell.commandline.normalize_message')
     def test_should_execute_normalize_message_when_message_option_is_given(self, normalize_message):
         normalize_message.return_value = 'normalized message'
@@ -253,99 +249,82 @@ class EnsureCommandHasRequiredArgumentsTests(unittest.TestCase):
 
     def setUp(self):
         self._show_help_callback_has_been_called = False
-        when(yadtshell.commandline.LOGGER).error(any_value).thenReturn(None)
+        self.log_patcher = patch('yadtshell.commandline.LOGGER.error')
+        self.log_patcher.start()
+        self.exit_patcher = patch('yadtshell.commandline.sys.exit')
+        self.mock_exit = self.exit_patcher.start()
 
     def tearDown(self):
-        unstub()
+        self.log_patcher.stop()
+        self.exit_patcher.stop()
 
     def fake_show_help_callback(self):
         self._show_help_callback_has_been_called = True
 
     def test_should_not_exit_when_arguments_are_provided(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'start', ['service://hostname/service'], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys, never).exit(
-            EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
+        self.mock_exit.assert_not_called()
 
     def test_should_fail_with_appropriate_error_code_when_executing_command_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'start', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_execute_show_help_callback_when_no_arguments_are_given(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'start', [], self.fake_show_help_callback)
 
         self.assertTrue(self._show_help_callback_has_been_called)
 
     def test_should_fail_when_executing_command_start_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'start', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_stop_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'stop', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_ignore_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'ignore', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_updateartefact_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'updateartefact', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_lock_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'lock', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_unlock_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'unlock', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
 
     def test_should_fail_when_executing_command_unignore_without_arguments(self):
-        when(yadtshell.commandline.sys).exit(any_value()).thenReturn(None)
-
         ensure_command_has_required_arguments(
             'lock', [], self.fake_show_help_callback)
 
-        verify(yadtshell.commandline.sys).exit(
+        self.mock_exit.assert_called_with(
             EXIT_CODE_MISSING_COMPONENT_URI_ARGUMENT)
