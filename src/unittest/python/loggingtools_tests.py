@@ -39,7 +39,9 @@ class LoggerConfigurationTests(unittest.TestCase):
 class CreateNextLogFileNameTests(FileNameTestCase):
 
     def setUp(self):
-        when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
+        patcher = patch('yadtshell.loggingtools._get_command_counter_and_increment')
+        patched = patcher.start()
+        patched.return_value = 123
         self.actual_file_name = create_next_log_file_name(
             log_dir='/var/log/test',
             target_name='target-name',
