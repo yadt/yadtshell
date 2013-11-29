@@ -20,7 +20,8 @@ def configure_logger_output_stream_by_level(stderr_handler, stdout_handler):
 def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
     command_counter = _get_command_counter_and_increment()
 
-    log_file_name = '%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s.%(user_name)s.%(command_counter)03i.%(source_host)s' % locals()
+    log_file_name = ('%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s' +
+                     '.%(user_name)s.%(command_counter)03i.%(source_host)s') % locals()
 
     if tag:
         log_file_name += '.' + tag
