@@ -24,7 +24,9 @@ class LoggerConfigurationTests(unittest.TestCase):
 
     @patch('yadtshell.loggingtools.ErrorFilter')
     @patch('yadtshell.loggingtools.InfoFilter')
-    def test_should_add_error_filter_to_stderr_and_info_filter_to_stdout(self, info_filter, error_filter):
+    def test_should_add_error_filter_to_stderr_and_info_filter_to_stdout(self,
+                                                                         info_filter,
+                                                                         error_filter):
         stderr_handler = Mock()
         stdout_handler = Mock()
 
@@ -119,7 +121,8 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
         self.assertEqual('log-file-name', actual_log_file_name)
         nlf.assert_called_with(
-            'log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
+            'log-directory', 'target-name', '2013-01-31--11-27-56',
+            'user-name', 'host-name', tag='status')
 
     @patch('yadtshell.loggingtools.create_next_log_file_name')
     def test_should_join_arguments_using_underscore(self, nlf):
