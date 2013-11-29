@@ -3,6 +3,8 @@ import logging
 
 from mockito import when, unstub, verify, mock, any as any_value
 
+from mock import Mock, patch
+
 from unittest_support import FileNameTestCase
 from yadtshell.loggingtools import (
     create_next_log_file_name_with_command_arguments_as_tag,
@@ -22,20 +24,16 @@ import yadtshell.loggingtools
 
 class LoggerConfigurationTests(unittest.TestCase):
 
-    def test_should_add_error_filter_to_stderr_and_info_filter_to_stdout(self):
-        stderr_handler = mock()
-        stdout_handler = mock()
-        error_filter = mock()
-        info_filter = mock()
-        when(yadtshell.loggingtools).ErrorFilter().thenReturn(error_filter)
-        when(yadtshell.loggingtools).InfoFilter().thenReturn(info_filter)
-        when(stderr_handler).addFilter(any_value()).thenReturn(None)
-        when(stdout_handler).addFilter(any_value()).thenReturn(None)
+    @patch('yadtshell.loggingtools.ErrorFilter')
+    @patch('yadtshell.loggingtools.InfoFilter')
+    def test_should_add_error_filter_to_stderr_and_info_filter_to_stdout(self, info_filter, error_filter):
+        stderr_handler = Mock()
+        stdout_handler = Mock()
 
         configure_logger_output_stream_by_level(stderr_handler, stdout_handler)
 
-        verify(stderr_handler).addFilter(error_filter)
-        verify(stdout_handler).addFilter(info_filter)
+        stderr_handler.addFilter.assert_called_with(error_filter.return_value)
+        stdout_handler.addFilter.assert_called_with(info_filter.return_value)
 
 
 class CreateNextLogFileNameTests(FileNameTestCase):
