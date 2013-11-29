@@ -58,7 +58,6 @@ def set_properties(project):
     project.depends_on('docopt')
 
     project.build_depends_on('shtub')
-    project.build_depends_on('mockito')
     project.build_depends_on('mock')
 
     project.set_property('integrationtest_parallel', True)

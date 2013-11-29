@@ -1,8 +1,6 @@
 import unittest
 import logging
 
-from mockito import when, unstub, verify, mock, any as any_value
-
 from mock import Mock, patch
 
 from unittest_support import FileNameTestCase
@@ -39,8 +37,9 @@ class LoggerConfigurationTests(unittest.TestCase):
 class CreateNextLogFileNameTests(FileNameTestCase):
 
     def setUp(self):
-        patcher = patch('yadtshell.loggingtools._get_command_counter_and_increment')
-        patched = patcher.start()
+        self.patcher = patch(
+            'yadtshell.loggingtools._get_command_counter_and_increment')
+        patched = self.patcher.start()
         patched.return_value = 123
         self.actual_file_name = create_next_log_file_name(
             log_dir='/var/log/test',
@@ -52,7 +51,7 @@ class CreateNextLogFileNameTests(FileNameTestCase):
         )
 
     def tearDown(self):
-        unstub()
+        self.patcher.stop()
 
     def test_should_use_script_name_with_log_dir_as_first_element(self):
         self._assert(self.actual_file_name)._element_at(
@@ -85,10 +84,13 @@ class CreateNextLogFileNameTests(FileNameTestCase):
 class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
 
     def setUp(self):
-        when(yadtshell.loggingtools)._get_command_counter_and_increment().thenReturn(123)
+        self.patcher = patch(
+            'yadtshell.loggingtools._get_command_counter_and_increment')
+        patched = self.patcher.start()
+        patched.return_value = 123
 
     def tearDown(self):
-        unstub()
+        self.patcher.stop()
 
     def test_should_use_command_argument_as_seventh_element(self):
         self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
@@ -102,10 +104,9 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         self._assert(self.actual_file_name)._element_at(
             6)._is_equal_to('status')
 
-    def test_should_call_create_next_log_file_name_using_given_arguments(self):
-        when(
-            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
-                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+    @patch('yadtshell.loggingtools.create_next_log_file_name')
+    def test_should_call_create_next_log_file_name_using_given_arguments(self, nlf):
+        nlf.return_value = 'log-file-name'
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
@@ -117,14 +118,12 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(
-            yadtshell.loggingtools).create_next_log_file_name('log-directory',
-                                                              'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
+        nlf.assert_called_with(
+            'log-directory', 'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='status')
 
-    def test_should_join_arguments_using_underscore(self):
-        when(
-            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
-                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+    @patch('yadtshell.loggingtools.create_next_log_file_name')
+    def test_should_join_arguments_using_underscore(self, nlf):
+        nlf.return_value = 'log-file-name'
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
@@ -137,14 +136,12 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(
-            yadtshell.loggingtools).create_next_log_file_name('log-directory',
-                                                              'target-name', '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
+        nlf.assert_called_with('log-directory', 'target-name',
+                               '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
 
-    def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self):
-        when(
-            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
-                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+    @patch('yadtshell.loggingtools.create_next_log_file_name')
+    def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self, nlf):
+        nlf.return_value = 'log-file-name'
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
@@ -156,26 +153,24 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(
-            yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name',
-                                                              '2013-01-31--11-27-56', 'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
+        nlf.assert_called_with(
+            'log-directory', 'target-name', '2013-01-31--11-27-56',
+            'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
 
-    def test_should_prepare_string_as_expected(self):
+    @patch('yadtshell.loggingtools.create_next_log_file_name')
+    @patch('yadtshell.loggingtools._replace_uri_specific_characters_with_underscores')
+    @patch('yadtshell.loggingtools._strip_dashes')
+    @patch('yadtshell.loggingtools._strip_special_characters')
+    @patch('yadtshell.loggingtools._trim_underscores')
+    @patch('yadtshell.loggingtools._replace_blanks_with_underscores')
+    def test_should_prepare_string_as_expected(self, blanks, underscores, special, dashes, uri, nlf):
 
-        when(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(
-            any_value()).thenReturn('replaced uri specific characters')
-        when(yadtshell.loggingtools)._strip_dashes(
-            any_value()).thenReturn('stripped dashes')
-        when(yadtshell.loggingtools)._strip_special_characters(
-            any_value()).thenReturn('stripped special characters')
-        when(yadtshell.loggingtools)._trim_underscores(
-            any_value()).thenReturn('trimmed underscores')
-        when(yadtshell.loggingtools)._replace_blanks_with_underscores(
-            any_value()).thenReturn('replaced blanks with underscores')
-
-        when(
-            yadtshell.loggingtools).create_next_log_file_name(any_value(), any_value(),
-                                                              any_value(), any_value(), any_value(), tag=any_value()).thenReturn('log-file-name')
+        uri.return_value = 'replaced uri specific characters'
+        dashes.return_value = 'stripped dashes'
+        special.return_value = 'stripped special characters'
+        underscores.return_value = 'trimmed underscores'
+        blanks.return_value = 'replaced blanks with underscores'
+        nlf.return_value = 'log-file-name'
 
         actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
@@ -187,20 +182,15 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        verify(yadtshell.loggingtools)._replace_uri_specific_characters_with_underscores(
-            'arg1_arg2')
-        verify(yadtshell.loggingtools)._strip_dashes(
-            'replaced uri specific characters')
-        verify(yadtshell.loggingtools)._strip_special_characters(
-            'stripped dashes')
-        verify(yadtshell.loggingtools)._trim_underscores(
-            'stripped special characters')
-        verify(yadtshell.loggingtools)._replace_blanks_with_underscores(
-            'trimmed underscores')
+        uri.assert_called_with('arg1_arg2')
+        dashes.assert_called_with('replaced uri specific characters')
+        special.assert_called_with('stripped dashes')
+        underscores.assert_called_with('stripped special characters')
+        blanks.assert_called_with('trimmed underscores')
 
-        verify(
-            yadtshell.loggingtools).create_next_log_file_name('log-directory', 'target-name',
-                                                              '2013-01-31--11-27-56', 'user-name', 'host-name', tag='replaced blanks with underscores')
+        nlf.assert_called_with(
+            'log-directory', 'target-name', '2013-01-31--11-27-56',
+            'user-name', 'host-name', tag='replaced blanks with underscores')
 
 
 class GetCommandCounterAndIncrementTests(unittest.TestCase):
@@ -332,13 +322,13 @@ class ErrorFilterTests(unittest.TestCase):
         self.error_filter = ErrorFilter()
 
     def test_should_log_errors(self):
-        error_record = mock()
+        error_record = Mock()
         error_record.levelno = logging.ERROR
         self.assertEqual(
             self.error_filter.filter(error_record), self.LOG_RECORD)
 
     def test_should_log_warnings(self):
-        warning_record = mock()
+        warning_record = Mock()
         warning_record.levelno = logging.WARN
         self.assertEqual(
             self.error_filter.filter(warning_record), self.LOG_RECORD)
@@ -348,25 +338,25 @@ class ErrorFilterTests(unittest.TestCase):
             self.error_filter.filter(warning_record), self.LOG_RECORD)
 
     def test_should_log_criticals(self):
-        critical_record = mock()
+        critical_record = Mock()
         critical_record.levelno = logging.CRITICAL
         self.assertEqual(
             self.error_filter.filter(critical_record), self.LOG_RECORD)
 
     def test_should_log_fatals(self):
-        fatal_record = mock()
+        fatal_record = Mock()
         fatal_record.levelno = logging.FATAL
         self.assertEqual(
             self.error_filter.filter(fatal_record), self.LOG_RECORD)
 
     def test_should_not_log_infos(self):
-        info_record = mock()
+        info_record = Mock()
         info_record.levelno = logging.INFO
         self.assertEqual(self.error_filter.filter(
             info_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_debugs(self):
-        debug_record = mock()
+        debug_record = Mock()
         debug_record.levelno = logging.DEBUG
         self.assertEqual(self.error_filter.filter(
             debug_record), self.DO_NOT_LOG_RECORD)
@@ -380,13 +370,13 @@ class InfoFilterTests(unittest.TestCase):
         self.info_filter = InfoFilter()
 
     def test_should_not_log_errors(self):
-        error_record = mock()
+        error_record = Mock()
         error_record.levelno = logging.ERROR
         self.assertEqual(self.info_filter.filter(
             error_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_warnings(self):
-        warning_record = mock()
+        warning_record = Mock()
         warning_record.levelno = logging.WARN
         self.assertEqual(self.info_filter.filter(
             warning_record), self.DO_NOT_LOG_RECORD)
@@ -396,24 +386,24 @@ class InfoFilterTests(unittest.TestCase):
             warning_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_criticals(self):
-        critical_record = mock()
+        critical_record = Mock()
         critical_record.levelno = logging.CRITICAL
         self.assertEqual(self.info_filter.filter(
             critical_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_not_log_fatals(self):
-        fatal_record = mock()
+        fatal_record = Mock()
         fatal_record.levelno = logging.FATAL
         self.assertEqual(self.info_filter.filter(
             fatal_record), self.DO_NOT_LOG_RECORD)
 
     def test_should_log_infos(self):
-        info_record = mock()
+        info_record = Mock()
         info_record.levelno = logging.INFO
         self.assertEqual(self.info_filter.filter(info_record), self.LOG_RECORD)
 
     def test_should_log_debugs(self):
-        debug_record = mock()
+        debug_record = Mock()
         debug_record.levelno = logging.DEBUG
         self.assertEqual(
             self.info_filter.filter(debug_record), self.LOG_RECORD)
