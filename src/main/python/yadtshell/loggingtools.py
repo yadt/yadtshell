@@ -17,7 +17,8 @@ def configure_logger_output_stream_by_level(stderr_handler, stdout_handler):
     stdout_handler.addFilter(stdout_filter)
 
 
-def create_next_log_file_name(log_dir, target_name, command_start_timestamp, user_name, source_host, tag=None):
+def create_next_log_file_name(log_dir, target_name, command_start_timestamp,
+                              user_name, source_host, tag=None):
     command_counter = _get_command_counter_and_increment()
 
     log_file_name = ('%(log_dir)s/yadtshell.%(target_name)s.%(command_start_timestamp)s' +
@@ -108,9 +109,9 @@ class ErrorFilter(logging.Filter):
 class InfoFilter(logging.Filter):
 
     def filter(self, record):
-        if record.levelno == logging.WARN \
-            or record.levelno == logging.ERROR \
-            or record.levelno == logging.CRITICAL \
-                or record.levelno == logging.FATAL:
+        if (record.levelno == logging.WARN
+            or record.levelno == logging.ERROR
+            or record.levelno == logging.CRITICAL
+                or record.levelno == logging.FATAL):
                     return DO_NOT_LOG
         return DO_LOG
