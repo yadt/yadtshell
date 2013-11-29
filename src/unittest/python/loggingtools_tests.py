@@ -95,7 +95,7 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         self.patcher.stop()
 
     def test_should_use_command_argument_as_seventh_element(self):
-        self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
             target_name='target-name',
             command_start_timestamp='2013-01-31--11-27-56',
@@ -103,14 +103,13 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
             source_host='host-name',
             command_arguments=['yadtshell', 'status']
         )
-        self._assert(self.actual_file_name)._element_at(
-            6)._is_equal_to('status')
+        self._assert(actual_file_name)._element_at(6)._is_equal_to('status')
 
     @patch('yadtshell.loggingtools.create_next_log_file_name')
-    def test_should_call_create_next_log_file_name_using_given_arguments(self, nlf):
-        nlf.return_value = 'log-file-name'
+    def test_should_call_create_next_log_file_name_using_given_arguments(self, next_logfile):
+        next_logfile.return_value = 'log-file-name'
 
-        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        actual_log_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
             target_name='target-name',
             command_start_timestamp='2013-01-31--11-27-56',
@@ -120,15 +119,15 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        nlf.assert_called_with(
+        next_logfile.assert_called_with(
             'log-directory', 'target-name', '2013-01-31--11-27-56',
             'user-name', 'host-name', tag='status')
 
     @patch('yadtshell.loggingtools.create_next_log_file_name')
-    def test_should_join_arguments_using_underscore(self, nlf):
-        nlf.return_value = 'log-file-name'
+    def test_should_join_arguments_using_underscore(self, next_logfile):
+        next_logfile.return_value = 'log-file-name'
 
-        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        actual_log_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
             target_name='target-name',
             command_start_timestamp='2013-01-31--11-27-56',
@@ -139,14 +138,15 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        nlf.assert_called_with('log-directory', 'target-name',
-                               '2013-01-31--11-27-56', 'user-name', 'host-name', tag='abc_def_ghi_jkl')
+        next_logfile.assert_called_with('log-directory', 'target-name',
+                                        '2013-01-31--11-27-56', 'user-name',
+                                        'host-name', tag='abc_def_ghi_jkl')
 
     @patch('yadtshell.loggingtools.create_next_log_file_name')
-    def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self, nlf):
-        nlf.return_value = 'log-file-name'
+    def test_should_join_command_and_arguments_using_underscore_if_command_is_not_yadtshell(self, next_logfile):
+        next_logfile.return_value = 'log-file-name'
 
-        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        actual_log_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
             target_name='target-name',
             command_start_timestamp='2013-01-31--11-27-56',
@@ -156,7 +156,7 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         )
 
         self.assertEqual('log-file-name', actual_log_file_name)
-        nlf.assert_called_with(
+        next_logfile.assert_called_with(
             'log-directory', 'target-name', '2013-01-31--11-27-56',
             'user-name', 'host-name', tag='foobar_abc_def_ghi_jkl')
 
@@ -166,16 +166,17 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
     @patch('yadtshell.loggingtools._strip_special_characters')
     @patch('yadtshell.loggingtools._trim_underscores')
     @patch('yadtshell.loggingtools._replace_blanks_with_underscores')
-    def test_should_prepare_string_as_expected(self, blanks, underscores, special, dashes, uri, nlf):
+    def test_should_prepare_string_as_expected(self, blanks, underscores,
+                                               special, dashes, uri, next_logfile):
 
         uri.return_value = 'replaced uri specific characters'
         dashes.return_value = 'stripped dashes'
         special.return_value = 'stripped special characters'
         underscores.return_value = 'trimmed underscores'
         blanks.return_value = 'replaced blanks with underscores'
-        nlf.return_value = 'log-file-name'
+        next_logfile.return_value = 'log-file-name'
 
-        actual_log_file_name = self.actual_file_name = create_next_log_file_name_with_command_arguments_as_tag(
+        actual_log_file_name = create_next_log_file_name_with_command_arguments_as_tag(
             log_dir='log-directory',
             target_name='target-name',
             command_start_timestamp='2013-01-31--11-27-56',
@@ -191,7 +192,7 @@ class CreateNextLogFileNameWithCommandArgumentsAsTagTests(FileNameTestCase):
         underscores.assert_called_with('stripped special characters')
         blanks.assert_called_with('trimmed underscores')
 
-        nlf.assert_called_with(
+        next_logfile.assert_called_with(
             'log-directory', 'target-name', '2013-01-31--11-27-56',
             'user-name', 'host-name', tag='replaced blanks with underscores')
 
