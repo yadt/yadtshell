@@ -61,8 +61,8 @@ arguments = docopt(__doc__)
 reactor.return_code = 127
 
 cmd = determine_command_from_arguments(arguments)
-uris = arguments['ARTEFACT-URI'] + arguments['HOST-URI'] + \
-    arguments['SERVICE-URI'] + arguments['URI-PATTERN']
+uris = (arguments['ARTEFACT-URI'] + arguments['HOST-URI'] +
+        arguments['SERVICE-URI'] + arguments['URI-PATTERN'])
 opts = infer_options_from_arguments(arguments)
 
 observer = log.PythonLoggingObserver()
@@ -178,7 +178,7 @@ def publish_result():
     yadtshell.settings.ybc.publish_cmd(
         cmd=cmd, state=state, tracking_id=yadtshell.settings.tracking_id)
     logger.debug('waiting for outstanding events to be delivered')
-    return deferLater(reactor, 2, observer.stop)
+    return deferLater(reactor, 2, lambda: None)
 
 
 def publish_start():
