@@ -75,10 +75,10 @@ def set_properties(project):
     project.set_property('coverage_break_build', False)
 
     project.rpm_release = '0'
-    project.install_file('share/man/man1/', 'docs/man/yadtshell.1.man')
+    project.install_file('share/man/man1/', 'docs/man/yadtshell.1.man.gz')
 
     project.set_property('copy_resources_target', '$dir_dist')
-    project.get_property('copy_resources_glob').extend(['setup.cfg', 'docs/man/yadtshell.1.man'])
+    project.get_property('copy_resources_glob').extend(['setup.cfg', 'docs/man/yadtshell.1.man.gz'])
 
     project.get_property('filter_resources_glob').extend(['**/yadtshell/__init__.py', '**/setup.cfg'])
 
@@ -127,3 +127,4 @@ def generate_manpage_with_pandoc(project, logger):
     assert_can_execute(['pandoc', '-v'], 'pandoc', 'generate_manpage_with_pandoc')
     import subprocess
     subprocess.check_output('pandoc -s -t man man-yadtshell.md -o docs/man/yadtshell.1.man', shell=True)
+    subprocess.check_output('rm -f docs/man/yadtshell.1.man.gz && gzip -9 docs/man/yadtshell.1.man', shell=True)
