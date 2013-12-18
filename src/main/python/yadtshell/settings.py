@@ -118,14 +118,15 @@ def _load_target_file(target_filename, targets_dir, target_basename, visited=Non
     target_settings = yaml.load(settings_file)
     settings_file.close()
 
+    if target_settings.get('hosts') is None:  # hosts:\n means hosts==None in YAML
+        target_settings['hosts'] = []         # so either the key is missing OR hosts is a null-value
     for include in target_settings.get('includes', []):
         subtarget_filename = os.path.join(
             targets_dir, include, target_basename)
         subtarget_settings = _load_target_file(
             subtarget_filename, targets_dir, target_basename, visited)
         for host in subtarget_settings.get('hosts', []):
-            target_hosts = target_settings.get('hosts', [])
-            target_settings.setdefault('hosts', target_hosts).append(host)
+            target_settings['hosts'].append(host)
     return target_settings
 
 
