@@ -39,12 +39,14 @@ hosts:
 
 class Test(integrationtest_support.IntegrationTestSupport):
 
-    def tearDown(self):
+    def do_preliminary_cleanup(self):
+        self.subtarget_folder = join(os.path.dirname(self.base_dir), 'sub')
         import shutil
-        shutil.rmtree(self.subtarget_folder)
+        if os.path.isdir(self.subtarget_folder):
+            shutil.rmtree(self.subtarget_folder)
 
     def test(self):
-        self.subtarget_folder = join(os.path.dirname(self.base_dir), 'sub')
+        self.do_preliminary_cleanup()
         with open(join(self.base_dir, 'target'), 'w') as target_file:
             target_file.write(root_target_contents)
         os.makedirs(self.subtarget_folder)
