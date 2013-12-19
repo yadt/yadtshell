@@ -24,7 +24,7 @@ class ServiceDefinitionValidator(object):
         strongly_connected_components = tarjan_scc(self.edges)
         for component in strongly_connected_components:
             if len(component) > 1:
-                cycles.append("\t\t%s" % Cycle(component))
+                cycles.append("\t\t * %s" % Cycle(component))
 
         if len(cycles) > 0:
             error_message = """Found cycle(s) in service definition : \n%s""" % "\n".join(
