@@ -187,7 +187,7 @@ def publish_start():
 
 
 try:
-    deferred.addErrback(yadtshell.twisted.report_error, logger.critical)
+    deferred.addErrback(yadtshell.twisted.report_error, logger.debug)
     deferred.addBoth(yadtshell.twisted.stop_and_return)
 
     if not reactor.running:
@@ -201,10 +201,9 @@ except yadtshell.actions.ActionException, e:
     if e.rootcause:
         msg += ': ' + str(e.rootcause)
     logger.critical(msg)
-except BaseException, e:
+except BaseException as e:
     reactor.return_code = 2
     logger.critical(str(e))
-
 
 if reactor.return_code == 0:
     print yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL${NORMAL}' % cmd.upper())
