@@ -33,6 +33,7 @@ import yadtshell.settings
 import yadtshell.components
 
 from yadtshell.constants import STANDALONE_SERVICE_RANK
+from yadtshell.validation import ServiceDefinitionValidator
 
 logger = logging.getLogger('util')
 
@@ -275,6 +276,11 @@ def outbound_deps_on_same_host(service, components):
 def compute_dependency_scores(components):
     servicedefs = dict((component.uri, component)
                        for component in components.values() if isinstance(component, yadtshell.components.Service))
+
+    #  we cannot compute the dependency scores if there is a service cycle
+    t = ServiceDefinitionValidator(servicedefs)
+    t.assert_no_cycles_present()
+
     for service, servicedef in servicedefs.iteritems():
         outbound_edges = len(
             outbound_deps_on_same_host(servicedef, components))
