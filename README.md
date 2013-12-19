@@ -1,6 +1,4 @@
-# [YADTSHELL](http://yadt-project.org) [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell)
-
-[![PyPI version](https://badge.fury.io/py/yadtshell.png)](https://badge.fury.io/py/yadtshell)
+# [YADTSHELL](http://yadt-project.org) [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell) [![PyPI version](https://badge.fury.io/py/yadtshell.png)](https://badge.fury.io/py/yadtshell)
 
 The yadtshell controls hosts with a _yadt-minion_ via ssh, handles service dependencies and package updates.
 
