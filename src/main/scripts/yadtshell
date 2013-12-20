@@ -166,7 +166,9 @@ else:
         # TODO event failed needed here
         sys.exit(1)
 
-if cmd in ['stop', 'start', 'update', 'updateartefact', 'ignore', 'lock', 'unignore', 'unlock'] and not opts.get('no_final_status'):
+commands_that_change_state = ['stop', 'start', 'update', 'updateartefact',
+                              'ignore', 'lock', 'unignore', 'unlock']
+if cmd in commands_that_change_state and not opts.get('no_final_status'):
     deferred.addCallback(yadtshell.status)
 
 
