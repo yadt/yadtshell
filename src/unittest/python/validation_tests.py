@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import yadtshell
 from yadtshell.validation import tarjan_scc, ServiceDefinitionValidator
 from yadtshell.components import Service
 
@@ -7,6 +8,8 @@ from yadtshell.components import Service
 class ServiceValidationTests(TestCase):
 
     def setUp(self):
+        yadtshell.settings.TARGET_SETTINGS = {
+            'name': 'test', 'hosts': ['foo', 'bar']}
         self.servicedefs = {
             'service://foo_host/foo': Service('foo_host', 'foo', {}),
             'service://bar_host/bar': Service('bar_host', 'bar', {}),
