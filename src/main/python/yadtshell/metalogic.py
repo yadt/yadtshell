@@ -232,7 +232,6 @@ def apply_instructions(plan, instructions):
         for sp in subplans.values():
             if not sp.nr_workers:
                 sp.nr_workers = instructions
-        #print plan
         return plan
     except:
         pass
