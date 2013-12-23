@@ -124,7 +124,11 @@ class ActionManager(object):
         component = self.components[uri]
         deferred = None
 
-        self.logger.debug('/' + '/'.join(path))
+        action_to_execute = '/' + '/'.join(path)
+        if self.dryrun:
+            self.logger.info(action_to_execute)
+        else:
+            self.logger.debug(action_to_execute)
         if cmd == yadtshell.settings.FINISH:
             if self.finish_fun:
                 self.finish_fun(action)
