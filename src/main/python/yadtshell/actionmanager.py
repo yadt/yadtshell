@@ -124,7 +124,7 @@ class ActionManager(object):
         component = self.components[uri]
         deferred = None
 
-        self.logger.info('/' + '/'.join(path))
+        self.logger.debug('/' + '/'.join(path))
         if cmd == yadtshell.settings.FINISH:
             if self.finish_fun:
                 self.finish_fun(action)
@@ -339,7 +339,7 @@ class ActionManager(object):
             queue.append(yadtshell.ActionManager.Task(
                 fun=self.handle, action=action, path=this_path))
         plan.nr_workers = min(plan.nr_workers, len(queue))
-        self.logger.info('%s : %s' % (plan_name, plan.meta_info()))
+        self.logger.debug('%s : %s' % (plan_name, plan.meta_info()))
 
         pool = yadtshell.defer.DeferredPool(
             plan_name,

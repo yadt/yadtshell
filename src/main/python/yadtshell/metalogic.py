@@ -207,7 +207,7 @@ def chop_minimal_related_chunks(plan):
         chunk_plan = yadtshell.actions.ActionPlan('chunk_%s' % nr, chunk_actions)
         chunk_plans.add(chunk_plan)
     if len(chunk_plans) > 1:
-        logger.info('%i independent chunks found' % len(chunk_plans))
+        logger.debug('%i independent chunks found' % len(chunk_plans))
 
     return yadtshell.actions.ActionPlan(plan.name, chunk_plans)
 
