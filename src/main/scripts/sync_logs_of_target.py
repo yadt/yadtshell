@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 #   YADT - an Augmented Deployment Tool
-#   Copyright (C) 2010-2013  Immobilien Scout GmbH
+#   Copyright (C) 2010-2014  Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -50,15 +50,15 @@ for host in hosts:
     host_logger.info('host log dir: %s' % host_log_dir)
     rsync_call = subprocess.Popen(
         [
-            'rsync', 
+            'rsync',
             '-e', ' '.join(SSH_CALL),
-            '-avO', '--no-p', 
+            '-avO', '--no-p',
             '%s:%s/' % (host, host_log_dir), log_dir
-        ], 
+        ],
         stdout=subprocess.PIPE)
     log_output(rsync_call.communicate()[0], host_logger)
 
     host_logger.info('--------')
-    
+
 logger.info('done')
 

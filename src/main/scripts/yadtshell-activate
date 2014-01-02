@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #   YADT - an Augmented Deployment Tool
-#   Copyright (C) 2010-2013  Immobilien Scout GmbH
+#   Copyright (C) 2010-2014  Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ _yadtshellCompletion() {
         COMPREPLY=( $(compgen -W "$(cat $SERVICES_FILE 2> /dev/null)" -- ${CURRENT}) )
     fi
     return 0
-} 
+}
 
 complete -o default -F _yadtshellCompletion yadtshell $YADTSHELL_CMDS
 
