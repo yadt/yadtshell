@@ -10,6 +10,11 @@ class StatusTests(unittest.TestCase):
         yadtshell.settings.SSH = 'ssh'
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'hosts': ['foobar42']}
+        self.pi_patcher = patch('yadtshell.twisted.ProgressIndicator')
+        self.pi_patcher.start()
+
+    def tearDown(self):
+        self.pi_patcher.stop()
 
     @patch('yadtshell._status.glob')
     @patch('yadtshell._status.os')
