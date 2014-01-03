@@ -35,7 +35,7 @@ hosts:
 class IntegrationTestSupport (testbase.IntegrationTestBase):
 
     def setUp(self):
-        super(IntegrationTestSupport, self).setUp()
+        self.command_counter = 0
         caller_stack_record = inspect.stack()[-1]
         caller_path = caller_stack_record[1]
         caller_filename = caller_path.split('/')[-1]
