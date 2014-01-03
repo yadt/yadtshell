@@ -111,6 +111,7 @@ def set_properties_for_teamcity_builds(project):
 @task
 def clean(project, logger):
     import glob
+    import os
     import shutil
 
     for yadtshell_log_dir in glob.glob('/tmp/logs/yadtshell/*'):
@@ -120,6 +121,11 @@ def clean(project, logger):
     for integrationtest_dir in glob.glob('/tmp/integration-test*'):
         logger.info('Removing IT directory {0}'.format(integrationtest_dir))
         shutil.rmtree(integrationtest_dir)
+
+    stubs_dir = '/tmp/yadtshell-it'
+    if os.path.exists(stubs_dir):
+        logger.info('Removing stubs directory {0}'.format(stubs_dir))
+        shutil.rmtree(stubs_dir)
 
 
 @task

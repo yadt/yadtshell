@@ -16,10 +16,10 @@
 
 __author__ = 'Alexander Metzner, Michael Gruber, Udo Juettner'
 
-import sys
 import inspect
+import sys
 
-from os import environ, pathsep, symlink, sep
+from os import environ, pathsep, symlink, path
 from os.path import abspath, exists, join
 
 from shutil import rmtree
@@ -59,12 +59,7 @@ class IntegrationTestSupport (testbase.IntegrationTestBase):
         symlink(absolute_path_to_script, destination)
 
     def _create_target_directory(self, name):
-        target_dir = abspath(__file__).split(sep)[:-4]
-        target_dir.append('target')
-        target_dir.append('integrationtests')
-        target_dir.append(name)
-
-        base_dir = sep.join(target_dir)
+        base_dir = path.join('/tmp', 'yadtshell-it', name)
 
         if exists(base_dir):
             rmtree(base_dir)
