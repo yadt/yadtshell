@@ -46,7 +46,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.7.1'
 
-default_task = ['analyze', 'publish']
+default_task = ['clean', 'analyze', 'publish']
 
 
 @init
@@ -102,7 +102,7 @@ def set_properties(project):
 def set_properties_for_teamcity_builds(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
-    project.default_task = ['install_build_dependencies', 'publish']
+    project.default_task = ['clean', 'install_build_dependencies', 'publish']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
     project.set_property('install_dependencies_use_mirrors', False)
     project.rpm_release = os.environ.get('RPM_RELEASE', 0)
