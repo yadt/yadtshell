@@ -177,8 +177,16 @@ def publish_result():
         state = 'finished'
     else:
         state = 'failed'
+        import socket
+        yadtshell.settings.ybc._sendEvent(
+            'error-info', data=None,
+            tracking_id=yadtshell.settings.tracking_id,
+            target=yadtshell.settings.ybc.target,
+            host=socket.gethostname(),
+            log_file=yadtshell.settings.log_file)
     yadtshell.settings.ybc.publish_cmd(
         cmd=cmd, state=state, tracking_id=yadtshell.settings.tracking_id)
+
     logger.debug('waiting for outstanding events to be delivered')
     return deferLater(reactor, 2, lambda: None)
 
