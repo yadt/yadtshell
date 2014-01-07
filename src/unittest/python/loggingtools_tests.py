@@ -220,6 +220,13 @@ class StripSpecialCharactersTest(unittest.TestCase):
     def test_should_strip_special_character_colon(self):
         self.assertEqual('', _strip_special_characters(':'))
 
+    def test_should_strip_special_character_parens(self):
+        self.assertEqual('', _strip_special_characters('('))
+        self.assertEqual('', _strip_special_characters(')'))
+
+    def test_should_strip_special_character_double_quotes(self):
+        self.assertEqual('', _strip_special_characters('"'))
+
     def test_should_strip_special_character_asterisk(self):
         self.assertEqual('', _strip_special_characters('*'))
 
