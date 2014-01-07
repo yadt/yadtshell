@@ -239,6 +239,12 @@ class StripSpecialCharactersTest(unittest.TestCase):
     def test_should_strip_special_character_single_quote(self):
         self.assertEqual('', _strip_special_characters("'"))
 
+    def test_should_strip_special_character_greater(self):
+        self.assertEqual('', _strip_special_characters(">"))
+
+    def test_should_strip_special_character_equals(self):
+        self.assertEqual('', _strip_special_characters("="))
+
     def test_should_not_strip_normal_characters(self):
         self.assertEqual(
             'foobar', _strip_special_characters(':*[]foo:*[]bar:*[]'))
