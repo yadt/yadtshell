@@ -63,7 +63,7 @@ logger = logging.getLogger('settings')
 
 try:
     from loggingconf import *  # NOQA
-except Exception, e:
+except Exception as e:
     root_logger.debug(e)
     if not os.path.isdir(DEFAULT_LOG_DIR):
         os.makedirs(DEFAULT_LOG_DIR)  # pragma: no cover
@@ -96,7 +96,7 @@ def initialize_broadcast_client():  # pragma: no cover
         import broadcasterconf  # NOQA
         sys.path.pop()
         broadcasterconf_imported = True
-    except Exception, e:
+    except Exception as e:
         logger.warn('no broadcaster config found')
         logger.warn(e)
 
@@ -161,7 +161,7 @@ def load_settings(log_to_file=True):
 
     try:
         os.makedirs(OUT_DIR)
-    except OSError, e:
+    except OSError as e:
         if e.errno != 17:   # 17: file exists
             root_logger.critical('cannot write to out dir %s' % OUT_DIR)
             root_logger.exception(e)
@@ -187,7 +187,7 @@ def load_settings(log_to_file=True):
     LOG_DIR = os.path.join(LOG_DIR_PREFIX, TODAY)
     try:
         os.makedirs(LOG_DIR)
-    except OSError, e:
+    except OSError as e:
         if e.errno != 17:   # 17: file exists
             root_logger.critical('cannot write to log dir %s' % LOG_DIR)
             root_logger.exception(e)
