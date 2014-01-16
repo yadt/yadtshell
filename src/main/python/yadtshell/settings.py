@@ -75,6 +75,9 @@ def initialize_broadcast_client():  # pragma: no cover
 
     class DummyBroadcaster(object):
 
+        def __init__(self):
+            self.target = 'dummy-target'
+
         def addOnSessionOpenHandler(self, *args, **kwargs):
             pass
 
@@ -88,6 +91,9 @@ def initialize_broadcast_client():  # pragma: no cover
             pass
 
         def publish_cmd(self, *args, **kwargs):
+            pass
+
+        def _sendEvent(self, *args, **kwargs):
             pass
 
     broadcasterconf_imported = False
