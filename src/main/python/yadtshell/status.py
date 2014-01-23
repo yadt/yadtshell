@@ -351,17 +351,19 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         components._add_when_missing_ = True
         logger.debug('wiring components')
         for component in components.values():
+            needs_with_resolved_version_alias = set([])
             for needed in getattr(component, 'needs', []):
                 try:
                     needed_component = components[needed]
                     if not hasattr(needed_component, 'needed_by'):
                         needed_component.needed_by = set()
                     needed_component.needed_by.add(component.uri)
-                    component.needs.remove(needed)
-                    component.needs.add(needed_component.uri)
+                    needs_with_resolved_version_alias.add(needed_component.uri)
                 except (KeyError, AttributeError), e:
                     logger.debug('needed: ' + needed)
                     raise e
+
+            component.needs = needs_with_resolved_version_alias
         components._add_when_missing_ = False
 
         for component in components.values():
