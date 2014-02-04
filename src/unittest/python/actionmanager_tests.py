@@ -54,6 +54,12 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         self.assertFalse(
             _user_should_acknowledge_plan(dryrun=True, flavor='update', forcedyes=False))
 
+    def test_next_with_preconditions(self):
+	task1 = ActionManager.Task(None, Mock(yadtshell.actions.ActionPlan))
+	task2 = ActionManager.Task(None, Mock())
+	queue = [task1, task2]
+	result = self.am.next_with_preconditions(queue)	
+	self.assertEqual(result, task1)
 
 class ActionManagerHandleTests(ActionManagerTestBase):
 
