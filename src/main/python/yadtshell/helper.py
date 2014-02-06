@@ -175,8 +175,8 @@ def plural(string):
 
 
 def locate(pattern, root=os.curdir, blacklist=None):
-    '''Locate all files matching supplied filename pattern in and below
-    supplied root directory, follows symbolic links.'''
+    """Locate all files matching supplied filename pattern in and below
+    supplied root directory, follows symbolic links."""
     if not blacklist:
         blacklist = set(['.svn', 'out', 'logs', 'config'])
     for path, dirs, files in os.walk(os.path.abspath(root)):
@@ -195,7 +195,7 @@ def locate(pattern, root=os.curdir, blacklist=None):
 
 
 def _traceit(frame, event, arg):
-    '''http://www.dalkescientific.com/writings/diary/archive/2005/04/20/tracing_python_code.html'''
+    """http://www.dalkescientific.com/writings/diary/archive/2005/04/20/tracing_python_code.html"""
     if event == "line":
         lineno = frame.f_lineno
         filename = frame.f_globals["__file__"]
