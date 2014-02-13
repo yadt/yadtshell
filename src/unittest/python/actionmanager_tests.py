@@ -1,10 +1,12 @@
+#from twisted.trial.unittest import TestCase
 from unittest import TestCase
 from mock import MagicMock, Mock, patch
 
 import yadtshell
 
 from yadtshell.actionmanager import (ActionManager,
-                                     _user_should_acknowledge_plan)
+                                     _user_should_acknowledge_plan,
+                                     filter_dangerous_actions)
 
 
 class ActionManagerTestBase(TestCase):
@@ -53,6 +55,22 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
 
         self.assertFalse(
             _user_should_acknowledge_plan(dryrun=True, flavor='update', forcedyes=False))
+
+    def test_dangerous_actions(self):
+        noop = Mock()
+        noop.cmd = 'harmless'
+        dangerous = Mock()
+        dangerous.cmd = 'update'
+        action_list = [noop, dangerous]
+        self.assertTrue(filter_dangerous_actions(action_list))
+
+    def test_harmless_actions(self):
+        noop = Mock()
+        noop.cmd = 'harmless'
+        dangerous = Mock()
+        dangerous.cmd = 'status'
+        action_list = [noop, dangerous]
+        self.assertFalse(filter_dangerous_actions(action_list))
 
     def test_next_with_preconditions_actionplan(self):
         task1 = ActionManager.Task(None, Mock(yadtshell.actions.ActionPlan))
@@ -151,21 +169,33 @@ class ActionManagerActionTests(ActionManagerTestBase):
     @patch('yadtshell.actionmanager.yaml.load')
     @patch('yadtshell.actionmanager.open', create=True)
     @patch('yadtshell.util.restore_current_state')
-    def test_should_not_abort_when_user_confirms(self,
+    def muted_test_should_not_abort_when_user_confirms(self,
                                                  components,
                                                  mock_open,
                                                  mock_load_action_plan,
                                                  mock_stop_and_return,
                                                  mock_stdout,
                                                  _):
+        """ TODO: damit twisted.trial nicht meckert, großen Test mit vielen Mocks durch kleinere ersetzen (siehe oben bei den helper functions.
+
+            Problem: hier sind gleichzeitig zwei Dinge, die nicht zum Abbruch fuehren:
+                     - keine Befehle sind dangerous
+                     - der Nutzer stimmt zu
+            Nur eines davon muss funktionieren, damit der Test gruen ist.
+
+            Wenn die Fragen unten geklärt sind, kann dieser Test hier geloescht werden.
+        """
         mock_stdout.isatty.return_value = True
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
-        dangerous.cmd = 'reboot'
+        dangerous.cmd = 'reboot'  # TODO: is this dangerous?  
+        # TODO: how do we test kwargs(reboot_required...) ??
         mock_load_action_plan.return_value.list_actions = [noop, dangerous]
         self.user_accepts_transaction()
 
         self.am.action('update')
 
         self.assertFalse(mock_stop_and_return.called)
+
+
