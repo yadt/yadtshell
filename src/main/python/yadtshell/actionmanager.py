@@ -469,6 +469,7 @@ def filter_dangerous_actions(actions):
         return action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)
     return filter(is_a_dangerous_action, actions)
 
+
 def _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
     if dryrun:
         return False

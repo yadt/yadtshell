@@ -162,5 +162,3 @@ class ActionManagerActionTests(ActionManagerTestBase):
 
         mock_stop_and_return.assert_called_with(
             yadtshell.commandline.EXIT_CODE_CANCELED_BY_USER)
-
-

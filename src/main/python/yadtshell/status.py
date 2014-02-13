@@ -50,6 +50,9 @@ def query_status(component, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
         component, '/usr/bin/yadt-status', pi)
     p.deferred = defer.Deferred()
+    # TODO(rwill): according to Twisted guidelines,
+    # YadtProcessProtocol should encapsulate creating the deferred.
+    # (this would also remove some code duplication)
     p.deferred.name = component
     cmd = shlex.split(yadtshell.settings.SSH) + [component]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
@@ -57,6 +60,12 @@ def query_status(component, pi=None):
 
 
 def create_host(protocol, components, yaml_loader):
+    """Most of the method is concerned with parsing the result from query_status,
+    so maybe better call it extract_host_from_query_status_result...??"""
+
+    # TODO(rwill): move this code to report_connection_error (and rename that
+    # one to handle_unreachable_host).
+    # Also addCallback(createHost, handl_unreachable_host) to merge both cases into a single flow.
     if isinstance(protocol, yadtshell.components.UnreachableHost):
         unreachable_host = protocol
         unreachable_host_uri = yadtshell.uri.create(
