@@ -163,39 +163,4 @@ class ActionManagerActionTests(ActionManagerTestBase):
         mock_stop_and_return.assert_called_with(
             yadtshell.commandline.EXIT_CODE_CANCELED_BY_USER)
 
-    @patch('yadtshell.actionmanager.print', create=True)
-    @patch('yadtshell.actionmanager.sys.stdout')
-    @patch('yadtshell.twisted.stop_and_return')
-    @patch('yadtshell.actionmanager.yaml.load')
-    @patch('yadtshell.actionmanager.open', create=True)
-    @patch('yadtshell.util.restore_current_state')
-    def muted_test_should_not_abort_when_user_confirms(self,
-                                                 components,
-                                                 mock_open,
-                                                 mock_load_action_plan,
-                                                 mock_stop_and_return,
-                                                 mock_stdout,
-                                                 _):
-        """ TODO: damit twisted.trial nicht meckert, großen Test mit vielen Mocks durch kleinere ersetzen (siehe oben bei den helper functions.
-
-            Problem: hier sind gleichzeitig zwei Dinge, die nicht zum Abbruch fuehren:
-                     - keine Befehle sind dangerous
-                     - der Nutzer stimmt zu
-            Nur eines davon muss funktionieren, damit der Test gruen ist.
-
-            Wenn die Fragen unten geklärt sind, kann dieser Test hier geloescht werden.
-        """
-        mock_stdout.isatty.return_value = True
-        noop = Mock()
-        noop.cmd = 'harmless'
-        dangerous = Mock()
-        dangerous.cmd = 'reboot'  # TODO: is this dangerous?  
-        # TODO: how do we test kwargs(reboot_required...) ??
-        mock_load_action_plan.return_value.list_actions = [noop, dangerous]
-        self.user_accepts_transaction()
-
-        self.am.action('update')
-
-        self.assertFalse(mock_stop_and_return.called)
-
 
