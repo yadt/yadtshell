@@ -55,7 +55,8 @@ class StatusTests(unittest.TestCase):
         spawn_process.assert_called_with(
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
 
-    def test_handle_unreachable_host(self):
+    @patch('yadtshell._status.logger')
+    def test_handle_unreachable_host(self, _):
         failure = Mock()
         failure.value.component = 'foobar42.domain.tld'
         failure.value.exitCode = 255

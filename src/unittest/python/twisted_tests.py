@@ -49,7 +49,7 @@ class TwistedTests(unittest.TestCase):
     def test_out_received_should_append_data(self):
         mock_process_protocol = Mock(YadtProcessProtocol)
         mock_process_protocol.data = 'some-data-'
-        mock_process_protocol.component_name = 'component'
+        mock_process_protocol.component = 'component'
         mock_process_protocol.out_log_level = 'info'
         mock_process_protocol.pi = None
         mock_logger = Mock()
@@ -65,7 +65,7 @@ class TwistedTests(unittest.TestCase):
         mock_process_protocol = Mock(YadtProcessProtocol)
         mock_process_protocol.data = ''
         mock_process_protocol.cmd = 'command'
-        mock_process_protocol.component_name = 'component'
+        mock_process_protocol.component = 'component'
         mock_process_protocol.out_log_level = 'info'
         mock_process_protocol.pi = mock_progress_indicator
         mock_logger = Mock()
@@ -81,7 +81,7 @@ class TwistedTests(unittest.TestCase):
         mock_process_protocol = Mock(YadtProcessProtocol)
         mock_process_protocol.data = ''
         mock_process_protocol.cmd = 'command'
-        mock_process_protocol.component_name = 'component'
+        mock_process_protocol.component = 'component'
         mock_process_protocol.err_log_level = 'info'
         mock_process_protocol.pi = mock_progress_indicator
         mock_logger = Mock()

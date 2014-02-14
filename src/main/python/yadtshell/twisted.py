@@ -95,9 +95,9 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.deferred = defer.Deferred()
         # self.deferred.name = component  # TODO(rwill): what's this needed for?
         try:
-            self.component_name = component.encode('ascii')
+            self.component = component.encode('ascii')
         except AttributeError:
-            self.component_name = component
+            self.component = component
         self.cmd = cmd.encode('ascii')
         self.wait_for_io = wait_for_io
         self.data = ""
@@ -113,35 +113,35 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.transport.write(self.cmd)
         self.transport.closeStdin()  # tell them we're done
         if self.pi:
-            self.pi.update((self.cmd, self.component_name))
+            self.pi.update((self.cmd, self.component))
 
     def outReceived(self, data):
         for line in data.splitlines():
             self.logger.log(self.out_log_level,
-                            '{0}: {1}'.format(self.component_name, line))
+                            '{0}: {1}'.format(self.component, line))
         self.data = self.data + data
         if self.pi:
-            self.pi.update((self.cmd, self.component_name))
+            self.pi.update((self.cmd, self.component))
 
     def errReceived(self, data):
         for line in data.splitlines():
             self.logger.log(self.err_log_level,
-                            '{0} {1} stderr: {2}'.format(self.component_name,
+                            '{0} {1} stderr: {2}'.format(self.component,
                                                          self.cmd,
                                                          line))
         if self.pi:
-            self.pi.update((self.cmd, self.component_name))
+            self.pi.update((self.cmd, self.component))
 
     def processExited(self, reason):
         self.logger.debug("%s@%s exited, exit code %s" % (self.cmd,
-                                                          self.component_name,
+                                                          self.component,
                                                           str(reason.value.exitCode)))
         if not self.wait_for_io:
             self.finish(reason)
 
     def processEnded(self, reason):
         self.logger.debug("%s@%s ended, exit code %s" % (self.cmd,
-                                                         self.component_name,
+                                                         self.component,
                                                          str(reason.value.exitCode)))
         if self.wait_for_io:
             self.finish(reason)
@@ -149,11 +149,11 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
     def finish(self, reason):
         self.exitcode = reason.value.exitCode
         if self.pi:
-            self.pi.update((self.cmd, self.component_name), str(self.exitcode))
+            self.pi.update((self.cmd, self.component), str(self.exitcode))
         if reason.value.exitCode == 0:
             self.deferred.callback(self)
         else:
-            reason.value.component = self.component_name
+            reason.value.component = self.component
             reason.value.orig_protocol = self
             self.deferred.errback(reason.value)
 
