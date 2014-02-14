@@ -49,7 +49,7 @@ class StatusTests(unittest.TestCase):
     @patch('yadtshell._status.reactor.spawnProcess')
     @patch('yadtshell.twisted.YadtProcessProtocol')
     def test_query_status_should_spawn_status_process(self, protocol, spawn_process, environment):
-        yadtshell._status.query_status(component='host://foobar42')
+        yadtshell._status.query_status(component_name='host://foobar42')
         protocol.assert_called_with(
             'host://foobar42', '/usr/bin/yadt-status', None)
         spawn_process.assert_called_with(

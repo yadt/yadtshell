@@ -46,15 +46,10 @@ def status_cb(protocol=None):
     return status()
 
 
-def query_status(component, pi=None):
+def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
-        component, '/usr/bin/yadt-status', pi)
-    p.deferred = defer.Deferred()
-    # TODO(rwill): according to Twisted guidelines,
-    # YadtProcessProtocol should encapsulate creating the deferred.
-    # (this would also remove some code duplication)
-    p.deferred.name = component
-    cmd = shlex.split(yadtshell.settings.SSH) + [component]
+        component_name, '/usr/bin/yadt-status', pi)
+    cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
 
@@ -180,7 +175,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             return cmd
         query_protocol = yadtshell.twisted.YadtProcessProtocol(
             service.uri, cmd)
-        query_protocol.deferred = defer.Deferred()
         reactor.spawnProcess(
             query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
         query_protocol.component = service

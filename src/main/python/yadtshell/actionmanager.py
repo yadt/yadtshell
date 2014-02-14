@@ -280,7 +280,6 @@ class ActionManager(object):
 
         # if self.pi:
             # self.pi.observables.append(p)
-        p.deferred = defer.Deferred()
         cmdline = shlex.split(cmdline.encode('ascii'))
         self.logger.debug('cmd: %s' % cmdline)
         reactor.spawnProcess(p, cmdline[0], cmdline, None)

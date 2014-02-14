@@ -25,7 +25,7 @@ import sys
 import yaml
 import shlex
 
-from twisted.internet import defer, reactor, task
+from twisted.internet import reactor, task
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 import yadtshell
@@ -264,8 +264,6 @@ class Host(Component):
         p.target_state = yadtshell.settings.UPTODATE
         p.state = yadtshell.settings.UNKNOWN
 
-        p.deferred = defer.Deferred()
-
         def handle_rebooting_machine(failure, ssh_poll_max_seconds):
             if failure.value.exitCode == 152:
                 raise yadtshell.actions.ActionException(
@@ -285,7 +283,6 @@ class Host(Component):
             poll_protocol = yadtshell.twisted.YadtProcessProtocol(
                 self, poll_command, out_log_level=logging.INFO)
             poll_protocol.ssh_poll_count = count
-            poll_protocol.deferred = defer.Deferred()
             if (count * yadtshell.constants.SSH_POLL_DELAY) < ssh_poll_max_seconds:
                 poll_protocol.deferred.addErrback(lambda x:
                                                   task.deferLater(reactor,
