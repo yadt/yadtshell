@@ -60,7 +60,7 @@ def handle_unreachable_host(failure, components):
             'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
             failure.value.component)
         unreachable_host = yadtshell.components.UnreachableHost(failure.value.component)
-        unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST, 
+        unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST,
                                                     host=unreachable_host.hostname)
         components[unreachable_host_uri] = unreachable_host
         return unreachable_host

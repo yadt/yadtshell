@@ -1,4 +1,4 @@
-# from twisted.trial 
+# from twisted.trial
 import unittest
 from mock import Mock
 
