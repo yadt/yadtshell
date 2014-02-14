@@ -36,8 +36,20 @@ from hostexpand.HostExpander import HostExpander
 import yadtshell
 from yadtshell.util import compute_dependency_scores
 
-
 logger = logging.getLogger('status')
+
+try:
+    from yaml import CLoader as Loader
+    logger.debug("using C implementation of yaml")
+except ImportError:
+    from yaml import Loader
+    logger.debug("using default yaml")
+try:
+    import cPickle as pickle
+    logger.debug("using C implementation of pickle")
+except ImportError:
+    import pickle
+    logger.debug("using default pickle")
 
 local_service_collector = None
 
@@ -107,19 +119,6 @@ def create_host(protocol, components, yaml_loader):
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
-    try:
-        from yaml import CLoader as Loader
-        logger.debug("using C implementation of yaml")
-    except ImportError:
-        from yaml import Loader
-        logger.debug("using default yaml")
-    try:
-        import cPickle as pickle
-        logger.debug("using C implementation of pickle")
-    except ImportError:
-        import pickle
-        logger.debug("using default pickle")
-
     yadtshell.settings.ybc.connect()
     if type(hosts) is str:
         hosts = [hosts]
@@ -172,13 +171,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                              .format(service.uri, failure.value.exitCode))
             cmd.addErrback(handle_service_state_failure, service)
             return cmd
-        query_protocol = yadtshell.twisted.YadtProcessProtocol(
-            service.uri, cmd)
-        reactor.spawnProcess(
-            query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
+        query_protocol = yadtshell.twisted.YadtProcessProtocol(service.uri, cmd)
+        reactor.spawnProcess(query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
         query_protocol.component = service
-        query_protocol.deferred.addCallbacks(
-            store_service_up, store_service_not_up)
+        query_protocol.deferred.addCallbacks(store_service_up, store_service_not_up)
         return query_protocol.deferred
 
     def initialize_services(host):
