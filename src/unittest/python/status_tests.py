@@ -77,7 +77,7 @@ class StatusTests(unittest.TestCase):
 }'''
 
         result_host = yadtshell._status.create_host(
-            protocol_with_json_data, components, None)
+            protocol_with_json_data, components)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, {})
@@ -97,7 +97,7 @@ class StatusTests(unittest.TestCase):
 }'''
 
         result_host = yadtshell._status.create_host(
-            protocol_with_json_data, components, None)
+            protocol_with_json_data, components)
 
         self.assertEqual(result_host.is_update_needed(), True)
 
@@ -110,9 +110,8 @@ hostname: foobar42
 next_artefacts: []
 some_attribute: some-value
 '''
-        from yaml import Loader
         result_host = yadtshell._status.create_host(
-            protocol_with_yaml_data, components, Loader)
+            protocol_with_yaml_data, components)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, [])

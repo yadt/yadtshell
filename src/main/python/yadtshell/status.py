@@ -39,10 +39,10 @@ from yadtshell.util import compute_dependency_scores
 logger = logging.getLogger('status')
 
 try:
-    from yaml import CLoader as Loader
+    from yaml import CLoader as yaml_loader
     logger.debug("using C implementation of yaml")
 except ImportError:
-    from yaml import Loader
+    from yaml import Loader as yaml_loader
     logger.debug("using default yaml")
 try:
     import cPickle as pickle
@@ -79,7 +79,7 @@ def handle_unreachable_host(failure, components):
     return failure
 
 
-def create_host(protocol, components, yaml_loader):
+def create_host(protocol, components):
     try:
         data = json.loads(protocol.data)
     except Exception, e:
@@ -115,6 +115,93 @@ def create_host(protocol, components, yaml_loader):
         host.next_artefacts = []
     host.logger = logging.getLogger(host.uri)
     components[host.uri] = host
+    return host
+
+
+def initialize_services(host, components):
+    """Find the service class for each of `host`s services and instantiate it.
+    Return `host` to facilitate chaining.
+    """
+    if yadtshell.util.not_up(host.state):
+        return host
+
+    host.defined_services = []
+    services = getattr(host, 'services', set())
+    for settings in services:
+        if type(settings) is str or not settings:
+            name = settings
+            settings = services.get(settings, None)
+            if settings:
+                service_class = settings.get('class', 'Service')
+            else:
+                service_class = 'Service'
+        else:
+            name = settings.keys()[0]
+            settings = settings[name]
+            service_class = settings.get('class', 'Service')
+
+        service = None
+        for module_name in sys.modules.keys()[:]:
+            if service:
+                break
+            for classname, clazz in inspect.getmembers(sys.modules[module_name], inspect.isclass):
+                if classname == service_class:
+                    service = clazz(host, name, settings)
+                    break
+        if not service:
+            host.logger.debug(
+                '%s not a standard service, searching class' % service_class)
+            clazz = None
+            try:
+                host.logger.debug('fallback 1: checking loaded modules')
+                clazz = eval(service_class)
+            except:
+                pass
+
+            def get_class(service_class):
+                module_name, class_name = service_class.rsplit('.', 1)
+                host.logger.debug('trying to load module %s' % module_name)
+                __import__(module_name)
+                m = sys.modules[module_name]
+                return getattr(m, class_name)
+
+            if not clazz:
+                try:
+                    host.logger.debug(
+                        'fallback 2: trying to load module myself')
+                    clazz = get_class(service_class)
+                except Exception, e:
+                    host.logger.debug(e)
+            if not clazz:
+                try:
+                    host.logger.debug(
+                        'fallback 3: trying to lookup %s in legacies' % service_class)
+                    import legacies
+                    mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
+                        service_class, service_class)
+                    clazz = get_class(mapped_service_class)
+                    host.logger.info(
+                        'deprecation info: class %s was mapped to %s' %
+                        (service_class, mapped_service_class))
+                except Exception, e:
+                    host.logger.debug(e)
+
+            if not clazz:
+                raise Exception(
+                    'cannot find class %(service_class)s' % locals())
+
+            try:
+                service = clazz(host, name, settings)
+            except Exception, e:
+                host.logger.exception(e)
+        if not service:
+            raise Exception(
+                'cannot instantiate class %(service_class)s' % locals())
+        components[service.uri] = service
+        service.fqdn = host.fqdn
+        service.needs = getattr(service, 'needs', set())
+        service.needs.add(host.uri)
+        host.defined_services.append(service)
     return host
 
 
@@ -161,6 +248,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         cmd = service.status()
         if isinstance(cmd, defer.Deferred):
             # TODO refactor: integrate all store_service_* cbs
+            # TODO(rwill): possibly make those methods of Service, to simplify
+            # to one line: cmd.addCallbacks(service.store_state, service.handle_state_failure)
             def store_service_state(state, service):
                 service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
                     state, yadtshell.settings.UNKNOWN)
@@ -176,89 +265,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         query_protocol.component = service
         query_protocol.deferred.addCallbacks(store_service_up, store_service_not_up)
         return query_protocol.deferred
-
-    def initialize_services(host):
-        services = getattr(host, 'services', set())
-
-        if yadtshell.util.not_up(host.state):
-            return host
-        host.defined_services = []
-        for settings in services:
-            if type(settings) is str or not settings:
-                name = settings
-                settings = services.get(settings, None)
-                if settings:
-                    service_class = settings.get('class', 'Service')
-                else:
-                    service_class = 'Service'
-            else:
-                name = settings.keys()[0]
-                settings = settings[name]
-                service_class = settings.get('class', 'Service')
-
-            service = None
-            for module_name in sys.modules.keys()[:]:
-                if service:
-                    break
-                for classname, clazz in inspect.getmembers(sys.modules[module_name], inspect.isclass):
-                    if classname == service_class:
-                        service = clazz(host, name, settings)
-                        break
-            if not service:
-                host.logger.debug(
-                    '%s not a standard service, searching class' % service_class)
-                clazz = None
-                try:
-                    host.logger.debug('fallback 1: checking loaded modules')
-                    clazz = eval(service_class)
-                except:
-                    pass
-
-                def get_class(service_class):
-                    module_name, class_name = service_class.rsplit('.', 1)
-                    host.logger.debug('trying to load module %s' % module_name)
-                    __import__(module_name)
-                    m = sys.modules[module_name]
-                    return getattr(m, class_name)
-
-                if not clazz:
-                    try:
-                        host.logger.debug(
-                            'fallback 2: trying to load module myself')
-                        clazz = get_class(service_class)
-                    except Exception, e:
-                        host.logger.debug(e)
-                if not clazz:
-                    try:
-                        host.logger.debug(
-                            'fallback 3: trying to lookup %s in legacies' % service_class)
-                        import legacies
-                        mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
-                            service_class, service_class)
-                        clazz = get_class(mapped_service_class)
-                        host.logger.info(
-                            'deprecation info: class %s was mapped to %s' %
-                            (service_class, mapped_service_class))
-                    except Exception, e:
-                        host.logger.debug(e)
-
-                if not clazz:
-                    raise Exception(
-                        'cannot find class %(service_class)s' % locals())
-
-                try:
-                    service = clazz(host, name, settings)
-                except Exception, e:
-                    host.logger.exception(e)
-            if not service:
-                raise Exception(
-                    'cannot instantiate class %(service_class)s' % locals())
-            components[service.uri] = service
-            service.fqdn = host.fqdn
-            service.needs = getattr(service, 'needs', set())
-            service.needs.add(host.uri)
-            host.defined_services.append(service)
-        return host
 
     def add_local_state(host):
         local_state = []
@@ -452,10 +458,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     deferreds = []
     for host in hosts:
         deferred = query_status(host, pi)
-        deferred.addCallbacks(callback=create_host, callbackArgs=[components, Loader],
+        deferred.addCallbacks(callback=create_host, callbackArgs=[components],
                               errback=handle_unreachable_host, errbackArgs=[components])
 
-        deferred.addCallback(initialize_services)
+        deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
         deferred.addCallback(initialize_artefacts)
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
