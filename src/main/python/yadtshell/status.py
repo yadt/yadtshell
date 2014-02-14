@@ -118,6 +118,16 @@ def create_host(protocol, components):
     return host
 
 
+def get_settings(services, settings_entry):
+    if type(settings_entry) is str:
+        name = settings_entry
+        settings = services.get(settings_entry, None)
+    elif settings_entry:
+        name = settings_entry.keys()[0]
+        settings = settings_entry[name]
+    return name, settings
+
+
 def initialize_services(host, components):
     """Find the service class for each of `host`s services and instantiate it.
     Return `host` to facilitate chaining.
@@ -127,34 +137,29 @@ def initialize_services(host, components):
 
     host.defined_services = []
     services = getattr(host, 'services', set())
-    for settings in services:
-        if type(settings) is str or not settings:
-            name = settings
-            settings = services.get(settings, None)
-            if settings:
-                service_class = settings.get('class', 'Service')
-            else:
-                service_class = 'Service'
+    for settings_entry in services:
+        name, settings = get_settings(services, settings_entry)
+        if settings:
+            service_class_name = settings.get('class', 'Service')
         else:
-            name = settings.keys()[0]
-            settings = settings[name]
-            service_class = settings.get('class', 'Service')
+            service_class_name = 'Service'
 
+        # TODO: instantiate clazz only once at end, extract middle into get_or_load_service_class()
         service = None
         for module_name in sys.modules.keys()[:]:
             if service:
                 break
-            for classname, clazz in inspect.getmembers(sys.modules[module_name], inspect.isclass):
-                if classname == service_class:
-                    service = clazz(host, name, settings)
+            for classname, service_class in inspect.getmembers(sys.modules[module_name], inspect.isclass):
+                if classname == service_class_name:
+                    service = service_class(host, name, settings)
                     break
         if not service:
             host.logger.debug(
-                '%s not a standard service, searching class' % service_class)
-            clazz = None
+                '%s not a standard service, searching class' % service_class_name)
+            service_class = None
             try:
                 host.logger.debug('fallback 1: checking loaded modules')
-                clazz = eval(service_class)
+                service_class = eval(service_class_name)
             except:
                 pass
 
@@ -165,33 +170,33 @@ def initialize_services(host, components):
                 m = sys.modules[module_name]
                 return getattr(m, class_name)
 
-            if not clazz:
+            if not service_class:
                 try:
                     host.logger.debug(
                         'fallback 2: trying to load module myself')
-                    clazz = get_class(service_class)
+                    service_class = get_class(service_class_name)
                 except Exception, e:
                     host.logger.debug(e)
-            if not clazz:
+            if not service_class:
                 try:
                     host.logger.debug(
-                        'fallback 3: trying to lookup %s in legacies' % service_class)
+                        'fallback 3: trying to lookup %s in legacies' % service_class_name)
                     import legacies
                     mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
-                        service_class, service_class)
-                    clazz = get_class(mapped_service_class)
+                        service_class_name, service_class_name)
+                    service_class = get_class(mapped_service_class)
                     host.logger.info(
                         'deprecation info: class %s was mapped to %s' %
-                        (service_class, mapped_service_class))
+                        (service_class_name, mapped_service_class))
                 except Exception, e:
                     host.logger.debug(e)
 
-            if not clazz:
+            if not service_class:
                 raise Exception(
                     'cannot find class %(service_class)s' % locals())
 
             try:
-                service = clazz(host, name, settings)
+                service = service_class(host, name, settings)
             except Exception, e:
                 host.logger.exception(e)
         if not service:
