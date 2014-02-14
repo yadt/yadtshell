@@ -268,10 +268,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                     service.prepare(host)
                 if hasattr(service, 'get_local_service_collector'):
                     global local_service_collector
-                    local_service_collector = service.get_local_service_collector(
-                    )
-                q = query_local_service(service)
-                local_state.append(q)
+                    local_service_collector = service.get_local_service_collector()
+                local_state.append(query_local_service(service))
 
         if local_state:
             dl = defer.DeferredList(local_state)
