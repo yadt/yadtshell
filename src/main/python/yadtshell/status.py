@@ -68,8 +68,6 @@ def handle_unreachable_host(failure, components):
 
 
 def create_host(protocol, components, yaml_loader):
-    """Most of the method is concerned with parsing the result from query_status,
-    so maybe better call it extract_host_from_query_status_result...??"""
     try:
         data = json.loads(protocol.data)
     except Exception, e:
@@ -78,6 +76,7 @@ def create_host(protocol, components, yaml_loader):
         data = yaml.load(protocol.data, Loader=yaml_loader)
 
     host = None
+    # simple data (just status) for backwards compat. with old yadtclient
     if data == yadtshell.settings.DOWN:
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.DOWN
@@ -91,6 +90,7 @@ def create_host(protocol, components, yaml_loader):
         logging.getLogger(protocol.component).warning(
             'no hostname? strange...')
     else:
+        # note: this is actually the normal case
         host = yadtshell.components.Host(data['hostname'])
         for key, value in data.iteritems():
             setattr(host, key, value)
@@ -125,8 +125,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         hosts = [hosts]
 
     try:
-        os.remove(
-            os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+        os.remove(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
     except OSError:
         pass
 
