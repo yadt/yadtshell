@@ -1,5 +1,5 @@
 import yadtshell
-#from twisted.trial
+# from twisted.trial 
 import unittest
 from mock import Mock, patch, call
 
@@ -55,15 +55,15 @@ class StatusTests(unittest.TestCase):
         spawn_process.assert_called_with(
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
 
-    def test_should_pass_through_unreachable_host_and_add_it_to_components(self):
-        unreachable_host = yadtshell.components.UnreachableHost(
-            'foobar42.domain.tld')
+    def test_handle_unreachable_host(self):
+        failure = Mock()
+        failure.value.component = 'foobar42.domain.tld'
+        failure.value.exitCode = 255
         components = {}
-        result = yadtshell._status.create_host(
-            unreachable_host, components, None)
-
-        self.assertEqual(result, unreachable_host)
-        self.assertEqual(components['host://foobar42'], unreachable_host)
+        result = yadtshell._status.handle_unreachable_host(failure, components)
+        self.assertIsInstance(result, yadtshell.components.UnreachableHost)
+        self.assertEqual(result.fqdn, 'foobar42.domain.tld')
+        self.assertEqual(components['host://foobar42'], result)
 
     def test_should_create_host_from_json(self):
         components = {}
