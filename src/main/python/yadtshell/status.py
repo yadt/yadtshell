@@ -144,10 +144,12 @@ def initialize_services(host, components):
         name, settings = get_settings(services, settings_entry)
         # TODO(rwill): settings_entry only used here, can we encapsulate it in the iteration 
         # or just get `services` in one format instead of two possible ones?
-        if settings:
-            service_class_name = settings.get('class', 'Service')
+
+        if settings != None and "service" in settings:
+            service_class_name = settings["service"]
         else:
-            service_class_name = 'Service'
+            logger.warn("No service name found, using default: 'Service'")
+            service_class_name = "Service"
 
         # TODO: instantiate service_class only once at end, extract middle into get_or_load_service_class()
         service = None
