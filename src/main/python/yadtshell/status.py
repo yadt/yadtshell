@@ -107,6 +107,12 @@ def create_host(protocol, components):
         host = yadtshell.components.Host(data['hostname'])
         for key, value in data.iteritems():
             setattr(host, key, value)
+        # TODO(rwill): convert obsolete format of 'services' (list of dicts) to new one
+        # if obsolete_format(self.services):
+        #     old_services = self.services
+        #     self.services = dict()
+        # for entry in old_services:
+        #     self.serives.update(entry)
         host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
     loc_type = yadtshell.util.determine_loc_type(host.hostname)
     host.loc_type = loc_type
@@ -123,7 +129,8 @@ def get_settings(services, settings_entry):
     if type(settings_entry) is str:
         name = settings_entry
         settings = services.get(settings_entry, None)
-    elif isinstance(settings_entry, dict):  # TODO(rwill): use try/except to be less strict about type?
+    elif isinstance(settings_entry, dict):
+        # old version: settings_entry is a one-element dictionary
         name = settings_entry.keys()[0]
         settings = settings_entry[name]
     else:
@@ -139,11 +146,12 @@ def initialize_services(host, components):
         return host
 
     host.defined_services = []
+    
+    # TODO(rwill): replace following three lines with "for name, settings in host.get_services():"
+    # (this also saves two local variables)
     services = getattr(host, 'services', set())
     for settings_entry in services:
         name, settings = get_settings(services, settings_entry)
-        # TODO(rwill): settings_entry only used here, can we encapsulate it in the iteration 
-        # or just get `services` in one format instead of two possible ones?
 
         if settings != None and "service" in settings:
             service_class_name = settings["service"]
@@ -151,7 +159,7 @@ def initialize_services(host, components):
             logger.warn("No service name found, using default: 'Service'")
             service_class_name = "Service"
 
-        # TODO: instantiate service_class only once at end, extract middle into get_or_load_service_class()
+        # TODO(rwill): instantiate service_class only once at end, extract middle into get_or_load_service_class()
         service = None
         for module_name in sys.modules.keys()[:]:
             if service:
