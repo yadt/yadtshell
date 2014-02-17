@@ -1,6 +1,7 @@
 import unittest
 from mock import Mock, patch
 import yadtshell
+import yaml
 
 
 class ServiceTests(unittest.TestCase):
@@ -172,3 +173,30 @@ class HostTests(unittest.TestCase):
 
         self.assertEqual(
             command, 'super-ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+
+    def set_attrs_with_obsolete_services_format(self):
+        data = {"services": {
+            {"service_foo": Mock()}: None,
+            {"service_bar": Mock()}: None
+        }}
+        host = yadtshell.components.Host("myhost")
+        host.set_attrs_from_data(data)
+        self.AssertEqual(len(host.services), 2)
+        self.AssertTrue("service_foo" in host.services)
+        self.AssertTrue("service_bar" in host.services)
+
+    def set_attrs_with_obsolete_yaml_services_format(self):
+        data_text = """services:
+        - backend-service:
+            state: $backend_service_state
+            service_artefact: yit-backend-service
+            needs_services: ['service://foo/bar']
+        """
+        data = yaml.load(data_text, Loader=yaml.Loader)
+        print data
+        host = yadtshell.components.Host("myhost")
+        host.set_attrs_from_data(data)
+        self.AssertTrue(False)
+        self.AssertEqual(len(host.services), 1)
+        self.AssertTrue("backend-service" in host.services)
+        self.AssertTrue(host.services["backend-service"]["service_artefact"], "yit-backend-service")
