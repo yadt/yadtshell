@@ -243,19 +243,19 @@ class Host(Component):
         self.reboot_required_after_next_update = False
         
         Component.__init__(self, yadtshell.settings.HOST, name)
-        
+
 
     def set_attrs_from_data(self, data):
         for key, value in data.iteritems():
             setattr(self, key, value)
         self.convert_obsolete_services(self.services)
         self.state = ['update_needed', 'uptodate'][not self.next_artefacts]
-        self.loc_type = yadtshell.util.determine_loc_type(self.hostname)
+        self.loc_type = yadtshell.util.determine_loc_type(self.name)
         self.update_attributes_after_status()
 
 
     def convert_obsolete_services(self, old_services):
-        if len(old_services) > 0 and type(oldservices[0]) is str:
+        if len(old_services) > 0 and type(old_services[0]) is str:
             self.services = dict()
             for entry in old_services:
                 self.services.update(entry)        
