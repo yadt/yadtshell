@@ -24,6 +24,8 @@ import socket
 import time
 import linecache
 
+SESSION_ID = None
+
 
 def condense_hosts(words):
     wgs = {}
@@ -157,7 +159,8 @@ def get_user_info():
     user = pwd.getpwuid(os.getuid())[0]
     yadt_host = socket.gethostname()
     working_copy = os.getcwd()
-    owner = user + '@' + yadt_host + ':' + working_copy
+    session_id = SESSION_ID or yadt_host + ':' + working_copy
+    owner = user + '@' + session_id
     when = time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime())
     pid = os.getpid()
 
@@ -167,6 +170,7 @@ def get_user_info():
             "owner": owner,
             "when": when,
             "pid": pid,
+            "session_id": session_id
             }
 
 

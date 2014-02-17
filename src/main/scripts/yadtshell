@@ -30,17 +30,18 @@ yadtshell unignore SERVICE-URI ... [options]
 yadtshell dump [URI-PATTERN...] [--attribute --show-pending-updates --show-current-artefacts]
 
 Options:
--n --dryrun            do not alter the system
--v --verbose           be more verbose
---tracking-id STRING   lets user define a tracking id
---no-final-status      do not fetch status of target after action
+-n --dryrun               do not alter the system
+-v --verbose              be more verbose
+--tracking-id STRING      lets user define a tracking id
+--no-final-status         do not fetch status of target after action
 
--m --message MESSAGE   reason
--p --parallel PSPEC    how to execute actions in parallel [default: 1]
--y --forcedyes         say yes to all questions
---force                force execution
---reboot               reboot servers if needed during an update
---no-reboot            do not reboot servers during an update, even if needed
+-m --message MESSAGE      reason
+-p --parallel PSPEC       how to execute actions in parallel [default: 1]
+-y --forcedyes            say yes to all questions
+--force                   force execution
+--reboot                  reboot servers if needed during an update
+--no-reboot               do not reboot servers during an update, even if needed
+--session-id SESSIONID    optional ID for session handling
 """
 
 import logging
@@ -52,6 +53,7 @@ from twisted.internet.task import deferLater
 from yadtshell.commandline import (EXIT_CODE_CANCELED_BY_USER,
                                    determine_command_from_arguments,
                                    infer_options_from_arguments)
+import yadtshell.helper
 
 from yadtshell.settings import SettingsError
 
@@ -64,6 +66,9 @@ cmd = determine_command_from_arguments(arguments)
 uris = (arguments['ARTEFACT-URI'] + arguments['HOST-URI'] +
         arguments['SERVICE-URI'] + arguments['URI-PATTERN'])
 opts = infer_options_from_arguments(arguments)
+
+if opts.get('session_id'):
+    yadtshell.helper.SESSION_ID = opts['session_id']
 
 observer = log.PythonLoggingObserver()
 observer.start()
