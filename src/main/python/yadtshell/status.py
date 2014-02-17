@@ -121,7 +121,7 @@ def initialize_services(host, components):
 
     host.defined_services = []
     logger.warn(host.services)
-    for name, settings in host.services:
+    for name, settings in host.services.items():
         if settings is not None and "service" in settings:
             service_class_name = settings["service"]
         else:

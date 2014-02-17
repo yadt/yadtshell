@@ -253,7 +253,7 @@ class Host(Component):
         self.update_attributes_after_status()
 
     def convert_obsolete_services(self, old_services):
-        if len(old_services) > 0 and type(old_services[0]) is str:
+        if len(old_services) > 0 and type(old_services) is list:
             self.services = dict()
             for entry in old_services:
                 self.services.update(entry)
