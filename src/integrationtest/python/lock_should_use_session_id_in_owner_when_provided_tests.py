@@ -40,7 +40,6 @@ class Test(integrationtest_support.IntegrationTestSupport):
         self.assertEqual(0, lock1_return_code)
 
         with self.verify() as verify:
-            verify.render_execution_chain()
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')
 
@@ -48,7 +47,8 @@ class Test(integrationtest_support.IntegrationTestSupport):
                 'it01.domain', '-O', 'check')
 
             verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'WHO=mriehl@my_id', "yadt-command yadt-host-lock 'locking'")
+                'it01.domain', "yadt-command yadt-host-lock 'locking'").at_least_one_argument_matches(
+                'WHO=[a-zA-Z0-9_]+\@my_id')
 
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')
