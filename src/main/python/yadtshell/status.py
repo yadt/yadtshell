@@ -61,6 +61,7 @@ def status_cb(protocol=None):
 def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
         component_name, '/usr/bin/yadt-status', pi)
+    process.deferred.name = component_name 
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
@@ -144,7 +145,7 @@ def initialize_services(host, components):
         else:
             service_class_name = 'Service'
 
-        # TODO: instantiate clazz only once at end, extract middle into get_or_load_service_class()
+        # TODO: instantiate service_class only once at end, extract middle into get_or_load_service_class()
         service = None
         for module_name in sys.modules.keys()[:]:
             if service:
