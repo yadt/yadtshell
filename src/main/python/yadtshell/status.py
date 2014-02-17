@@ -87,12 +87,11 @@ def create_host(protocol, components):
         logger.debug(
             '%s: %s, falling back to yaml parser' % (protocol.component, str(e)))
         data = yaml.load(protocol.data, Loader=yaml_loader)
-    logger.warn(protocol.data)
-    logger.warn(data)
 
     host = None
     # simple data (just status) for backwards compat. with old yadtclient
     if data == yadtshell.settings.DOWN:
+        # TODO(rwill): this does not set fqdn, so we can't add any services!
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.DOWN
     elif data == yadtshell.settings.UNKNOWN:
@@ -106,9 +105,7 @@ def create_host(protocol, components):
         # note: this is actually the normal case
         host = yadtshell.components.Host(data['hostname'])
         host.set_attrs_from_data(data)
-    host.logger = logging.getLogger(host.uri)
     components[host.uri] = host
-    logger.warn(host.services)
     return host
 
 
@@ -120,12 +117,11 @@ def initialize_services(host, components):
         return host
 
     host.defined_services = []
-    logger.warn(host.services)
     for name, settings in host.services.items():
         if settings is not None and "service" in settings:
             service_class_name = settings["service"]
         else:
-            logger.warn("No service name found, using default: 'Service'")
+            logger.info("No service name found, using default: 'Service'")
             service_class_name = "Service"
 
         service_class = get_service_class_from_loaded_modules(service_class_name)
@@ -140,9 +136,10 @@ def initialize_services(host, components):
         if not service:
             raise Exception(
                 'cannot instantiate class %(service_class)s' % locals())
+        # TODO(rwill): move this to Service.__init__(), but need to test with is24-yadtshell.services ...
         service.fqdn = host.fqdn
-        service.needs = getattr(service, 'needs', set())
         service.needs.add(host.uri)
+        # service.needs = getattr(service, 'needs', set())  # TODO(rwill): remove. it's already ensured in Service.__init__()
 
         components[service.uri] = service
         host.defined_services.append(service)

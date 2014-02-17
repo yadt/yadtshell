@@ -119,3 +119,20 @@ some_attribute: some-value
         self.assertEqual(result_host.some_attribute, "some-value")
         self.assertEqual(result_host.loc_type, {
                          'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
+
+    @patch('yadtshell._status.logger')
+    def test_initialize_services(self, _):
+        host = yadtshell.components.Host("foo")
+        host.state = "uptodate"
+        host.fqdn = "foo.rz.is"
+        self.assertTrue(yadtshell.util.is_up(host.state), host.state)
+
+        host.services = {"fooService": {},
+                         "barService": {}
+                         }
+        components = {}
+        host = yadtshell._status.initialize_services(host, components)
+        self.assertEqual(len(host.defined_services), 2)
+        self.assertTrue(host.defined_services[0].name in host.services.keys())
+        self.assertTrue(host.defined_services[1].name in host.services.keys())
+        self.assertEqual(len(components), 2)

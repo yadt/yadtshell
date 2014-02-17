@@ -44,8 +44,7 @@ class Component(object):
         else:
             self.host = host.host
             self.fqdn = host.fqdn
-        self.host_uri = yadtshell.uri.create(
-            yadtshell.settings.HOST, self.host)
+        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
         self.name = getattr(self, 'name', name)
         if self.name is not None:
             self.name = self.name.rstrip('/').split('/', 1)[0]
@@ -243,6 +242,7 @@ class Host(Component):
         self.reboot_required_after_next_update = False
 
         Component.__init__(self, yadtshell.settings.HOST, name)
+        self.logger = logging.getLogger(self.uri)
 
     def set_attrs_from_data(self, data):
         for key, value in data.iteritems():
@@ -415,8 +415,7 @@ class UnreachableHost(Component):
 class Artefact(Component):
 
     def __init__(self, host, name, version=None):
-        Component.__init__(
-            self, yadtshell.settings.ARTEFACT, host, name, version)
+        Component.__init__(self, yadtshell.settings.ARTEFACT, host, name, version)
         # self.needs.add(uri.create(settings.HOST, host.host))
 
     def updateartefact(self):

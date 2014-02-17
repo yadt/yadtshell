@@ -195,7 +195,6 @@ services:
     needs_services: ['service://foo/bar']
 """
         data = yaml.load(data_text, Loader=yaml.Loader)
-        print data
         host = yadtshell.components.Host("myhost")
         host.set_attrs_from_data(data)
         self.assertEqual(len(host.services), 1)
