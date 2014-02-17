@@ -37,6 +37,7 @@ logger = logging.getLogger('components')
 class Component(object):
 
     def __init__(self, t, host, name=None, version=None):
+        """`self` is a string, not a Host."""
         self.type = t
         if type(host) in [str, unicode]:
             self.host = host
@@ -231,6 +232,8 @@ class ComponentSet(set):
 class Host(Component):
 
     def __init__(self, name):
+        self.next_artefacts = []
+        self.services = {}
         self.lockstate = None
         self.is_locked = None
         self.is_locked_by_other = None
@@ -238,7 +241,25 @@ class Host(Component):
         self.ssh_poll_max_seconds = yadtshell.constants.SSH_POLL_MAX_SECONDS_DEFAULT
         self.reboot_required_to_activate_latest_kernel = False
         self.reboot_required_after_next_update = False
+        
         Component.__init__(self, yadtshell.settings.HOST, name)
+        
+
+    def set_attrs_from_data(self, data):
+        for key, value in data.iteritems():
+            setattr(self, key, value)
+        self.convert_obsolete_services(self.services)
+        self.state = ['update_needed', 'uptodate'][not self.next_artefacts]
+        self.loc_type = yadtshell.util.determine_loc_type(self.hostname)
+        self.update_attributes_after_status()
+
+
+    def convert_obsolete_services(self, old_services):
+        if len(old_services) > 0 and type(oldservices[0]) is str:
+            self.services = dict()
+            for entry in old_services:
+                self.services.update(entry)        
+
 
     @property
     def reboot_required(self):

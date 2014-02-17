@@ -67,7 +67,7 @@ def set_properties(project):
     project.set_property('flake8_verbose_output', True)
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_ignore', 'E501')
-    project.set_property('flake8_break_build', True)
+    # project.set_property('flake8_break_build', True)
 
     project.set_property('verbose', True)
 

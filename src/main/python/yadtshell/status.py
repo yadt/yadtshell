@@ -61,7 +61,7 @@ def status_cb(protocol=None):
 def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
         component_name, '/usr/bin/yadt-status', pi)
-    process.deferred.name = component_name 
+    p.deferred.name = component_name 
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
@@ -105,37 +105,10 @@ def create_host(protocol, components):
     else:
         # note: this is actually the normal case
         host = yadtshell.components.Host(data['hostname'])
-        for key, value in data.iteritems():
-            setattr(host, key, value)
-        # TODO(rwill): convert obsolete format of 'services' (list of dicts) to new one
-        # if obsolete_format(self.services):
-        #     old_services = self.services
-        #     self.services = dict()
-        # for entry in old_services:
-        #     self.serives.update(entry)
-        host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
-    loc_type = yadtshell.util.determine_loc_type(host.hostname)
-    host.loc_type = loc_type
-    host.update_attributes_after_status()
-    host.next_artefacts = getattr(host, 'next_artefacts', [])
-    if host.next_artefacts is None:
-        host.next_artefacts = []
+        host.set_attrs_from_data(data)
     host.logger = logging.getLogger(host.uri)
     components[host.uri] = host
     return host
-
-
-def get_settings(services, settings_entry):
-    if type(settings_entry) is str:
-        name = settings_entry
-        settings = services.get(settings_entry, None)
-    elif isinstance(settings_entry, dict):
-        # old version: settings_entry is a one-element dictionary
-        name = settings_entry.keys()[0]
-        settings = settings_entry[name]
-    else:
-        logger.warning("no settings found for entry %s", settings_entry)
-    return name, settings
 
 
 def initialize_services(host, components):
@@ -146,83 +119,85 @@ def initialize_services(host, components):
         return host
 
     host.defined_services = []
-    
-    # TODO(rwill): replace following three lines with "for name, settings in host.get_services():"
-    # (this also saves two local variables)
-    services = getattr(host, 'services', set())
-    for settings_entry in services:
-        name, settings = get_settings(services, settings_entry)
-
+    for name, settings in host.services:
         if settings != None and "service" in settings:
             service_class_name = settings["service"]
         else:
             logger.warn("No service name found, using default: 'Service'")
             service_class_name = "Service"
 
-        # TODO(rwill): instantiate service_class only once at end, extract middle into get_or_load_service_class()
-        service = None
-        for module_name in sys.modules.keys()[:]:
-            if service:
-                break
-            for classname, service_class in inspect.getmembers(sys.modules[module_name], inspect.isclass):
-                if classname == service_class_name:
-                    service = service_class(host, name, settings)
-                    break
-        if not service:
-            host.logger.debug(
-                '%s not a standard service, searching class' % service_class_name)
-            service_class = None
-            try:
-                host.logger.debug('fallback 1: checking loaded modules')
-                service_class = eval(service_class_name)
-            except:
-                pass
+        service_class = get_service_class_name_from_loaded_modules(service_class_name)
+        if not service_class_name:
+            service_class = get_service_class_name_from_fallbacks(host, service_class_name)
 
-            def get_class(service_class):
-                module_name, class_name = service_class.rsplit('.', 1)
-                host.logger.debug('trying to load module %s' % module_name)
-                __import__(module_name)
-                m = sys.modules[module_name]
-                return getattr(m, class_name)
+        try:
+            service = service_class(host, name, settings)
+        except Exception, e:
+            host.logger.exception(e)
 
-            if not service_class:
-                try:
-                    host.logger.debug(
-                        'fallback 2: trying to load module myself')
-                    service_class = get_class(service_class_name)
-                except Exception, e:
-                    host.logger.debug(e)
-            if not service_class:
-                try:
-                    host.logger.debug(
-                        'fallback 3: trying to lookup %s in legacies' % service_class_name)
-                    import legacies
-                    mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
-                        service_class_name, service_class_name)
-                    service_class = get_class(mapped_service_class)
-                    host.logger.info(
-                        'deprecation info: class %s was mapped to %s' %
-                        (service_class_name, mapped_service_class))
-                except Exception, e:
-                    host.logger.debug(e)
-
-            if not service_class:
-                raise Exception(
-                    'cannot find class %(service_class)s' % locals())
-
-            try:
-                service = service_class(host, name, settings)
-            except Exception, e:
-                host.logger.exception(e)
         if not service:
             raise Exception(
                 'cannot instantiate class %(service_class)s' % locals())
-        components[service.uri] = service
         service.fqdn = host.fqdn
         service.needs = getattr(service, 'needs', set())
         service.needs.add(host.uri)
+
+        components[service.uri] = service
         host.defined_services.append(service)
     return host
+
+
+def get_service_class_from_loaded_modules(service_class_name):
+    for module_name in sys.modules.keys()[:]:
+        for classname, service_class in inspect.getmembers(sys.modules[module_name], inspect.isclass):
+            if classname == service_class_name:
+                return service_class
+    return None
+
+
+def get_service_class_name_from_fallbacks(host, service_class_name):
+    host.logger.debug(
+        '%s not a standard service, searching class' % service_class_name)
+    service_class = None
+    try:
+        host.logger.debug('fallback 1: checking loaded modules')
+        service_class = eval(service_class_name)
+    except:
+        pass
+
+    def get_class(service_class):
+        module_name, class_name = service_class.rsplit('.', 1)
+        host.logger.debug('trying to load module %s' % module_name)
+        __import__(module_name)
+        m = sys.modules[module_name]
+        return getattr(m, class_name)
+
+    if not service_class:
+        try:
+            host.logger.debug(
+                'fallback 2: trying to load module myself')
+            service_class = get_class(service_class_name)
+        except Exception, e:
+            host.logger.debug(e)
+    if not service_class:
+        try:
+            host.logger.debug(
+                'fallback 3: trying to lookup %s in legacies' % service_class_name)
+            import legacies
+            mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
+                service_class_name, service_class_name)
+            service_class = get_class(mapped_service_class)
+            host.logger.info(
+                'deprecation info: class %s was mapped to %s' %
+                (service_class_name, mapped_service_class))
+        except Exception, e:
+            host.logger.debug(e)
+
+    if not service_class:
+        raise Exception(
+            'cannot find class %(service_class)s' % locals())
+
+    return service_class
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
@@ -487,6 +462,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
         deferreds.append(deferred)
 
+    #  cutline here ?
     reactor.callLater(10, show_still_pending, deferreds)
 
     dl = defer.DeferredList(deferreds)
