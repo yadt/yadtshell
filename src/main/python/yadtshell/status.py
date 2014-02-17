@@ -61,7 +61,7 @@ def status_cb(protocol=None):
 def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
         component_name, '/usr/bin/yadt-status', pi)
-    p.deferred.name = component_name 
+    p.deferred.name = component_name
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
@@ -87,6 +87,8 @@ def create_host(protocol, components):
         logger.debug(
             '%s: %s, falling back to yaml parser' % (protocol.component, str(e)))
         data = yaml.load(protocol.data, Loader=yaml_loader)
+    logger.warn(protocol.data)
+    logger.warn(data)
 
     host = None
     # simple data (just status) for backwards compat. with old yadtclient
@@ -97,17 +99,16 @@ def create_host(protocol, components):
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.UNKNOWN
     elif data is None:
-        logging.getLogger(protocol.component).warning(
-            'no data? strange...')
+        logging.getLogger(protocol.component).warning('no data? strange...')
     elif "hostname" not in protocol.data:
-        logging.getLogger(protocol.component).warning(
-            'no hostname? strange...')
+        logging.getLogger(protocol.component).warning('no hostname? strange...')
     else:
         # note: this is actually the normal case
         host = yadtshell.components.Host(data['hostname'])
         host.set_attrs_from_data(data)
     host.logger = logging.getLogger(host.uri)
     components[host.uri] = host
+    logger.warn(host.services)
     return host
 
 
@@ -119,14 +120,15 @@ def initialize_services(host, components):
         return host
 
     host.defined_services = []
+    logger.warn(host.services)
     for name, settings in host.services:
-        if settings != None and "service" in settings:
+        if settings is not None and "service" in settings:
             service_class_name = settings["service"]
         else:
             logger.warn("No service name found, using default: 'Service'")
             service_class_name = "Service"
 
-        service_class = get_service_class_name_from_loaded_modules(service_class_name)
+        service_class = get_service_class_from_loaded_modules(service_class_name)
         if not service_class_name:
             service_class = get_service_class_name_from_fallbacks(host, service_class_name)
 
