@@ -28,6 +28,7 @@ import shlex
 from twisted.internet import defer, reactor, task
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
+from yadtshell.helper import get_user_info
 import yadtshell
 
 
@@ -104,7 +105,7 @@ class Component(object):
         service = self.name
         remotecall_script = '/usr/bin/yadt-remotecall'
         log_file = self.create_remote_log_filename(tag=tag)
-        owner = yadtshell.util.get_locking_user_info()['owner']
+        owner = get_user_info()['owner']
         is_force = {False: '', True: ' --force'}[force]
         complete_cmd = '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(is_force)s" ' % locals()
         return complete_cmd
@@ -344,7 +345,7 @@ class Host(Component):
             return message.replace("'", "").replace('"', '')
         if not message:
             raise ValueError('the "message" parameter is mandatory')
-        lockinfo = yadtshell.util.get_locking_user_info()
+        lockinfo = get_user_info()
         lockinfo["message"] = message
         lockinfo["force"] = force
         return self.remote_call(
@@ -358,7 +359,7 @@ class Host(Component):
     def update_attributes_after_status(self):
         self.is_locked = not self.lockstate is None
 
-        lockinfo = yadtshell.util.get_locking_user_info()
+        lockinfo = get_user_info()
         lock_owner = None
         if self.lockstate:
             lock_owner = self.lockstate.get("owner")

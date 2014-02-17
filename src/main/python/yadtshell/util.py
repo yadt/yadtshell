@@ -20,13 +20,10 @@ from __future__ import absolute_import
 
 import logging
 import os.path
-import pwd
-import socket
 import sys
 import yaml
 import shlex
 
-from time import localtime, strftime
 from twisted.internet import defer, reactor
 
 import yadtshell.settings
@@ -142,24 +139,6 @@ def log_subprocess(pipe, stdout_level=logging.DEBUG, stderr_level=logging.WARNIN
         logger.log(stdout_level, 'stdout ' + line.strip())
     logger.debug('return code: %i' % return_code)
     return return_code
-
-
-def get_locking_user_info():
-    """@Deprecated, use Helper.get_user_info() instead"""
-    user = pwd.getpwuid(os.getuid())[0]
-    yadt_host = socket.getfqdn()
-    working_copy = os.getcwd()
-    owner = user + '@' + yadt_host + ':' + working_copy
-    when = strftime("%a, %d %b %Y %H:%M:%S %Z", localtime())
-    pid = os.getpid()
-
-    return {"user": user,
-            "yadt_host": yadt_host,
-            "working_copy": working_copy,
-            "owner": owner,
-            "when": when,
-            "pid": pid,
-            }
 
 
 def get_yaml(adict):

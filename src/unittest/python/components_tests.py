@@ -145,7 +145,7 @@ class HostTests(unittest.TestCase):
         mock_host.remote_call.assert_called_with(
             "yadt-host-lock 'lock me!'", 'lock_host', False)
 
-    @patch('yadtshell.util.get_locking_user_info')
+    @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_create_wrapping_command_with_adequate_environment(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
         yadtshell.settings.SSH = 'super-ssh'
@@ -159,7 +159,7 @@ class HostTests(unittest.TestCase):
         self.assertEqual(
             command, 'super-ssh foobar42.domain WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
-    @patch('yadtshell.util.get_locking_user_info')
+    @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_use_host_when_component_has_no_fqdn(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
         yadtshell.settings.SSH = 'super-ssh'
