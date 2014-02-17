@@ -123,9 +123,11 @@ def get_settings(services, settings_entry):
     if type(settings_entry) is str:
         name = settings_entry
         settings = services.get(settings_entry, None)
-    elif settings_entry:
+    elif isinstance(settings_entry, dict):  # TODO(rwill): use try/except to be less strict about type?
         name = settings_entry.keys()[0]
         settings = settings_entry[name]
+    else:
+        logger.warning("no settings found for entry %s", settings_entry)
     return name, settings
 
 
@@ -140,6 +142,8 @@ def initialize_services(host, components):
     services = getattr(host, 'services', set())
     for settings_entry in services:
         name, settings = get_settings(services, settings_entry)
+        # TODO(rwill): settings_entry only used here, can we encapsulate it in the iteration 
+        # or just get `services` in one format instead of two possible ones?
         if settings:
             service_class_name = settings.get('class', 'Service')
         else:
