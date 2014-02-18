@@ -59,8 +59,7 @@ def status_cb(protocol=None):
 
 
 def query_status(component_name, pi=None):
-    p = yadtshell.twisted.YadtProcessProtocol(
-        component_name, '/usr/bin/yadt-status', pi)
+    p = yadtshell.twisted.YadtProcessProtocol(component_name, '/usr/bin/yadt-status', pi)
     p.deferred.name = component_name
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
@@ -73,9 +72,7 @@ def handle_unreachable_host(failure, components):
             'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
             failure.value.component)
         unreachable_host = yadtshell.components.UnreachableHost(failure.value.component)
-        unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST,
-                                                    host=unreachable_host.hostname)
-        components[unreachable_host_uri] = unreachable_host
+        components[unreachable_host.uri] = unreachable_host
         return unreachable_host
     return failure
 
@@ -128,6 +125,7 @@ def initialize_services(host, components):
         if not service_class_name:
             service_class = get_service_class_name_from_fallbacks(host, service_class_name)
 
+        service = None
         try:
             service = service_class(host, name, settings)
         except Exception, e:
@@ -278,10 +276,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         return host
 
     def initialize_artefacts(host):
+        # TODO(rwill): needs documentation or simplification
         try:
             for version in getattr(host, 'current_artefacts', []):
-                artefact = yadtshell.components.Artefact(
-                    host, version, version)
+                artefact = yadtshell.components.Artefact(host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 components[artefact.uri] = artefact
         except TypeError:
@@ -290,13 +288,12 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'current_artefacts', []):
-                uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(
-                    uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.CURRENT
-                current_uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.CURRENT)
+                current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                                   host.host,
+                                                   artefact.name + '/' + yadtshell.settings.CURRENT)
                 components[uri] = artefact
                 components[current_uri] = artefact
         except TypeError:
@@ -304,27 +301,27 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'next_artefacts', set()):
-                artefact = yadtshell.components.Artefact(
-                    host, version, version)
+                artefact = yadtshell.components.Artefact(host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 artefact.revision = yadtshell.settings.NEXT
                 components[artefact.uri] = artefact
         except TypeError:
             pass
+
         try:
             for version in getattr(host, 'next_artefacts', []):
-                uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(
-                    uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.NEXT
-                next_uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.NEXT)
+                next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                                host.host,
+                                                artefact.name + '/' + yadtshell.settings.NEXT)
                 components[uri] = artefact
                 components[next_uri] = artefact
                 host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
         except TypeError:
             pass
+
         return host
 
     def check_responses(responses):
@@ -449,8 +446,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     pi = yadtshell.twisted.ProgressIndicator()
 
-    deferreds = []
-    for host in hosts:
+    def query_and_initialize_host(host):
         deferred = query_status(host, pi)
         deferred.addCallbacks(callback=create_host, callbackArgs=[components],
                               errback=handle_unreachable_host, errbackArgs=[components])
@@ -459,9 +455,9 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         deferred.addCallback(add_local_state)
         deferred.addCallback(initialize_artefacts)
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
-        deferreds.append(deferred)
+        return deferred
 
-    #  cutline here ?
+    deferreds = [query_and_initialize_host(host) for host in hosts]
     reactor.callLater(10, show_still_pending, deferreds)
 
     dl = defer.DeferredList(deferreds)

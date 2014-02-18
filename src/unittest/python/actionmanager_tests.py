@@ -162,3 +162,36 @@ class ActionManagerActionTests(ActionManagerTestBase):
 
         mock_stop_and_return.assert_called_with(
             yadtshell.commandline.EXIT_CODE_CANCELED_BY_USER)
+
+    @patch('yadtshell.actionmanager.print', create=True)
+    @patch('yadtshell.actionmanager.sys.stdout')
+    @patch('yadtshell.twisted.stop_and_return')
+    @patch('yadtshell.actionmanager.yaml.load')
+    @patch('yadtshell.actionmanager.open', create=True)
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_not_abort_when_user_confirms(self,
+                                                 components,
+                                                 mock_open,
+                                                 mock_load_action_plan,
+                                                 mock_stop_and_return,
+                                                 mock_stdout,
+                                                 _):
+        """ TODO(rwill): rewrite test to be more comprehensive and to use less mocks.
+
+            Problem: hier sind gleichzeitig zwei Dinge, die nicht zum Abbruch fuehren:
+                     - keine Befehle sind dangerous
+                     - der Nutzer stimmt zu
+            Nur eines davon muss funktionieren, damit der Test gruen ist.
+        """
+        mock_stdout.isatty.return_value = True
+        noop = Mock()
+        noop.cmd = 'harmless'
+        dangerous = Mock()
+        dangerous.cmd = 'reboot'  # TODO: is this dangerous?
+        # TODO: how do we test kwargs(reboot_required...) ??
+        mock_load_action_plan.return_value.list_actions = [noop, dangerous]
+        self.user_accepts_transaction()
+
+        self.am.action('update')
+
+        self.assertFalse(mock_stop_and_return.called)

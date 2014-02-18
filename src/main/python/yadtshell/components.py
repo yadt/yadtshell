@@ -51,8 +51,7 @@ class Component(object):
         self.version = version
         if self.version is not None:
             self.version = str(self.version)
-        self.uri = yadtshell.uri.create(
-            self.type, self.host, self.name, self.version)
+        self.uri = yadtshell.uri.create(self.type, self.host, self.name, self.version)
         self.version = yadtshell.uri.parse(self.uri)['version']
         self.name_and_version = yadtshell.uri.as_source_file(self.uri)
         self.state = yadtshell.settings.UNKNOWN
@@ -391,7 +390,7 @@ class UnreachableHost(Component):
     def __init__(self, name):
         self.fqdn = name
         self.hostname = self.fqdn.split('.')[0]
-        Component.__init__(self, yadtshell.settings.HOST, name)
+        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
 
     def is_reachable(self):
         return False
