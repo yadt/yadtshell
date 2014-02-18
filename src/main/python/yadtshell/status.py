@@ -207,8 +207,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h)
                        for h in hosts]
     else:
-        state_files = glob.glob(
-            os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
+        state_files = glob.glob(os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
     for state_file in state_files:
         logger.debug('removing old state %(state_file)s' % locals())
         try:
@@ -239,8 +238,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             # TODO(rwill): possibly make those methods of Service, to simplify
             # to one line: cmd.addCallbacks(service.store_state, service.handle_state_failure)
             def store_service_state(state, service):
-                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
-                    state, yadtshell.settings.UNKNOWN)
+                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(state,
+                                                                          yadtshell.settings.UNKNOWN)
             cmd.addCallback(store_service_state, service)
 
             def handle_service_state_failure(failure, service):
@@ -461,7 +460,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
     dl.addCallback(yadtshell.info, components=components)
-    dl.addErrback(yadtshell.twisted.report_error,
-                  logger.error, include_stacktrace=False)
+    dl.addErrback(yadtshell.twisted.report_error, logger.error, include_stacktrace=False)
 
     return dl
