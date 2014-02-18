@@ -36,8 +36,20 @@ from hostexpand.HostExpander import HostExpander
 import yadtshell
 from yadtshell.util import compute_dependency_scores
 
-
 logger = logging.getLogger('status')
+
+try:
+    from yaml import CLoader as Loader
+    logger.debug("using C implementation of yaml")
+except ImportError:
+    from yaml import Loader
+    logger.debug("using default yaml")
+try:
+    import cPickle as pickle
+    logger.debug("using C implementation of pickle")
+except ImportError:
+    import pickle
+    logger.debug("using default pickle")
 
 local_service_collector = None
 
@@ -46,34 +58,37 @@ def status_cb(protocol=None):
     return status()
 
 
-def query_status(component, pi=None):
+def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
-        component, '/usr/bin/yadt-status', pi)
-    p.deferred = defer.Deferred()
-    p.deferred.name = component
-    cmd = shlex.split(yadtshell.settings.SSH) + [component]
+        component_name, '/usr/bin/yadt-status', pi)
+    cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
 
 
-def create_host(protocol, components, yaml_loader):
-    if isinstance(protocol, yadtshell.components.UnreachableHost):
-        unreachable_host = protocol
-        unreachable_host_uri = yadtshell.uri.create(
-            type=yadtshell.settings.HOST, host=unreachable_host.hostname)
+def handle_unreachable_host(failure, components):
+    if failure.value.exitCode == 255:
+        logger.critical(
+            'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
+            failure.value.component)
+        unreachable_host = yadtshell.components.UnreachableHost(failure.value.component)
+        unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST,
+                                                    host=unreachable_host.hostname)
         components[unreachable_host_uri] = unreachable_host
         return unreachable_host
+    return failure
 
-    def convert_string_to_host(data, host=None):
-        try:
-            return json.loads(data)
-        except Exception, e:
-            logger.debug(
-                '%s: %s, falling back to yaml parser' % (host, str(e)))
-            return yaml.load(data, Loader=yaml_loader)
+
+def create_host(protocol, components, yaml_loader):
+    try:
+        data = json.loads(protocol.data)
+    except Exception, e:
+        logger.debug(
+            '%s: %s, falling back to yaml parser' % (protocol.component, str(e)))
+        data = yaml.load(protocol.data, Loader=yaml_loader)
 
     host = None
-    data = convert_string_to_host(protocol.data, protocol.component)
+    # simple data (just status) for backwards compat. with old yadtclient
     if data == yadtshell.settings.DOWN:
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.DOWN
@@ -87,6 +102,7 @@ def create_host(protocol, components, yaml_loader):
         logging.getLogger(protocol.component).warning(
             'no hostname? strange...')
     else:
+        # note: this is actually the normal case
         host = yadtshell.components.Host(data['hostname'])
         for key, value in data.iteritems():
             setattr(host, key, value)
@@ -103,26 +119,12 @@ def create_host(protocol, components, yaml_loader):
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
-    try:
-        from yaml import CLoader as Loader
-        logger.debug("using C implementation of yaml")
-    except ImportError:
-        from yaml import Loader
-        logger.debug("using default yaml")
-    try:
-        import cPickle as pickle
-        logger.debug("using C implementation of pickle")
-    except ImportError:
-        import pickle
-        logger.debug("using default pickle")
-
     yadtshell.settings.ybc.connect()
     if type(hosts) is str:
         hosts = [hosts]
 
     try:
-        os.remove(
-            os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
+        os.remove(os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'))
     except OSError:
         pass
 
@@ -169,14 +171,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                              .format(service.uri, failure.value.exitCode))
             cmd.addErrback(handle_service_state_failure, service)
             return cmd
-        query_protocol = yadtshell.twisted.YadtProcessProtocol(
-            service.uri, cmd)
-        query_protocol.deferred = defer.Deferred()
-        reactor.spawnProcess(
-            query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
+        query_protocol = yadtshell.twisted.YadtProcessProtocol(service.uri, cmd)
+        reactor.spawnProcess(query_protocol, '/bin/sh', ['/bin/sh'], os.environ)
         query_protocol.component = service
-        query_protocol.deferred.addCallbacks(
-            store_service_up, store_service_not_up)
+        query_protocol.deferred.addCallbacks(store_service_up, store_service_not_up)
         return query_protocol.deferred
 
     def initialize_services(host):
@@ -270,10 +268,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
                     service.prepare(host)
                 if hasattr(service, 'get_local_service_collector'):
                     global local_service_collector
-                    local_service_collector = service.get_local_service_collector(
-                    )
-                q = query_local_service(service)
-                local_state.append(q)
+                    local_service_collector = service.get_local_service_collector()
+                local_state.append(query_local_service(service))
 
         if local_state:
             dl = defer.DeferredList(local_state)
@@ -444,14 +440,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             logger.info('pending: %s' % ' '.join(pending))
             reactor.callLater(10, show_still_pending, deferreds)
 
-    def report_connection_error(failure):
-        if failure.value.exitCode == 255:
-            logger.critical(
-                'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
-                failure.value.component)
-            return yadtshell.components.UnreachableHost(failure.value.component)
-        return failure
-
     def notify_collector(ignored):
         global local_service_collector
         if local_service_collector:
@@ -464,8 +452,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     deferreds = []
     for host in hosts:
         deferred = query_status(host, pi)
-        deferred.addErrback(report_connection_error)
-        deferred.addCallback(create_host, components, Loader)
+        deferred.addCallbacks(callback=create_host, callbackArgs=[components, Loader],
+                              errback=handle_unreachable_host, errbackArgs=[components])
 
         deferred.addCallback(initialize_services)
         deferred.addCallback(add_local_state)

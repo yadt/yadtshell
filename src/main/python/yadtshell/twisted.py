@@ -16,8 +16,7 @@
 
 from __future__ import absolute_import
 
-import twisted.internet.protocol as protocol
-import twisted.internet.reactor as reactor
+from twisted.internet import protocol, reactor, defer
 import twisted.python.failure as failure
 
 import sys
@@ -93,6 +92,8 @@ class ProgressIndicator(object):
 class YadtProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG,
                  err_log_level=logging.WARN, log_prefix='', wait_for_io=True):
+        self.deferred = defer.Deferred()
+        # self.deferred.name = component  # TODO(rwill): what's this needed for?
         try:
             self.component = component.encode('ascii')
         except AttributeError:
