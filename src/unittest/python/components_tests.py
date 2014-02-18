@@ -175,7 +175,7 @@ class HostTests(unittest.TestCase):
             command, 'super-ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
     def test_set_attrs_with_obsolete_services_format(self):
-        data = {"hostname": "foo",
+        data = {"fqdn": "foo-boing",
                 "services": [
                     {"service_foo": Mock()},
                     {"service_bar": Mock()}
@@ -187,7 +187,7 @@ class HostTests(unittest.TestCase):
         self.assertTrue("service_bar" in host.services)
 
     def test_set_attrs_with_obsolete_yaml_services_format(self):
-        data_text = """hostname: foo
+        data_text = """fqdn: foo.baz
 services:
 - backend-service:
     state: $backend_service_state

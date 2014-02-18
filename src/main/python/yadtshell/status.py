@@ -88,7 +88,8 @@ def create_host(protocol, components):
     host = None
     # simple data (just status) for backwards compat. with old yadtclient
     if data == yadtshell.settings.DOWN:
-        # TODO(rwill): this does not set fqdn, so we can't add any services!
+        # TODO(rwill): This is probably dead code since it does not set fqdn
+        # and therefore creates invalid Host instance.
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.DOWN
     elif data == yadtshell.settings.UNKNOWN:
@@ -96,11 +97,11 @@ def create_host(protocol, components):
         host.state = yadtshell.settings.UNKNOWN
     elif data is None:
         logging.getLogger(protocol.component).warning('no data? strange...')
-    elif "hostname" not in protocol.data:
+    elif "fqdn" not in protocol.data:
         logging.getLogger(protocol.component).warning('no hostname? strange...')
     else:
         # note: this is actually the normal case
-        host = yadtshell.components.Host(data['hostname'])
+        host = yadtshell.components.Host(data['fqdn'])
         host.set_attrs_from_data(data)
     components[host.uri] = host
     return host
@@ -132,12 +133,7 @@ def initialize_services(host, components):
             host.logger.exception(e)
 
         if not service:
-            raise Exception(
-                'cannot instantiate class %(service_class)s' % locals())
-        # TODO(rwill): move this to Service.__init__(), but need to test with is24-yadtshell.services ...
-        service.fqdn = host.fqdn
-        service.needs.add(host.uri)
-        # service.needs = getattr(service, 'needs', set())  # TODO(rwill): remove. it's already ensured in Service.__init__()
+            raise Exception('cannot instantiate class %(service_class)s' % locals())
 
         components[service.uri] = service
         host.defined_services.append(service)

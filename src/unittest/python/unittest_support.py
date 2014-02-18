@@ -28,7 +28,7 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     components = yadtshell.components.ComponentDict()
 
     # create host components
-    host = yadtshell.components.Host('foobar42')
+    host = yadtshell.components.Host('foobar42.acme.com')
     host.state = host_state
     host.reboot_required_after_next_update = host_reboot_after_update
     host.reboot_required_to_activate_latest_kernel = host_reboot_now
@@ -61,12 +61,10 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     if next_artefacts_present:
         host.next_artefacts = {'foo/0:0.1.0': 'yit/0:0.1.1'}
 
-        foo2_artefact = yadtshell.components.Artefact(
-            'foobar42', 'foo', '0:0.1.0')
+        foo2_artefact = yadtshell.components.Artefact('foobar42', 'foo', '0:0.1.0')
         foo2_artefact.state = artefact_state
         foo2_artefact.revision = yadtshell.settings.NEXT
-        yit2_artefact = yadtshell.components.Artefact(
-            'foobar42', 'yit', '0:0.1.1')
+        yit2_artefact = yadtshell.components.Artefact('foobar42', 'yit', '0:0.1.1')
         yit2_artefact.state = artefact_state
         yit2_artefact.revision = yadtshell.settings.NEXT
         components['artefact://foobar42/foo/0:0.1.0'] = foo2_artefact
@@ -75,12 +73,10 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     # create service components
     if add_services:
         host.services = ['barservice', 'bazservice']
-        bar_service = yadtshell.components.Service(
-            'foobar42', 'barservice', {})
+        bar_service = yadtshell.components.Service(host, 'barservice', {})
         bar_service.state = service_state
         bar_service.dependency_score = -1
-        baz_service = yadtshell.components.Service(
-            'foobar42', 'barservice', {})
+        baz_service = yadtshell.components.Service(host, 'barservice', {})
         bar_service.needs_artefacts = ['artefact://foobar42/foo']
         baz_service.state = service_state
         baz_service.dependency_score = 1

@@ -71,13 +71,12 @@ class StatusTests(unittest.TestCase):
         protocol_with_json_data = Mock()
         protocol_with_json_data.component = 'host://foobar42'
         protocol_with_json_data.data = '''{
-"hostname": "foobar42",
+"fqdn": "foobar42.acme.com",
 "next_artefacts": {},
 "some_attribute": "some-value"
 }'''
 
-        result_host = yadtshell._status.create_host(
-            protocol_with_json_data, components)
+        result_host = yadtshell._status.create_host(protocol_with_json_data, components)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, {})
@@ -91,13 +90,12 @@ class StatusTests(unittest.TestCase):
         protocol_with_json_data = Mock()
         protocol_with_json_data.component = 'host://foobar42'
         protocol_with_json_data.data = '''{
-"hostname": "foobar42",
+"fqdn": "foobar42.acme.com",
 "next_artefacts": {"some-artefact": "another-artefact"},
 "some_attribute": "some-value"
 }'''
 
-        result_host = yadtshell._status.create_host(
-            protocol_with_json_data, components)
+        result_host = yadtshell._status.create_host(protocol_with_json_data, components)
 
         self.assertEqual(result_host.is_update_needed(), True)
 
@@ -106,12 +104,11 @@ class StatusTests(unittest.TestCase):
         protocol_with_yaml_data = Mock()
         protocol_with_yaml_data.component = 'host://foobar42'
         protocol_with_yaml_data.data = '''
-hostname: foobar42
+fqdn: foobar42.acme.com
 next_artefacts: []
 some_attribute: some-value
 '''
-        result_host = yadtshell._status.create_host(
-            protocol_with_yaml_data, components)
+        result_host = yadtshell._status.create_host(protocol_with_yaml_data, components)
 
         self.assertEqual(result_host.hostname, 'foobar42')
         self.assertEqual(result_host.next_artefacts, [])
@@ -122,9 +119,8 @@ some_attribute: some-value
 
     @patch('yadtshell._status.logger')
     def test_initialize_services(self, _):
-        host = yadtshell.components.Host("foo")
+        host = yadtshell.components.Host("foo.acme.com")
         host.state = "uptodate"
-        host.fqdn = "foo.rz.is"
         self.assertTrue(yadtshell.util.is_up(host.state), host.state)
 
         host.services = {"fooService": {},
@@ -139,9 +135,8 @@ some_attribute: some-value
 
     @patch('yadtshell._status.logger')
     def todo_test_loading_service_class(self, _):
-        host = yadtshell.components.Host("foo")
+        host = yadtshell.components.Host("foo.acme.com")
         host.state = "uptodate"
-        host.fqdn = "foo.rz.is"
         self.assertTrue(yadtshell.util.is_up(host.state), host.state)
 
         host.services = {"fooService": {"service": "MyService"},

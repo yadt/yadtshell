@@ -38,7 +38,9 @@ logger = logging.getLogger('components')
 class Component(object):
 
     def __init__(self, t, host, name=None, version=None):
-        """`self` is a string, not a Host."""
+        """`self` can be a string/unicode or a Host instance.
+        But note that some subclasses require a Host instance in their constructors.
+        """
         self.type = t
         if type(host) in [str, unicode]:
             self.host = host
@@ -230,7 +232,9 @@ class ComponentSet(set):
 
 class Host(Component):
 
-    def __init__(self, name):
+    def __init__(self, fqdn):
+        self.fqdn = fqdn
+        self.hostname = fqdn.split('.')[0]
         self.next_artefacts = []
         self.services = {}
         self.lockstate = None
@@ -241,11 +245,13 @@ class Host(Component):
         self.reboot_required_to_activate_latest_kernel = False
         self.reboot_required_after_next_update = False
 
-        Component.__init__(self, yadtshell.settings.HOST, name)
+        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
         self.logger = logging.getLogger(self.uri)
 
     def set_attrs_from_data(self, data):
         for key, value in data.iteritems():
+            if key == "hostname" and value != self.hostname:
+                self.logger.warning("Hostname %(hostname)s doesn't match FQDN %(fqdn)." % data)
             setattr(self, key, value)
         self.convert_obsolete_services(self.services)
         self.state = ['update_needed', 'uptodate'][not self.next_artefacts]
@@ -388,9 +394,9 @@ class Host(Component):
 
 class UnreachableHost(Component):
 
-    def __init__(self, name):
-        self.fqdn = name
-        self.hostname = self.fqdn.split('.')[0]
+    def __init__(self, fqdn):
+        self.fqdn = fqdn
+        self.hostname = fqdn.split('.')[0]
         Component.__init__(self, yadtshell.settings.HOST, self.hostname)
 
     def is_reachable(self):
@@ -428,9 +434,11 @@ class Service(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
+        self.fqdn = host.fqdn
         self.needs_services = []
         self.needs_artefacts = []
         self.needs = set()
+        self.needs.add(host.uri)
 
         for k in settings:
             setattr(self, k, settings[k])
