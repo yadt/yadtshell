@@ -37,11 +37,13 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
+    """Note that the .host attribute is always a string. TODO(rwill): rename it to .hostname.
+    Further, note that __init__ can take a string or Host instance as argument `host`,
+    but in Service.__init__ it always has to be a Host instance.
+    TODO(rwill): document behavior for all classes and possibly simplify.
+    """
 
     def __init__(self, t, host, name=None, version=None):
-        """`self` can be a string/unicode or a Host instance.
-        But note that some subclasses require a Host instance in their constructors.
-        """
         self.type = t
         if type(host) in [str, unicode]:
             self.host = host
@@ -169,7 +171,7 @@ class ComponentDict(dict):
 
     def _key_(self, key):
         try:
-            return self._key_(key.uri)
+            return self._key_(key.uri)  # TODO(rwill): looks like the intention here is to return key.uri ??
         except AttributeError:
             return key
 
@@ -182,12 +184,11 @@ class ComponentDict(dict):
     def get(self, key, default=None):
         if self._key_(key) not in self and self._add_when_missing_:
             logger.debug('missing' + key)
-            self[self._key_(key)] = MissingComponent(key)
+            self[self._key_(key)] = MissingComponent(key)  # (rwill) why no _key_ on RHS?
         return dict.get(self, self._key_(key), default)
 
     def __setitem__(self, key, value):
-        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value,
-        # 'state', ''))
+        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
 
 
@@ -208,8 +209,7 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
-            # logger.warning('known keys: ' + ',
-            # '.join(self.components.keys()))
+            # logger.warning('known keys: ' + ', '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
@@ -231,10 +231,15 @@ class ComponentSet(set):
 
 
 class Host(Component):
+    """Note: Host.name, Host.host and Host.hostname are probably all the same value.
+    (All seem to be immutable after creation).
+    TODO(rwill): remove all but Host.name.
+    """
 
     def __init__(self, fqdn):
         self.fqdn = fqdn
         self.hostname = fqdn.split('.')[0]
+        self.current_artefacts = []
         self.next_artefacts = []
         self.services = {}
         self.lockstate = None

@@ -22,15 +22,12 @@ import glob
 import os
 import logging
 import sys
-import traceback
 import inspect
 import shlex
 import yaml
 import simplejson as json
 
-from twisted.internet import protocol
-from twisted.internet import reactor
-from twisted.internet import defer
+from twisted.internet import (defer, protocol, reactor)
 
 from hostexpand.HostExpander import HostExpander
 import yadtshell
@@ -272,50 +269,47 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     def initialize_artefacts(host):
         # TODO(rwill): needs documentation or simplification
-        try:
-            for version in getattr(host, 'current_artefacts', []):
-                artefact = yadtshell.components.Artefact(host, version, version)
-                artefact.state = yadtshell.settings.INSTALLED
-                components[artefact.uri] = artefact
-        except TypeError:
-            type_, value_, traceback_ = sys.exc_info()
-            traceback.format_tb(traceback_)
+        if isinstance(host, yadtshell.components.UnreachableHost):
+            # TODO(rwill): decide if it is better to initialize UnreachableHost with
+            # empty artefact-lists. (Null-Object-Pattern)
+            return host
 
-        try:
-            for version in getattr(host, 'current_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-                artefact.revision = yadtshell.settings.CURRENT
-                current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                                   host.host,
-                                                   artefact.name + '/' + yadtshell.settings.CURRENT)
-                components[uri] = artefact
-                components[current_uri] = artefact
-        except TypeError:
-            pass
+        for version in host.current_artefacts:
+            artefact = yadtshell.components.Artefact(host, name=version, version=version)
+            artefact.state = yadtshell.settings.INSTALLED
+            # why not set `artefact.revision` here, but set it everywhere else?
+            components[artefact.uri] = artefact
 
-        try:
-            for version in getattr(host, 'next_artefacts', set()):
-                artefact = yadtshell.components.Artefact(host, version, version)
-                artefact.state = yadtshell.settings.INSTALLED
-                artefact.revision = yadtshell.settings.NEXT
-                components[artefact.uri] = artefact
-        except TypeError:
-            pass
+        for version in host.current_artefacts:
+            # create uri without version
+            uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+            artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+            artefact.revision = yadtshell.settings.CURRENT
+            # artefact.name below is just `version` because that is how it has been created...
+            # (either with Artefact() or MissingComponent())
+            current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                               host.host,
+                                               artefact.name + '/' + yadtshell.settings.CURRENT)
+            # above we have set `artefact = components[uri]` so the following line is redundant?!?!
+            components[uri] = artefact
+            components[current_uri] = artefact
 
-        try:
-            for version in getattr(host, 'next_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-                artefact.revision = yadtshell.settings.NEXT
-                next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                                host.host,
-                                                artefact.name + '/' + yadtshell.settings.NEXT)
-                components[uri] = artefact
-                components[next_uri] = artefact
-                host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
-        except TypeError:
-            pass
+        for version in host.next_artefacts:  # diff
+            artefact = yadtshell.components.Artefact(host, name=version, version=version)
+            artefact.state = yadtshell.settings.INSTALLED
+            artefact.revision = yadtshell.settings.NEXT  # diff
+            components[artefact.uri] = artefact
+
+        for version in host.next_artefacts:
+            uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+            artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+            artefact.revision = yadtshell.settings.NEXT    # diff
+            next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                            host.host,
+                                            artefact.name + '/' + yadtshell.settings.NEXT)  # diff
+            components[uri] = artefact
+            components[next_uri] = artefact
+            host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
 
         return host
 
