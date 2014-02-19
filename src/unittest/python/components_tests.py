@@ -90,6 +90,10 @@ class UnreachableHostTests(unittest.TestCase):
         unreachable_host = yadtshell.components.UnreachableHost('foobar42')
         self.assertEquals(unreachable_host.is_locked_by_me, False)
 
+    def test_uri(self):
+        unreachable_host = yadtshell.components.UnreachableHost('foobar42.rz.is')
+        self.assertEquals(unreachable_host.uri, 'host://foobar42')
+
 
 class HostTests(unittest.TestCase):
 
