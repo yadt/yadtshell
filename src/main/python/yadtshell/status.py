@@ -198,15 +198,18 @@ def initialize_artefacts(host, components):
         # empty artefact-lists. (Null-Object-Pattern)
         return host
 
-    for version in host.current_artefacts:
-        artefact = yadtshell.components.Artefact(host, name=version, version=version)
+    for name_version in host.current_artefacts:
+        name, version = name_version.split('/')
+        artefact = yadtshell.components.Artefact(host, name, version)
         artefact.state = yadtshell.settings.INSTALLED
         # why not set `artefact.revision` here, but set it everywhere else?
         components[artefact.uri] = artefact
+        # components[artefact.revision_uri] = artefact
 
-    for version in host.current_artefacts:
+    for name_version in host.current_artefacts:
+        name, version = name_version.split('/')
         # create uri without version
-        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name, version)
         artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
         artefact.revision = yadtshell.settings.CURRENT
         # artefact.name below is just `version` because that is how it has been created...
@@ -218,14 +221,16 @@ def initialize_artefacts(host, components):
         components[uri] = artefact
         components[current_uri] = artefact
 
-    for version in host.next_artefacts:  # diff
-        artefact = yadtshell.components.Artefact(host, name=version, version=version)
+    for name_version in host.next_artefacts:  # diff
+        name, version = name_version.split('/')
+        artefact = yadtshell.components.Artefact(host, name, version)
         artefact.state = yadtshell.settings.INSTALLED
         artefact.revision = yadtshell.settings.NEXT  # diff
         components[artefact.uri] = artefact
 
-    for version in host.next_artefacts:
-        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+    for name_version in host.next_artefacts:
+        name, version = name_version.split('/')
+        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name, version)
         artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
         artefact.revision = yadtshell.settings.NEXT    # diff
         next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
