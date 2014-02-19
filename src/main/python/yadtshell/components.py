@@ -51,6 +51,8 @@ class Component(object):
             self.host = host.host
             self.fqdn = host.fqdn
         self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
+        # TODO(rwill): this code is written such that name can be set before calling the super __init__
+        # it would be simpler to agree on one convention, for example always call super __init__ first...
         self.name = getattr(self, 'name', name)
         if self.name is not None:
             self.name = self.name.rstrip('/').split('/', 1)[0]
@@ -58,10 +60,14 @@ class Component(object):
         if self.version is not None:
             self.version = str(self.version)
         self.uri = yadtshell.uri.create(self.type, self.host, self.name, self.version)
+
+        # TODO(rwill): version information only seems to be used for artefacts.
+        # move to class Artefact?
         self.version = yadtshell.uri.parse(self.uri)['version']
         self.name_and_version = yadtshell.uri.as_source_file(self.uri)
-        self.state = yadtshell.settings.UNKNOWN
         self.revision = yadtshell.settings.EMPTY
+
+        self.state = yadtshell.settings.UNKNOWN
         self.needs = getattr(self, 'needs', set())
         self.needed_by = set()
         self.config_prefix = yadtshell.settings.TARGET_SETTINGS['name']
@@ -416,10 +422,12 @@ class UnreachableHost(Component):
 
 
 class Artefact(Component):
+    """TODO(rwill): what's the difference between `.version` and `.revision`?"""
 
-    def __init__(self, host, name, version=None):
+    def __init__(self, host, name, version=None, revision=None):
         Component.__init__(self, yadtshell.settings.ARTEFACT, host, name, version)
         # self.needs.add(uri.create(settings.HOST, host.host))
+        self.revision = revision
 
     def updateartefact(self):
         return self.remote_call('yadt-artefact-update %s' % self.name,
