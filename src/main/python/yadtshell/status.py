@@ -124,7 +124,7 @@ def initialize_services(host, components):
 
         service_class = get_service_class_from_loaded_modules(service_class_name)
         if not service_class_name:
-            service_class = get_service_class_name_from_fallbacks(host, service_class_name)
+            service_class = get_service_class_from_fallbacks(host, service_class_name)
 
         service = None
         try:
@@ -148,7 +148,7 @@ def get_service_class_from_loaded_modules(service_class_name):
     return None
 
 
-def get_service_class_name_from_fallbacks(host, service_class_name):
+def get_service_class_from_fallbacks(host, service_class_name):
     host.logger.debug(
         '%s not a standard service, searching class' % service_class_name)
     service_class = None
@@ -174,9 +174,10 @@ def get_service_class_name_from_fallbacks(host, service_class_name):
             host.logger.debug(e)
     if not service_class:
         try:
+            # TODO(rwill): this might be dead code that can be removed
             host.logger.debug(
                 'fallback 3: trying to lookup %s in legacies' % service_class_name)
-            import legacies
+            import legacies  # this module is a config file living in /etc/yadtshell
             mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
                 service_class_name, service_class_name)
             service_class = get_class(mapped_service_class)

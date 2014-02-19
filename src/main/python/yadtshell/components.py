@@ -39,7 +39,7 @@ logger = logging.getLogger('components')
 class Component(object):
 
     def __init__(self, t, host, name=None, version=None):
-        """`self` can be a string/unicode or a Host instance.
+        """`host` can be a string/unicode or a Host instance.
         But note that some subclasses require a Host instance in their constructors.
         """
         self.type = t
