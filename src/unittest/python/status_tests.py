@@ -64,7 +64,8 @@ class StatusTests(unittest.TestCase):
         result = yadtshell._status.handle_unreachable_host(failure, components)
         self.assertTrue(isinstance(result, yadtshell.components.UnreachableHost))
         self.assertEqual(result.fqdn, 'foobar42.domain.tld')
-        self.assertEqual(components['host://foobar42'], result)
+        self.assertIn('host://foobar42', components)
+        self.assertEqual(components['host://foobar42'], result, "components.keys() = %s" % components.keys())
 
     def test_should_create_host_from_json(self):
         components = {}
@@ -159,9 +160,16 @@ some_attribute: some-value
         result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "module_for_class_loading.Example")
         self.assertEqual(result_class.__name__, "Example")
 
-    def test_syntax_initialize_artefacts(self):
+    def test_initialize_artefacts(self):
         host = yadtshell.components.Host("foo.bar.com")
         host.current_artefacts = ["arte/0", "fact/2"]
         host.next_artefacts = ["arte/1"]
         components = {}
         yadtshell._status.initialize_artefacts(host, components)
+        print components.keys()
+        self.assertItemsEqual(components.keys(),
+                              ['artefact://foo/arte/0', 'artefact://foo/arte/current',
+                               'artefact://foo/arte/1', 'artefact://foo/arte/next',
+                               'artefact://foo/fact/2', 'artefact://foo/fact/current']
+)
+
