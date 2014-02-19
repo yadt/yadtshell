@@ -200,31 +200,13 @@ def initialize_artefacts(host, components):
 
     for name_version in host.current_artefacts:
         name, version = name_version.split('/')
-        artefact = yadtshell.components.Artefact(host, name, version)
-        artefact.state = yadtshell.settings.INSTALLED
-        # why not set `artefact.revision` here, but set it everywhere else?
+        artefact = yadtshell.components.Artefact(host, name, version, yadtshell.settings.CURRENT)
         components[artefact.uri] = artefact
-        # components[artefact.revision_uri] = artefact
-
-    for name_version in host.current_artefacts:
-        name, version = name_version.split('/')
-        # create uri without version
-        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name, version)
-        artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-        artefact.revision = yadtshell.settings.CURRENT
-        # artefact.name below is just `version` because that is how it has been created...
-        # (either with Artefact() or MissingComponent())
-        current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                           host.host,
-                                           artefact.name + '/' + yadtshell.settings.CURRENT)
-        # above we have set `artefact = components[uri]` so the following line is redundant?!?!
-        components[uri] = artefact
-        components[current_uri] = artefact
+        components[artefact.revision_uri] = artefact
 
     for name_version in host.next_artefacts:  # diff
         name, version = name_version.split('/')
         artefact = yadtshell.components.Artefact(host, name, version)
-        artefact.state = yadtshell.settings.INSTALLED
         artefact.revision = yadtshell.settings.NEXT  # diff
         components[artefact.uri] = artefact
 
