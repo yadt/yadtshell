@@ -280,7 +280,6 @@ class ActionManager(object):
 
         # if self.pi:
             # self.pi.observables.append(p)
-        p.deferred = defer.Deferred()
         cmdline = shlex.split(cmdline.encode('ascii'))
         self.logger.debug('cmd: %s' % cmdline)
         reactor.spawnProcess(p, cmdline[0], cmdline, None)
@@ -430,11 +429,6 @@ class ActionManager(object):
                 pi.finish()
             return result
 
-        def filter_dangerous_actions(actions):
-            def is_a_dangerous_action(action):
-                return action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)
-            return filter(is_a_dangerous_action, actions)
-
         if _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
             dangerous_actions = filter_dangerous_actions(action_plan.list_actions)
             if dangerous_actions:
@@ -467,6 +461,12 @@ class ActionManager(object):
             deferred.addBoth(yadtshell.util.stop_ssh_multiplexed)
 
         return deferred
+
+
+def filter_dangerous_actions(actions):
+    def is_a_dangerous_action(action):
+        return action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)
+    return filter(is_a_dangerous_action, actions)
 
 
 def _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
