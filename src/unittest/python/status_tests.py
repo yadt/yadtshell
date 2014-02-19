@@ -144,3 +144,17 @@ some_attribute: some-value
                          }
         components = {}
         host = yadtshell._status.initialize_services(host, components)
+
+    def test_get_service_class_from_loaded_modules(self):
+        result_class = yadtshell._status.get_service_class_from_loaded_modules("StatusTests")
+        self.assertEqual(result_class.__name__, "StatusTests")
+
+    def test_get_service_class_from_fallback_1(self):
+        myhost = yadtshell.components.Host("foo.bar.com")
+        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "yadtshell.components.Service")
+        self.assertEqual(result_class.__name__, "Service")
+
+    def test_get_service_class_from_fallback_2(self):
+        myhost = yadtshell.components.Host("foo.bar.com")
+        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "module_for_class_loading.Example")
+        self.assertEqual(result_class.__name__, "Example")
