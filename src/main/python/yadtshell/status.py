@@ -192,37 +192,25 @@ def get_service_class_from_fallbacks(host, service_class_name):
 
 
 def initialize_artefacts(host, components):
-    # TODO(rwill): needs documentation or simplification
     if isinstance(host, yadtshell.components.UnreachableHost):
         # TODO(rwill): decide if it is better to initialize UnreachableHost with
         # empty artefact-lists. (Null-Object-Pattern)
         return host
 
     for name_version in host.current_artefacts:
-        name, version = name_version.split('/')
-        artefact = yadtshell.components.Artefact(host, name, version, yadtshell.settings.CURRENT)
-        components[artefact.uri] = artefact
-        components[artefact.revision_uri] = artefact
-
-    for name_version in host.next_artefacts:  # diff
-        name, version = name_version.split('/')
-        artefact = yadtshell.components.Artefact(host, name, version)
-        artefact.revision = yadtshell.settings.NEXT  # diff
-        components[artefact.uri] = artefact
+        add_artefact(components, host, name_version, yadtshell.settings.CURRENT)
 
     for name_version in host.next_artefacts:
-        name, version = name_version.split('/')
-        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name, version)
-        artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-        artefact.revision = yadtshell.settings.NEXT    # diff
-        next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                        host.host,
-                                        artefact.name + '/' + yadtshell.settings.NEXT)  # diff
-        components[uri] = artefact
-        components[next_uri] = artefact
-        host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
+        add_artefact(components, host, name_version, yadtshell.settings.NEXT)
 
     return host
+
+
+def add_artefact(components, host, name_version, revision):
+    name, version = name_version.split('/')
+    artefact = yadtshell.components.Artefact(host, name, version, revision)
+    components[artefact.uri] = artefact
+    components[artefact.revision_uri] = artefact
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
