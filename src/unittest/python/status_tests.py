@@ -171,5 +171,4 @@ some_attribute: some-value
                               ['artefact://foo/arte/0', 'artefact://foo/arte/current',
                                'artefact://foo/arte/1', 'artefact://foo/arte/next',
                                'artefact://foo/fact/2', 'artefact://foo/fact/current']
-)
-
+                              )
