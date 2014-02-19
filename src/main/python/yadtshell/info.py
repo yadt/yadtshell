@@ -201,8 +201,10 @@ def calculate_info_view_settings():
     except:
         cols = 80
 
+    logger.debug("expanding hosts")
     he = hostexpand.HostExpander.HostExpander()
     max_row_length = max([len(he.expand(hosts)) for hosts in original_hosts])
+    logger.debug("expanded hosts")
 
     width = '1col'
 
