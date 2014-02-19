@@ -46,11 +46,9 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
         host.is_locked_by_me = True
 
     # create artefact components
-    foo_artefact = yadtshell.components.Artefact(
-        'foobar42', 'foo', '0:0.0.0')
+    foo_artefact = yadtshell.components.Artefact(host, 'foo', '0:0.0.0')
     foo_artefact.state = artefact_state
-    yit_artefact = yadtshell.components.Artefact(
-        'foobar42', 'yit', '0:0.0.1')
+    yit_artefact = yadtshell.components.Artefact(host, 'yit', '0:0.0.1')
     yit_artefact.state = artefact_state
 
     if not next_artefacts_present:
@@ -61,10 +59,10 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     if next_artefacts_present:
         host.next_artefacts = {'foo/0:0.1.0': 'yit/0:0.1.1'}
 
-        foo2_artefact = yadtshell.components.Artefact('foobar42', 'foo', '0:0.1.0')
+        foo2_artefact = yadtshell.components.Artefact(host, 'foo', '0:0.1.0')
         foo2_artefact.state = artefact_state
         foo2_artefact.revision = yadtshell.settings.NEXT
-        yit2_artefact = yadtshell.components.Artefact('foobar42', 'yit', '0:0.1.1')
+        yit2_artefact = yadtshell.components.Artefact(host, 'yit', '0:0.1.1')
         yit2_artefact.state = artefact_state
         yit2_artefact.revision = yadtshell.settings.NEXT
         components['artefact://foobar42/foo/0:0.1.0'] = foo2_artefact
