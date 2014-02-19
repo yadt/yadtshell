@@ -24,7 +24,7 @@ import yadtshell.helper
 logger = logging.getLogger('uri')
 
 
-def create(type=None, host=None, name=None, version=None, **kwargs):
+def create(type, host, name=None, version=None, **kwargs):
     if version is None:
         version = ''
     if name is None:
