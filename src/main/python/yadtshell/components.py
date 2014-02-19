@@ -419,12 +419,15 @@ class UnreachableHost(Component):
 
 
 class Artefact(Component):
-    """TODO(rwill): what's the difference between `.version` and `.revision`?"""
+    """`version` is numeric
+    `revision` is either 'next' or 'current'. (Use constants in yadtshell.settings!)
+    """
 
-    def __init__(self, host, name, version=None, revision=None):
+    def __init__(self, host, name, version, revision=yadtshell.settings.CURRENT):
         Component.__init__(self, yadtshell.settings.ARTEFACT, host, name)
         self.version = version
         self.revision = revision
+        self.state = yadtshell.settings.INSTALLED  # only needed for yadtshell.util.is_up()
         self.uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.name, name, version)
         self.revision_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.name, name, revision)
 
