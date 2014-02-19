@@ -190,6 +190,53 @@ def get_service_class_name_from_fallbacks(host, service_class_name):
     return service_class
 
 
+def initialize_artefacts(host, components):
+    # TODO(rwill): needs documentation or simplification
+    if isinstance(host, yadtshell.components.UnreachableHost):
+        # TODO(rwill): decide if it is better to initialize UnreachableHost with
+        # empty artefact-lists. (Null-Object-Pattern)
+        return host
+
+    for version in host.current_artefacts:
+        artefact = yadtshell.components.Artefact(host, name=version, version=version)
+        artefact.state = yadtshell.settings.INSTALLED
+        # why not set `artefact.revision` here, but set it everywhere else?
+        components[artefact.uri] = artefact
+
+    for version in host.current_artefacts:
+        # create uri without version
+        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+        artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+        artefact.revision = yadtshell.settings.CURRENT
+        # artefact.name below is just `version` because that is how it has been created...
+        # (either with Artefact() or MissingComponent())
+        current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                           host.host,
+                                           artefact.name + '/' + yadtshell.settings.CURRENT)
+        # above we have set `artefact = components[uri]` so the following line is redundant?!?!
+        components[uri] = artefact
+        components[current_uri] = artefact
+
+    for version in host.next_artefacts:  # diff
+        artefact = yadtshell.components.Artefact(host, name=version, version=version)
+        artefact.state = yadtshell.settings.INSTALLED
+        artefact.revision = yadtshell.settings.NEXT  # diff
+        components[artefact.uri] = artefact
+
+    for version in host.next_artefacts:
+        uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
+        artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
+        artefact.revision = yadtshell.settings.NEXT    # diff
+        next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                        host.host,
+                                        artefact.name + '/' + yadtshell.settings.NEXT)  # diff
+        components[uri] = artefact
+        components[next_uri] = artefact
+        host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
+
+    return host
+
+
 def status(hosts=None, include_artefacts=True, **kwargs):
     yadtshell.settings.ybc.connect()
     if type(hosts) is str:
@@ -265,52 +312,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             dl = defer.DeferredList(local_state)
             dl.addCallback(lambda _: host)
             return dl
-        return host
-
-    def initialize_artefacts(host):
-        # TODO(rwill): needs documentation or simplification
-        if isinstance(host, yadtshell.components.UnreachableHost):
-            # TODO(rwill): decide if it is better to initialize UnreachableHost with
-            # empty artefact-lists. (Null-Object-Pattern)
-            return host
-
-        for version in host.current_artefacts:
-            artefact = yadtshell.components.Artefact(host, name=version, version=version)
-            artefact.state = yadtshell.settings.INSTALLED
-            # why not set `artefact.revision` here, but set it everywhere else?
-            components[artefact.uri] = artefact
-
-        for version in host.current_artefacts:
-            # create uri without version
-            uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
-            artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-            artefact.revision = yadtshell.settings.CURRENT
-            # artefact.name below is just `version` because that is how it has been created...
-            # (either with Artefact() or MissingComponent())
-            current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                               host.host,
-                                               artefact.name + '/' + yadtshell.settings.CURRENT)
-            # above we have set `artefact = components[uri]` so the following line is redundant?!?!
-            components[uri] = artefact
-            components[current_uri] = artefact
-
-        for version in host.next_artefacts:  # diff
-            artefact = yadtshell.components.Artefact(host, name=version, version=version)
-            artefact.state = yadtshell.settings.INSTALLED
-            artefact.revision = yadtshell.settings.NEXT  # diff
-            components[artefact.uri] = artefact
-
-        for version in host.next_artefacts:
-            uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, name=version)
-            artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-            artefact.revision = yadtshell.settings.NEXT    # diff
-            next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                            host.host,
-                                            artefact.name + '/' + yadtshell.settings.NEXT)  # diff
-            components[uri] = artefact
-            components[next_uri] = artefact
-            host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
-
         return host
 
     def check_responses(responses):
@@ -442,7 +443,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
-        deferred.addCallback(initialize_artefacts)
+        deferred.addCallback(initialize_artefacts, components)
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
         return deferred
 
