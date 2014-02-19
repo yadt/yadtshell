@@ -80,7 +80,7 @@ class UnreachableHostTests(unittest.TestCase):
 
     def test_should_not_have_updates(self):
         unreachable_host = yadtshell.components.UnreachableHost('foobar42')
-        self.assertEquals(unreachable_host.next_artefacts, {})
+        self.assertEquals(unreachable_host.next_artefacts, [])
 
     def test_should_not_be_locked_by_me(self):
         unreachable_host = yadtshell.components.UnreachableHost('foobar42')

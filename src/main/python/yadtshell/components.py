@@ -37,23 +37,28 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
-    """Note that the .host attribute is always a string. TODO(rwill): rename it to .hostname.
+    """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
+
+    Note that the `.host` attribute is always a string, not a Host instance.
+    TODO(rwill): rename it to `.hostname` or change it to a Host instance (as passed into constructor anyway).
     """
 
     def __init__(self, t, host, name):
-        """`t` is one of the component types in yadtshell.settings
-        `host` must be a true Host instance so we can set `fqdn` properly.
-        `name` is a plain string and doesn't contain a version.
+        """Makes a component.
+
+        - `t` is one of the component types in yadtshell.settings
+        - `host` must be a true Host instance so we can set `fqdn` properly.
+        - `name` is a plain string and doesn't contain a version.
+
+        Note the constructor is written such that subclasses can call it first
+        and then overwrite any values if so desired. The pattern here is "initialize
+        with a default value and overwrite if needed".
         """
         self.type = t
         self.name = name
-        if t == yadtshell.settings.HOST:
-            self.host = name
-            self.uri = yadtshell.uri.create(yadtshell.settings.HOST, self.name)
-        else:
-            self.host = host.name
-            self.fqdn = host.fqdn
-            self.uri = yadtshell.uri.create(self.type, self.host, self.name)
+        self.host = host.name
+        self.fqdn = host.fqdn
+        self.uri = yadtshell.uri.create(self.type, self.host, self.name)
 
         self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)  # TODO(rwill): seems like dead code
 
@@ -152,8 +157,7 @@ class Component(object):
 
 
 class MissingComponent(Component):
-    """This seems to be only used for missing artefacts.
-    TODO(rwill): check if it is obsolete.
+    """TODO(rwill): What is the usecase for this? Add tests or remove it.
     """
 
     def __init__(self, s):
@@ -230,21 +234,29 @@ class ComponentSet(set):
         return self._key_(item) in self._set
 
 
-class Host(Component):
-    """Note: Host.name, Host.host and Host.hostname are probably all the same value.
-    (All seem to be immutable after creation).
-    TODO(rwill): remove all but Host.name.
-    """
-
+class AbstractHost(Component):
     def __init__(self, fqdn):
-        hostname = fqdn.split('.')[0]
-        Component.__init__(self, yadtshell.settings.HOST, self, hostname)
-        self.hostname = hostname
+        # we need to set those values first, because Component.__init__ requires them on its `host` argument ;)
         self.fqdn = fqdn
+        self.hostname = fqdn.split('.')[0]
+        Component.__init__(self, yadtshell.settings.HOST, self, self.hostname)
+        self.uri = yadtshell.uri.create(yadtshell.settings.HOST, self.name)
 
         self.current_artefacts = []
         self.next_artefacts = []
         self.services = {}
+
+
+class Host(AbstractHost):
+    """Note: `Host.name`, `Host.host` and `Host.hostname` are all the same value.
+    We need `.host` and `.name` because they are part of Component, but when
+    `Component.host` is renamed to Component.hostname, we will at least have
+    one less redundant variable.
+    """
+
+    def __init__(self, fqdn):
+        AbstractHost.__init__(self, fqdn)
+
         self.lockstate = None
         self.is_locked = None
         self.is_locked_by_other = None
@@ -391,23 +403,16 @@ class Host(Component):
             self.is_locked_by_me) + ", is_locked_by_other=" + repr(self.is_locked_by_other))
 
 
-class UnreachableHost(Component):
+class UnreachableHost(AbstractHost):
 
     def __init__(self, fqdn):
-        hostname = fqdn.split('.')[0]
-        Component.__init__(self, yadtshell.settings.HOST, self, hostname)
-        self.hostname = hostname
-        self.fqdn = fqdn
+        AbstractHost.__init__(self, fqdn)
 
     def is_reachable(self):
         return False
 
     def is_unknown(self):
         return True
-
-    @property
-    def next_artefacts(self):
-        return {}
 
     @property
     def is_locked_by_other(self):
