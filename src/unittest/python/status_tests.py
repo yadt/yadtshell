@@ -158,3 +158,10 @@ some_attribute: some-value
         myhost = yadtshell.components.Host("foo.bar.com")
         result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "module_for_class_loading.Example")
         self.assertEqual(result_class.__name__, "Example")
+
+    def test_syntax_initialize_artefacts(self):
+        host = yadtshell.components.Host("foo.bar.com")
+        host.current_artefacts = ["arte/0", "fact/2"]
+        host.next_artefacts = ["arte/1"]
+        components = {}
+        yadtshell._status.initialize_artefacts(host, components)
