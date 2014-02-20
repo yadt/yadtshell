@@ -5,8 +5,11 @@ from mock import Mock, patch, call
 
 
 class StatusTests(unittest.TestCase):
+    # TODO(rwill): make sure no actual files are read or written. (Always mock `os` module...??)
 
     def setUp(self):
+        # Apparently we don't need to mock or patch reactor.spawnProcess
+        # because it doesn't do anything as long as no actual reactor is running!
         yadtshell.settings.ybc = Mock()
         yadtshell.settings.SSH = 'ssh'
         yadtshell.settings.TARGET_SETTINGS = {
@@ -64,7 +67,8 @@ class StatusTests(unittest.TestCase):
         result = yadtshell._status.handle_unreachable_host(failure, components)
         self.assertTrue(isinstance(result, yadtshell.components.UnreachableHost))
         self.assertEqual(result.fqdn, 'foobar42.domain.tld')
-        self.assertIn('host://foobar42', components)
+        # self.assertIn('host://foobar42', components)  # use this when we have Python >= 2.7
+        self.assertTrue('host://foobar42' in components)
         self.assertEqual(components['host://foobar42'], result, "components.keys() = %s" % components.keys())
 
     def test_should_create_host_from_json(self):
@@ -167,8 +171,12 @@ some_attribute: some-value
         components = {}
         yadtshell._status.initialize_artefacts(host, components)
         print components.keys()
-        self.assertItemsEqual(components.keys(),
-                              ['artefact://foo/arte/0', 'artefact://foo/arte/current',
-                               'artefact://foo/arte/1', 'artefact://foo/arte/next',
-                               'artefact://foo/fact/2', 'artefact://foo/fact/current']
-                              )
+        expected_uris = ['artefact://foo/arte/0', 'artefact://foo/arte/current',
+                         'artefact://foo/arte/1', 'artefact://foo/arte/next',
+                         'artefact://foo/fact/2', 'artefact://foo/fact/current']
+        # self.assertItemsEqual(components.keys(), expected_uris)  # use this in Python >= 2.7
+        self.assertEqual(set(components.keys()), set(expected_uris))
+
+    @patch('yadtshell._status.query_status')
+    def test_syntax_status(self, query_status):
+        pass
