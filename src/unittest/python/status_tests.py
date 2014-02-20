@@ -186,9 +186,11 @@ some_attribute: some-value
 
     @patch('yadtshell._status.query_status')
     def test_syntax_status(self, query_status):
-        # TODO(rwill): the more data we put here, the more code will be exercised.
+        # TODO(rwill): this currently crashes because of build_*_dependency_tree.component_files
+        # mock or refactor
         protocol = Mock()
         protocol.component = "host://myhost"
+        # TODO(rwill): the more data we put here, the more code will be exercised.
         protocol.data = '''
 fqdn: foobar42.acme.com
 current_artefacts:
@@ -197,7 +199,11 @@ current_artefacts:
 next_artefacts:
 - foo/1.1
 services:
-- my_service
+  tomcat:
+    needs_services: [database]
+    state: down
+  database:
+    state: up
 ''' 
-        query_status.return_value = defer.succeed(host_yaml)
+        query_status.return_value = defer.succeed(protocol)
         yadtshell.status("myhost")
