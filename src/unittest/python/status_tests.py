@@ -164,19 +164,6 @@ some_attribute: some-value
         result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "module_for_class_loading.Example")
         self.assertEqual(result_class.__name__, "Example")
 
-    def test_initialize_artefacts(self):
-        host = yadtshell.components.Host("foo.bar.com")
-        host.current_artefacts = ["arte/0", "fact/2"]
-        host.next_artefacts = ["arte/1"]
-        components = {}
-        yadtshell._status.initialize_artefacts(host, components)
-        print components.keys()
-        expected_uris = ['artefact://foo/arte/0', 'artefact://foo/arte/current',
-                         'artefact://foo/arte/1', 'artefact://foo/arte/next',
-                         'artefact://foo/fact/2', 'artefact://foo/fact/current']
-        # self.assertItemsEqual(components.keys(), expected_uris)  # use this in Python >= 2.7
-        self.assertEqual(set(components.keys()), set(expected_uris))
-
     @patch('yadtshell._status.query_status')
     def test_syntax_status(self, query_status):
         pass
