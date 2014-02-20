@@ -93,10 +93,12 @@ class UnreachableHostTests(unittest.TestCase):
 
 class HostTests(unittest.TestCase):
 
-    def test_should_be_reachable(self):
+    def setUp(self):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'foo'
         }
+
+    def test_should_be_reachable(self):
         reachable_host = yadtshell.components.Host('foobar42')
         self.assertTrue(reachable_host.is_reachable())
 
