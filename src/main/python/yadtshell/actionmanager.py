@@ -396,10 +396,8 @@ class ActionManager(object):
         for service in [s for s in self.components.values() if s.type == yadtshell.settings.SERVICE]:
             service.state = yadtshell.settings.UNKNOWN
         for host in [h for h in self.components.values() if isinstance(h, yadtshell.components.Host)]:
-            setattr(
-                host, 'state', yadtshell.settings.UNKNOWN)
-            setattr(
-                host, yadtshell.constants.PROBED, yadtshell.settings.UNKNOWN)
+            host.state = yadtshell.settings.UNKNOWN
+            host.probed = yadtshell.settings.UNKNOWN
 
         if dryrun:
             log_plan_fun = self.logger.info
