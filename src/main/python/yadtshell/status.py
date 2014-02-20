@@ -192,11 +192,6 @@ def get_service_class_from_fallbacks(host, service_class_name):
 
 
 def initialize_artefacts(host, components):
-    if isinstance(host, yadtshell.components.UnreachableHost):
-        # TODO(rwill): decide if it is better to initialize UnreachableHost with
-        # empty artefact-lists. (Null-Object-Pattern)
-        return host
-
     for name_version in host.current_artefacts:
         add_artefact(components, host, name_version, yadtshell.settings.CURRENT)
 
