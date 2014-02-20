@@ -2,8 +2,14 @@ import yadtshell
 # from twisted.trial
 import unittest
 from mock import Mock, patch, call
+from twisted.internet import defer
 
 
+class MyCustomService(yadtshell.components.Service):
+    pass
+
+
+# TODO(rwill): break up tests into different classes so we can have different setUp() for each group.
 class StatusTests(unittest.TestCase):
     # TODO(rwill): make sure no actual files are read or written. (Always mock `os` module...??)
 
@@ -139,25 +145,27 @@ some_attribute: some-value
         self.assertEqual(len(components), 2)
 
     @patch('yadtshell._status.logger')
-    def todo_test_loading_service_class(self, _):
+    def test_initialize_service_with_custom_service_class(self, _):
         host = yadtshell.components.Host("foo.acme.com")
         host.state = "uptodate"
         self.assertTrue(yadtshell.util.is_up(host.state), host.state)
 
-        host.services = {"fooService": {"service": "MyService"},
+        host.services = {"fooService": {"service": "MyCustomService"},
                          "barService": {}
                          }
         components = {}
         host = yadtshell._status.initialize_services(host, components)
+        service_class = components["service://foo/fooService"].__class__
+        self.assertEqual(service_class.__name__, "MyCustomService")
 
     def test_get_service_class_from_loaded_modules(self):
-        result_class = yadtshell._status.get_service_class_from_loaded_modules("StatusTests")
-        self.assertEqual(result_class.__name__, "StatusTests")
+        result_class = yadtshell._status.get_service_class_from_loaded_modules("MyCustomService")
+        self.assertEqual(result_class.__name__, "MyCustomService")
 
     def test_get_service_class_from_fallback_1(self):
         myhost = yadtshell.components.Host("foo.bar.com")
-        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "yadtshell.components.Service")
-        self.assertEqual(result_class.__name__, "Service")
+        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "yadtshell.components.Component")
+        self.assertEqual(result_class.__name__, "Component")
 
     def test_get_service_class_from_fallback_2(self):
         myhost = yadtshell.components.Host("foo.bar.com")
@@ -179,4 +187,18 @@ some_attribute: some-value
 
     @patch('yadtshell._status.query_status')
     def test_syntax_status(self, query_status):
-        pass
+        # TODO(rwill): the more data we put here, the more code will be exercised.
+        protocol = Mock()
+        protocol.component = "host://myhost"
+        protocol.data = '''
+fqdn: foobar42.acme.com
+current_artefacts:
+- foo/1.0
+- bar/2.3
+next_artefacts:
+- foo/1.1
+services:
+- my_service
+''' 
+        query_status.return_value = defer.succeed(host_yaml)
+        yadtshell.status("myhost")
