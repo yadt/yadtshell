@@ -39,10 +39,10 @@ from yadtshell.util import compute_dependency_scores
 logger = logging.getLogger('status')
 
 try:
-    from yaml import CLoader as Loader
+    from yaml import CLoader as yaml_loader
     logger.debug("using C implementation of yaml")
 except ImportError:
-    from yaml import Loader
+    from yaml import Loader as yaml_loader
     logger.debug("using default yaml")
 try:
     import cPickle as pickle
@@ -59,8 +59,8 @@ def status_cb(protocol=None):
 
 
 def query_status(component_name, pi=None):
-    p = yadtshell.twisted.YadtProcessProtocol(
-        component_name, '/usr/bin/yadt-status', pi)
+    p = yadtshell.twisted.YadtProcessProtocol(component_name, '/usr/bin/yadt-status', pi)
+    p.deferred.name = component_name
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
     return p.deferred
@@ -72,14 +72,12 @@ def handle_unreachable_host(failure, components):
             'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
             failure.value.component)
         unreachable_host = yadtshell.components.UnreachableHost(failure.value.component)
-        unreachable_host_uri = yadtshell.uri.create(type=yadtshell.settings.HOST,
-                                                    host=unreachable_host.hostname)
-        components[unreachable_host_uri] = unreachable_host
+        components[unreachable_host.uri] = unreachable_host
         return unreachable_host
     return failure
 
 
-def create_host(protocol, components, yaml_loader):
+def create_host(protocol, components):
     try:
         data = json.loads(protocol.data)
     except Exception, e:
@@ -90,32 +88,110 @@ def create_host(protocol, components, yaml_loader):
     host = None
     # simple data (just status) for backwards compat. with old yadtclient
     if data == yadtshell.settings.DOWN:
+        # TODO(rwill): This is probably dead code since it does not set fqdn
+        # and therefore creates invalid Host instance.
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.DOWN
     elif data == yadtshell.settings.UNKNOWN:
         host = yadtshell.components.Host(protocol.component)
         host.state = yadtshell.settings.UNKNOWN
     elif data is None:
-        logging.getLogger(protocol.component).warning(
-            'no data? strange...')
-    elif "hostname" not in protocol.data:
-        logging.getLogger(protocol.component).warning(
-            'no hostname? strange...')
+        logging.getLogger(protocol.component).warning('no data? strange...')
+    elif "fqdn" not in protocol.data:
+        logging.getLogger(protocol.component).warning('no hostname? strange...')
     else:
         # note: this is actually the normal case
-        host = yadtshell.components.Host(data['hostname'])
-        for key, value in data.iteritems():
-            setattr(host, key, value)
-        host.state = ['update_needed', 'uptodate'][not host.next_artefacts]
-    loc_type = yadtshell.util.determine_loc_type(host.hostname)
-    host.loc_type = loc_type
-    host.update_attributes_after_status()
-    host.next_artefacts = getattr(host, 'next_artefacts', [])
-    if host.next_artefacts is None:
-        host.next_artefacts = []
-    host.logger = logging.getLogger(host.uri)
+        host = yadtshell.components.Host(data['fqdn'])
+        host.set_attrs_from_data(data)
     components[host.uri] = host
     return host
+
+
+def initialize_services(host, components):
+    """Find the service class for each of `host`s services and instantiate it.
+    Return `host` to facilitate chaining.
+    """
+    if yadtshell.util.not_up(host.state):
+        return host
+
+    host.defined_services = []
+    for name, settings in host.services.items():
+        if settings is not None and "service" in settings:
+            service_class_name = settings["service"]
+        else:
+            logger.info("No service name found, using default: 'Service'")
+            service_class_name = "Service"
+
+        service_class = get_service_class_from_loaded_modules(service_class_name)
+        if not service_class_name:
+            service_class = get_service_class_from_fallbacks(host, service_class_name)
+
+        service = None
+        try:
+            service = service_class(host, name, settings)
+        except Exception, e:
+            host.logger.exception(e)
+
+        if not service:
+            raise Exception('cannot instantiate class %(service_class)s' % locals())
+
+        components[service.uri] = service
+        host.defined_services.append(service)
+    return host
+
+
+def get_service_class_from_loaded_modules(service_class_name):
+    for module_name in sys.modules.keys()[:]:
+        for classname, service_class in inspect.getmembers(sys.modules[module_name], inspect.isclass):
+            if classname == service_class_name:
+                return service_class
+    return None
+
+
+def get_service_class_from_fallbacks(host, service_class_name):
+    host.logger.debug(
+        '%s not a standard service, searching class' % service_class_name)
+    service_class = None
+    try:
+        host.logger.debug('fallback 1: checking loaded modules')
+        service_class = eval(service_class_name)
+    except:
+        pass
+
+    def get_class(service_class):
+        module_name, class_name = service_class.rsplit('.', 1)
+        host.logger.debug('trying to load module %s' % module_name)
+        __import__(module_name)
+        m = sys.modules[module_name]
+        return getattr(m, class_name)
+
+    if not service_class:
+        try:
+            host.logger.debug(
+                'fallback 2: trying to load module myself')
+            service_class = get_class(service_class_name)
+        except Exception, e:
+            host.logger.debug(e)
+    if not service_class:
+        try:
+            # TODO(rwill): this might be dead code that can be removed
+            host.logger.debug(
+                'fallback 3: trying to lookup %s in legacies' % service_class_name)
+            import legacies  # this module is a config file living in /etc/yadtshell
+            mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
+                service_class_name, service_class_name)
+            service_class = get_class(mapped_service_class)
+            host.logger.info(
+                'deprecation info: class %s was mapped to %s' %
+                (service_class_name, mapped_service_class))
+        except Exception, e:
+            host.logger.debug(e)
+
+    if not service_class:
+        raise Exception(
+            'cannot find class %(service_class)s' % locals())
+
+    return service_class
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
@@ -132,8 +208,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         state_files = [os.path.join(yadtshell.settings.OUT_DIR, 'current_state_%s.yaml' % h)
                        for h in hosts]
     else:
-        state_files = glob.glob(
-            os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
+        state_files = glob.glob(os.path.join(yadtshell.settings.OUT_DIR, 'current_state*'))
     for state_file in state_files:
         logger.debug('removing old state %(state_file)s' % locals())
         try:
@@ -161,9 +236,11 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         cmd = service.status()
         if isinstance(cmd, defer.Deferred):
             # TODO refactor: integrate all store_service_* cbs
+            # TODO(rwill): possibly make those methods of Service, to simplify
+            # to one line: cmd.addCallbacks(service.store_state, service.handle_state_failure)
             def store_service_state(state, service):
-                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
-                    state, yadtshell.settings.UNKNOWN)
+                service.state = yadtshell.settings.STATE_DESCRIPTIONS.get(state,
+                                                                          yadtshell.settings.UNKNOWN)
             cmd.addCallback(store_service_state, service)
 
             def handle_service_state_failure(failure, service):
@@ -176,89 +253,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         query_protocol.component = service
         query_protocol.deferred.addCallbacks(store_service_up, store_service_not_up)
         return query_protocol.deferred
-
-    def initialize_services(host):
-        services = getattr(host, 'services', set())
-
-        if yadtshell.util.not_up(host.state):
-            return host
-        host.defined_services = []
-        for settings in services:
-            if type(settings) is str or not settings:
-                name = settings
-                settings = services.get(settings, None)
-                if settings:
-                    service_class = settings.get('class', 'Service')
-                else:
-                    service_class = 'Service'
-            else:
-                name = settings.keys()[0]
-                settings = settings[name]
-                service_class = settings.get('class', 'Service')
-
-            service = None
-            for module_name in sys.modules.keys()[:]:
-                if service:
-                    break
-                for classname, clazz in inspect.getmembers(sys.modules[module_name], inspect.isclass):
-                    if classname == service_class:
-                        service = clazz(host, name, settings)
-                        break
-            if not service:
-                host.logger.debug(
-                    '%s not a standard service, searching class' % service_class)
-                clazz = None
-                try:
-                    host.logger.debug('fallback 1: checking loaded modules')
-                    clazz = eval(service_class)
-                except:
-                    pass
-
-                def get_class(service_class):
-                    module_name, class_name = service_class.rsplit('.', 1)
-                    host.logger.debug('trying to load module %s' % module_name)
-                    __import__(module_name)
-                    m = sys.modules[module_name]
-                    return getattr(m, class_name)
-
-                if not clazz:
-                    try:
-                        host.logger.debug(
-                            'fallback 2: trying to load module myself')
-                        clazz = get_class(service_class)
-                    except Exception, e:
-                        host.logger.debug(e)
-                if not clazz:
-                    try:
-                        host.logger.debug(
-                            'fallback 3: trying to lookup %s in legacies' % service_class)
-                        import legacies
-                        mapped_service_class = legacies.MAPPING_OLD_NEW_SERVICECLASSES.get(
-                            service_class, service_class)
-                        clazz = get_class(mapped_service_class)
-                        host.logger.info(
-                            'deprecation info: class %s was mapped to %s' %
-                            (service_class, mapped_service_class))
-                    except Exception, e:
-                        host.logger.debug(e)
-
-                if not clazz:
-                    raise Exception(
-                        'cannot find class %(service_class)s' % locals())
-
-                try:
-                    service = clazz(host, name, settings)
-                except Exception, e:
-                    host.logger.exception(e)
-            if not service:
-                raise Exception(
-                    'cannot instantiate class %(service_class)s' % locals())
-            components[service.uri] = service
-            service.fqdn = host.fqdn
-            service.needs = getattr(service, 'needs', set())
-            service.needs.add(host.uri)
-            host.defined_services.append(service)
-        return host
 
     def add_local_state(host):
         local_state = []
@@ -278,10 +272,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         return host
 
     def initialize_artefacts(host):
+        # TODO(rwill): needs documentation or simplification
         try:
             for version in getattr(host, 'current_artefacts', []):
-                artefact = yadtshell.components.Artefact(
-                    host, version, version)
+                artefact = yadtshell.components.Artefact(host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 components[artefact.uri] = artefact
         except TypeError:
@@ -290,13 +284,12 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'current_artefacts', []):
-                uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(
-                    uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.CURRENT
-                current_uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.CURRENT)
+                current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                                   host.host,
+                                                   artefact.name + '/' + yadtshell.settings.CURRENT)
                 components[uri] = artefact
                 components[current_uri] = artefact
         except TypeError:
@@ -304,27 +297,27 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         try:
             for version in getattr(host, 'next_artefacts', set()):
-                artefact = yadtshell.components.Artefact(
-                    host, version, version)
+                artefact = yadtshell.components.Artefact(host, version, version)
                 artefact.state = yadtshell.settings.INSTALLED
                 artefact.revision = yadtshell.settings.NEXT
                 components[artefact.uri] = artefact
         except TypeError:
             pass
+
         try:
             for version in getattr(host, 'next_artefacts', []):
-                uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(
-                    uri, yadtshell.components.MissingComponent(uri))
+                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
+                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
                 artefact.revision = yadtshell.settings.NEXT
-                next_uri = yadtshell.uri.create(
-                    yadtshell.settings.ARTEFACT, host.host, artefact.name + '/' + yadtshell.settings.NEXT)
+                next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                                host.host,
+                                                artefact.name + '/' + yadtshell.settings.NEXT)
                 components[uri] = artefact
                 components[next_uri] = artefact
                 host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
         except TypeError:
             pass
+
         return host
 
     def check_responses(responses):
@@ -449,18 +442,18 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     pi = yadtshell.twisted.ProgressIndicator()
 
-    deferreds = []
-    for host in hosts:
+    def query_and_initialize_host(host):
         deferred = query_status(host, pi)
-        deferred.addCallbacks(callback=create_host, callbackArgs=[components, Loader],
+        deferred.addCallbacks(callback=create_host, callbackArgs=[components],
                               errback=handle_unreachable_host, errbackArgs=[components])
 
-        deferred.addCallback(initialize_services)
+        deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
         deferred.addCallback(initialize_artefacts)
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
-        deferreds.append(deferred)
+        return deferred
 
+    deferreds = [query_and_initialize_host(host) for host in hosts]
     reactor.callLater(10, show_still_pending, deferreds)
 
     dl = defer.DeferredList(deferreds)
@@ -468,7 +461,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
     dl.addCallback(yadtshell.info, components=components)
-    dl.addErrback(yadtshell.twisted.report_error,
-                  logger.error, include_stacktrace=False)
+    dl.addErrback(yadtshell.twisted.report_error, logger.error, include_stacktrace=False)
 
     return dl

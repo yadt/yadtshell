@@ -1,6 +1,7 @@
 import unittest
 from mock import Mock, patch
 import yadtshell
+import yaml
 
 
 class ServiceTests(unittest.TestCase):
@@ -92,10 +93,12 @@ class UnreachableHostTests(unittest.TestCase):
 
 class HostTests(unittest.TestCase):
 
-    def test_should_be_reachable(self):
+    def setUp(self):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'foo'
         }
+
+    def test_should_be_reachable(self):
         reachable_host = yadtshell.components.Host('foobar42')
         self.assertTrue(reachable_host.is_reachable())
 
@@ -172,3 +175,30 @@ class HostTests(unittest.TestCase):
 
         self.assertEqual(
             command, 'super-ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+
+    def test_set_attrs_with_obsolete_services_format(self):
+        data = {"fqdn": "foo-boing",
+                "services": [
+                    {"service_foo": Mock()},
+                    {"service_bar": Mock()}
+                ]}
+        host = yadtshell.components.Host("myhost")
+        host.set_attrs_from_data(data)
+        self.assertEqual(len(host.services), 2)
+        self.assertTrue("service_foo" in host.services)
+        self.assertTrue("service_bar" in host.services)
+
+    def test_set_attrs_with_obsolete_yaml_services_format(self):
+        data_text = """fqdn: foo.baz
+services:
+- backend-service:
+    state: $backend_service_state
+    service_artefact: yit-backend-service
+    needs_services: ['service://foo/bar']
+"""
+        data = yaml.load(data_text, Loader=yaml.Loader)
+        host = yadtshell.components.Host("myhost")
+        host.set_attrs_from_data(data)
+        self.assertEqual(len(host.services), 1)
+        self.assertTrue("backend-service" in host.services)
+        self.assertTrue(host.services["backend-service"]["service_artefact"], "yit-backend-service")

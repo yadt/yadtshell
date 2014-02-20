@@ -78,7 +78,8 @@ class ProgressIndicator(object):
         finished = [r for r in rendered if r not in self.rendered]
         unfinished = [r for r in rendered if r in self.rendered]
         finished_histo = dict((i, finished.count(i)) for i in set(finished))
-        return ''.join(['%(count)i*%(key)s ' % locals() for key, count in finished_histo.iteritems()]) + ''.join([str(o) for o in unfinished])
+        return (''.join(['%(count)i*%(key)s ' % locals() for key, count in finished_histo.items()]) +
+                ''.join([str(o) for o in unfinished]))
 
     def _update(self):
         if sys.stderr.isatty():
@@ -93,7 +94,6 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, component, cmd, pi=None, out_log_level=logging.DEBUG,
                  err_log_level=logging.WARN, log_prefix='', wait_for_io=True):
         self.deferred = defer.Deferred()
-        # self.deferred.name = component  # TODO(rwill): what's this needed for?
         try:
             self.component = component.encode('ascii')
         except AttributeError:

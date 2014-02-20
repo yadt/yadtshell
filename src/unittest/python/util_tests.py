@@ -11,6 +11,7 @@ from yadtshell.util import (inbound_deps_on_same_host,
                             restore_current_state,
                             get_mtime_of_current_state)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
+from yadtshell.components import (Host, Service)
 
 
 class ServiceOrderingTests(unittest.TestCase):
@@ -19,12 +20,11 @@ class ServiceOrderingTests(unittest.TestCase):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'hosts': ['foobar42']}
         self.components = yadtshell.components.ComponentDict()
-        self.bar_service = yadtshell.components.Service(
-            'foobar42', 'barservice', {})
-        self.baz_service = yadtshell.components.Service(
-            'foobar42', 'bazservice', {})
-        self.ack_service = yadtshell.components.Service(
-            'foobar42', 'ackservice', {})
+        myhost = Host('foo.bar.com')
+        self.otherhost = Host('foo.boing')
+        self.bar_service = Service(myhost, 'barservice', {})
+        self.baz_service = Service(myhost, 'bazservice', {})
+        self.ack_service = Service(myhost, 'ackservice', {})
 
         self.components['service://foobar42/barservice'] = self.bar_service
         self.components['service://foobar42/bazservice'] = self.baz_service
@@ -91,14 +91,12 @@ class ServiceOrderingTests(unittest.TestCase):
         self.assertEqual(self.bar_service.dependency_score, -1)
 
     def test_should_ignore_cross_host_inward_dependencies(self):
-        self.components['service://otherhost/foo'] = yadtshell.components.Service(
-            'otherhost', 'foo', {})
+        self.components['service://otherhost/foo'] = Service(self.otherhost, 'foo', {})
         self.bar_service.needed_by = ['service://otherhost/foo']
         compute_dependency_scores(self.components)
 
     def test_should_ignore_cross_host_outward_dependencies(self):
-        self.components['service://otherhost/foo'] = yadtshell.components.Service(
-            'otherhost', 'foo', {})
+        self.components['service://otherhost/foo'] = Service(self.otherhost, 'foo', {})
         self.bar_service.needs = ['service://otherhost/foo']
         compute_dependency_scores(self.components)
         self.assertEqual(

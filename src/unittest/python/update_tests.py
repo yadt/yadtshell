@@ -14,11 +14,12 @@ class AdjacentNeededHostsTests(unittest.TestCase):
 
         self.components = yadtshell.components.ComponentDict()
         self.host = yadtshell.components.Host('thehost')
-        self.service = yadtshell.components.Service('thehost', 'theservice', {})
+        self.service = yadtshell.components.Service(self.host, 'theservice', {})
         self.components['host://thehost'] = self.host
         self.components['service://thehost/theservice'] = self.service
-        self.components['host://otherhost'] = yadtshell.components.Host('otherhost')
-        self.components['service://otherhost/otherservice'] = yadtshell.components.Service('otherhost', 'otherservice', {})
+        other_host = yadtshell.components.Host('otherhost')
+        self.components['host://otherhost'] = other_host
+        self.components['service://otherhost/otherservice'] = yadtshell.components.Service(other_host, 'otherservice', {})
 
     def test_should_include_immediate_host_from_service(self):
         self.service.needs = ['host://thehost']

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import yadtshell
 from yadtshell.validation import tarjan_scc, ServiceDefinitionValidator
-from yadtshell.components import Service
+from yadtshell.components import (Host, Service)
 
 
 class ServiceValidationTests(TestCase):
@@ -11,8 +11,8 @@ class ServiceValidationTests(TestCase):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'hosts': ['foo', 'bar']}
         self.servicedefs = {
-            'service://foo_host/foo': Service('foo_host', 'foo', {}),
-            'service://bar_host/bar': Service('bar_host', 'bar', {}),
+            'service://foo_host/foo': Service(Host('foo_host'), 'foo', {}),
+            'service://bar_host/bar': Service(Host('bar_host'), 'bar', {}),
         }
 
     def test_should_not_do_anything_when_there_are_no_service_cycles(self):
@@ -25,8 +25,7 @@ class ServiceValidationTests(TestCase):
             'service://foo_host/foo']
 
         self.assertRaises(EnvironmentError,
-                          ServiceDefinitionValidator(
-                              self.servicedefs).assert_no_cycles_present
+                          ServiceDefinitionValidator(self.servicedefs).assert_no_cycles_present
                           )
 
 

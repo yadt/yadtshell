@@ -29,6 +29,7 @@ from twisted.internet import reactor, task
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
+from yadtshell.twisted import YadtProcessProtocol
 import yadtshell
 
 
@@ -38,22 +39,23 @@ logger = logging.getLogger('components')
 class Component(object):
 
     def __init__(self, t, host, name=None, version=None):
+        """`host` can be a string/unicode or a Host instance.
+        But note that some subclasses require a Host instance in their constructors.
+        """
         self.type = t
         if type(host) in [str, unicode]:
             self.host = host
         else:
             self.host = host.host
             self.fqdn = host.fqdn
-        self.host_uri = yadtshell.uri.create(
-            yadtshell.settings.HOST, self.host)
+        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
         self.name = getattr(self, 'name', name)
         if self.name is not None:
             self.name = self.name.rstrip('/').split('/', 1)[0]
         self.version = version
         if self.version is not None:
             self.version = str(self.version)
-        self.uri = yadtshell.uri.create(
-            self.type, self.host, self.name, self.version)
+        self.uri = yadtshell.uri.create(self.type, self.host, self.name, self.version)
         self.version = yadtshell.uri.parse(self.uri)['version']
         self.name_and_version = yadtshell.uri.as_source_file(self.uri)
         self.state = yadtshell.settings.UNKNOWN
@@ -106,8 +108,8 @@ class Component(object):
         remotecall_script = '/usr/bin/yadt-remotecall'
         log_file = self.create_remote_log_filename(tag=tag)
         owner = get_user_info()['owner']
-        is_force = {False: '', True: ' --force'}[force]
-        complete_cmd = '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(is_force)s" ' % locals()
+        force_flag = {False: '', True: ' --force'}[force]
+        complete_cmd = '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s" "yadt-command %(cmd)s%(force_flag)s" ' % locals()
         return complete_cmd
 
     def local_call(self, cmd, tag=None, guard=True, force=False, no_subprocess=True):
@@ -121,9 +123,9 @@ class Component(object):
         if no_subprocess:
             return cmds
         if guard:
-            sp = self.remote_call(
-                ": #check service callable", tag='check_service_callable',
-                force=force)
+            sp = self.remote_call(": #check service callable",
+                                  tag='check_service_callable',
+                                  force=force)
             returncode = yadtshell.util.log_subprocess(sp)
             if returncode != 0:
                 return returncode
@@ -155,8 +157,7 @@ class MissingComponent(Component):
 
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
-        Component.__init__(self, parts['type'], parts[
-                           'host'], parts['name'], parts['version'])
+        Component.__init__(self, parts['type'], parts['host'], parts['name'], parts['version'])
         self.state = yadtshell.settings.MISSING
 
 
@@ -231,7 +232,11 @@ class ComponentSet(set):
 
 class Host(Component):
 
-    def __init__(self, name):
+    def __init__(self, fqdn):
+        self.fqdn = fqdn
+        self.hostname = fqdn.split('.')[0]
+        self.next_artefacts = []
+        self.services = {}
         self.lockstate = None
         self.is_locked = None
         self.is_locked_by_other = None
@@ -239,7 +244,25 @@ class Host(Component):
         self.ssh_poll_max_seconds = yadtshell.constants.SSH_POLL_MAX_SECONDS_DEFAULT
         self.reboot_required_to_activate_latest_kernel = False
         self.reboot_required_after_next_update = False
-        Component.__init__(self, yadtshell.settings.HOST, name)
+
+        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
+        self.logger = logging.getLogger(self.uri)
+
+    def set_attrs_from_data(self, data):
+        for key, value in data.iteritems():
+            if key == "hostname" and value != self.hostname:
+                self.logger.warning("Hostname %(hostname)s doesn't match FQDN %(fqdn)." % data)
+            setattr(self, key, value)
+        self.convert_obsolete_services(self.services)
+        self.state = ['update_needed', 'uptodate'][not self.next_artefacts]
+        self.loc_type = yadtshell.util.determine_loc_type(self.hostname)
+        self.update_attributes_after_status()
+
+    def convert_obsolete_services(self, old_services):
+        if len(old_services) > 0 and type(old_services) is list:
+            self.services = dict()
+            for entry in old_services:
+                self.services.update(entry)
 
     @property
     def reboot_required(self):
@@ -252,16 +275,13 @@ class Host(Component):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
         if not reboot_required:
-            return self.remote_call(
-                'yadt-host-update %s' % ' '.join(next_artefacts), '%s_%s' %
-                (self.hostname, yadtshell.settings.UPDATE))
+            return self.remote_call('yadt-host-update %s' % ' '.join(next_artefacts),
+                                    '%s_%s' % (self.hostname, yadtshell.settings.UPDATE))
 
         update_and_reboot_command = self.remote_call(
-            'yadt-host-update -r %s' % ' '.join(next_artefacts), '%s_%s' %
-            (self.hostname, yadtshell.settings.UPDATE))
-        p = yadtshell.twisted.YadtProcessProtocol(self,
-                                                  update_and_reboot_command,
-                                                  out_log_level=logging.INFO)
+            'yadt-host-update -r %s' % ' '.join(next_artefacts),
+            '%s_%s' % (self.hostname, yadtshell.settings.UPDATE))
+        p = YadtProcessProtocol(self, update_and_reboot_command, out_log_level=logging.INFO)
         p.target_state = yadtshell.settings.UPTODATE
         p.state = yadtshell.settings.UNKNOWN
 
@@ -271,33 +291,30 @@ class Host(Component):
                     'Timed out while waiting for %s to reboot' % self.uri)
             elif failure.value.exitCode == 255:
                 logger.info("%s: rebooting now" % self.uri)
-                return poll_rebooting_machine(ssh_poll_max_seconds=ssh_poll_max_seconds)
+                return poll_rebooting_machine()
             return failure
 
-        def poll_rebooting_machine(count=1, ssh_poll_max_seconds=yadtshell.constants.SSH_POLL_MAX_SECONDS_DEFAULT):
-            max_tries = calculate_max_tries_for_interval_and_delay(interval=ssh_poll_max_seconds,
+        def poll_rebooting_machine(count=1):
+            max_tries = calculate_max_tries_for_interval_and_delay(interval=self.ssh_poll_max_seconds,
                                                                    delay=yadtshell.constants.SSH_POLL_DELAY)
             logger.info("%s: polling for ssh connect, try %i of %i" %
                         (self.uri, count, max_tries))
-            poll_command = self.remote_call(
-                'uptime', '%s_poll' % self.hostname)
-            poll_protocol = yadtshell.twisted.YadtProcessProtocol(
-                self, poll_command, out_log_level=logging.INFO)
+            poll_command = self.remote_call('uptime', '%s_poll' % self.hostname)
+            poll_protocol = YadtProcessProtocol(self, poll_command, out_log_level=logging.INFO)
             poll_protocol.ssh_poll_count = count
-            if (count * yadtshell.constants.SSH_POLL_DELAY) < ssh_poll_max_seconds:
-                poll_protocol.deferred.addErrback(lambda x:
-                                                  task.deferLater(reactor,
-                                                                  yadtshell.constants.SSH_POLL_DELAY,
-                                                                  poll_rebooting_machine,
-                                                                  count + 1,
-                                                                  ssh_poll_max_seconds=ssh_poll_max_seconds))
+            if (count * yadtshell.constants.SSH_POLL_DELAY) < self.ssh_poll_max_seconds:
+                poll_protocol.deferred.addErrback(
+                    lambda x: task.deferLater(reactor,
+                                              yadtshell.constants.SSH_POLL_DELAY,
+                                              poll_rebooting_machine,
+                                              count + 1)
+                )
             cmdline = shlex.split(poll_protocol.cmd)
             reactor.spawnProcess(poll_protocol, cmdline[0], cmdline, None)
 
             return poll_protocol.deferred
 
-        p.deferred.addErrback(
-            handle_rebooting_machine, self.ssh_poll_max_seconds)
+        p.deferred.addErrback(handle_rebooting_machine, self.ssh_poll_max_seconds)
 
         def display_reboot_info(protocol):
             if hasattr(protocol, 'ssh_poll_count'):
@@ -360,9 +377,7 @@ class Host(Component):
         lock_owner = None
         if self.lockstate:
             lock_owner = self.lockstate.get("owner")
-        self.is_locked_by_me = self.is_locked and lock_owner and lock_owner == lockinfo[
-            "owner"]
-
+        self.is_locked_by_me = self.is_locked and lock_owner and lock_owner == lockinfo["owner"]
         self.is_locked_by_other = self.is_locked and not self.is_locked_by_me
 
         logger.debug("is_locked=" + repr(self.is_locked) + ", is_locked_by_me=" + repr(
@@ -371,10 +386,10 @@ class Host(Component):
 
 class UnreachableHost(Component):
 
-    def __init__(self, name):
-        self.fqdn = name
-        self.hostname = self.fqdn.split('.')[0]
-        Component.__init__(self, yadtshell.settings.HOST, name)
+    def __init__(self, fqdn):
+        self.fqdn = fqdn
+        self.hostname = fqdn.split('.')[0]
+        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
 
     def is_reachable(self):
         return False
@@ -398,8 +413,7 @@ class UnreachableHost(Component):
 class Artefact(Component):
 
     def __init__(self, host, name, version=None):
-        Component.__init__(
-            self, yadtshell.settings.ARTEFACT, host, name, version)
+        Component.__init__(self, yadtshell.settings.ARTEFACT, host, name, version)
         # self.needs.add(uri.create(settings.HOST, host.host))
 
     def updateartefact(self):
@@ -412,9 +426,11 @@ class Service(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
+        self.fqdn = host.fqdn
         self.needs_services = []
         self.needs_artefacts = []
         self.needs = set()
+        self.needs.add(host.uri)
 
         for k in settings:
             setattr(self, k, settings[k])
@@ -432,8 +448,9 @@ class Service(Component):
                 self.needs.add(yadtshell.uri.create(
                     yadtshell.settings.SERVICE, host.host, n % locals()))
         for n in self.needs_artefacts:
-            self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, n % locals() +
-                                                "/" + yadtshell.settings.CURRENT))
+            self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT,
+                                                host.host,
+                                                n % locals() + "/" + yadtshell.settings.CURRENT))
         # self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
 
         self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
@@ -489,8 +506,7 @@ def do(args, opts):
     for component_name in component_names:
         component = components.get(component_name, None)
         if not component:
-            component = components[
-                yadtshell.uri.change_version(component_name, 'current')]
+            component = components[yadtshell.uri.change_version(component_name, 'current')]
         fun = getattr(component, cmd, None)
         import inspect
         if inspect.ismethod(fun):
@@ -499,19 +515,16 @@ def do(args, opts):
             except TypeError:
                 sp = fun()
         else:
-            logger.error(
-                '"%(cmd)s" is not defined for %(component_name)s, aborting' % locals())
+            logger.error('"%(cmd)s" is not defined for %(component_name)s, aborting' % locals())
             sys.exit(2)
         logger.debug('%(cmd)sing %(component_name)s' % locals())
         try:
             logger.debug('executing fun ' + str(fun))
             if isinstance(sp, subprocess.Popen):
-                exit_code = yadtshell.util.log_subprocess(
-                    sp, stdout_level=logging.INFO)
+                exit_code = yadtshell.util.log_subprocess(sp, stdout_level=logging.INFO)
             else:
                 exit_code = sp
             logger.debug('exit code %(exit_code)s' % locals())
         except AttributeError, ae:
-            logger.warning(
-                'problem while executing %(cmd)s on %(component_name)s' % locals())
+            logger.warning('problem while executing %(cmd)s on %(component_name)s' % locals())
             logger.exception(ae)
