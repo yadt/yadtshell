@@ -232,6 +232,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     logger.debug('starting remote queries')
 
+    # TODO(rwill): handle this case on caller side, remove "if hosts" above.
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
 
