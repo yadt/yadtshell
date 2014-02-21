@@ -2,8 +2,14 @@ import yadtshell
 # from twisted.trial
 import unittest
 from mock import Mock, patch, call
+from twisted.internet import defer
 
 
+class MyCustomService(yadtshell.components.Service):
+    pass
+
+
+# TODO(rwill): break up tests into different classes so we can have different setUp() for each group.
 class StatusTests(unittest.TestCase):
     # TODO(rwill): make sure no actual files are read or written. (Always mock `os` module...??)
 
@@ -12,8 +18,9 @@ class StatusTests(unittest.TestCase):
         # because it doesn't do anything as long as no actual reactor is running!
         yadtshell.settings.ybc = Mock()
         yadtshell.settings.SSH = 'ssh'
-        yadtshell.settings.TARGET_SETTINGS = {
-            'name': 'test', 'hosts': ['foobar42']}
+        yadtshell.settings.TARGET_SETTINGS = {'name': 'test',
+                                              'hosts': ['foobar42']
+                                              }
         self.pi_patcher = patch('yadtshell.twisted.ProgressIndicator')
         self.pi_patcher.start()
 
@@ -25,8 +32,7 @@ class StatusTests(unittest.TestCase):
     def test_should_remove_globbed_old_state_files_when_calling_status_without_hosts(self, os, glob):
         yadtshell.status()
 
-        os.path.join.assert_called_with(
-            yadtshell.settings.OUT_DIR, 'current_state*')
+        os.path.join.assert_called_with(yadtshell.settings.OUT_DIR, 'current_state*')
         os.remove.assert_called_with(os.path.join.return_value)
 
     @patch('yadtshell._status.glob')
@@ -34,8 +40,7 @@ class StatusTests(unittest.TestCase):
     def test_should_remove_old_state_files_explicity_when_calling_status_with_hosts(self, os, glob):
         yadtshell.status(hosts=['foobar42'])
 
-        os.path.join.assert_called_with(
-            yadtshell.settings.OUT_DIR, 'current_state_foobar42.yaml')
+        os.path.join.assert_called_with(yadtshell.settings.OUT_DIR, 'current_state_foobar42.yaml')
         os.remove.assert_called_with(os.path.join.return_value)
 
     @patch('yadtshell.twisted.ProgressIndicator')
@@ -139,25 +144,27 @@ some_attribute: some-value
         self.assertEqual(len(components), 2)
 
     @patch('yadtshell._status.logger')
-    def todo_test_loading_service_class(self, _):
+    def test_initialize_service_with_custom_service_class(self, _):
         host = yadtshell.components.Host("foo.acme.com")
         host.state = "uptodate"
         self.assertTrue(yadtshell.util.is_up(host.state), host.state)
 
-        host.services = {"fooService": {"service": "MyService"},
+        host.services = {"fooService": {"service": "MyCustomService"},
                          "barService": {}
                          }
         components = {}
         host = yadtshell._status.initialize_services(host, components)
+        service_class = components["service://foo/fooService"].__class__
+        self.assertEqual(service_class.__name__, "MyCustomService")
 
     def test_get_service_class_from_loaded_modules(self):
-        result_class = yadtshell._status.get_service_class_from_loaded_modules("StatusTests")
-        self.assertEqual(result_class.__name__, "StatusTests")
+        result_class = yadtshell._status.get_service_class_from_loaded_modules("MyCustomService")
+        self.assertEqual(result_class.__name__, "MyCustomService")
 
     def test_get_service_class_from_fallback_1(self):
         myhost = yadtshell.components.Host("foo.bar.com")
-        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "yadtshell.components.Service")
-        self.assertEqual(result_class.__name__, "Service")
+        result_class = yadtshell._status.get_service_class_from_fallbacks(myhost, "yadtshell.components.Component")
+        self.assertEqual(result_class.__name__, "Component")
 
     def test_get_service_class_from_fallback_2(self):
         myhost = yadtshell.components.Host("foo.bar.com")
@@ -170,7 +177,6 @@ some_attribute: some-value
         host.next_artefacts = ["arte/1"]
         components = {}
         yadtshell._status.initialize_artefacts(host, components)
-        print components.keys()
         expected_uris = ['artefact://foo/arte/0', 'artefact://foo/arte/current',
                          'artefact://foo/arte/1', 'artefact://foo/arte/next',
                          'artefact://foo/fact/2', 'artefact://foo/fact/current']
@@ -178,5 +184,24 @@ some_attribute: some-value
         self.assertEqual(set(components.keys()), set(expected_uris))
 
     @patch('yadtshell._status.query_status')
-    def test_syntax_status(self, query_status):
-        pass
+    def todo_test_syntax_status(self, query_status):
+        # TODO(rwill): this currently crashes because of build_*_dependency_tree.component_files
+        # extract file I/O from status() method into submethods, so those can be mocked.
+        protocol = Mock()
+        protocol.component = "host://myhost"
+        protocol.data = '''
+fqdn: foobar42.acme.com
+current_artefacts:
+- foo/1.0
+- bar/2.3
+next_artefacts:
+- foo/1.1
+services:
+  tomcat:
+    needs_services: [database]
+    state: down
+  database:
+    state: up
+'''
+        query_status.return_value = defer.succeed(protocol)
+        yadtshell.status("myhost")

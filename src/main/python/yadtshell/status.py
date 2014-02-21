@@ -78,8 +78,8 @@ def create_host(protocol, components):
     try:
         data = json.loads(protocol.data)
     except Exception, e:
-        logger.debug(
-            '%s: %s, falling back to yaml parser' % (protocol.component, str(e)))
+        logger.debug('%s: %s, falling back to yaml parser' %
+                     (protocol.component, str(e)))
         data = yaml.load(protocol.data, Loader=yaml_loader)
 
     host = None
@@ -232,6 +232,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     logger.debug('starting remote queries')
 
+    # TODO(rwill): handle this case on caller side, remove "if hosts" above.
     if not hosts:
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
 

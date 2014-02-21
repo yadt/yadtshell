@@ -65,11 +65,6 @@ class ArtefactTests(unittest.TestCase):
 
 class UnreachableHostTests(unittest.TestCase):
 
-    def setUp(self):
-        yadtshell.settings.TARGET_SETTINGS = {
-            'name': 'foo'
-        }
-
     def test_should_be_unreachable(self):
         unreachable_host = yadtshell.components.UnreachableHost('foobar42')
         self.assertFalse(unreachable_host.is_reachable())
@@ -96,12 +91,6 @@ class UnreachableHostTests(unittest.TestCase):
 
 
 class HostTests(unittest.TestCase):
-
-    def setUp(self):
-        # TODO(rwill): this should be done once per Test Class and cleaned up afterwards.
-        yadtshell.settings.TARGET_SETTINGS = {
-            'name': 'foo'
-        }
 
     def test_should_be_reachable(self):
         reachable_host = yadtshell.components.Host('foobar42')
