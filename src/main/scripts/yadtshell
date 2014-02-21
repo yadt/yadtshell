@@ -77,7 +77,7 @@ import yadtshell
 logger = logging.getLogger('yadtshell')
 
 try:
-    yadtshell.settings.load_settings(log_to_file=(cmd not in ['dump', 'info']))
+    yadtshell.settings.load_settings_and_create_dirs(log_to_file=(cmd not in ['dump', 'info']))
 except SettingsError, e:
     logger.critical(e)
     sys.exit(1)
