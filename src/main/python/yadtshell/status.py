@@ -22,15 +22,12 @@ import glob
 import os
 import logging
 import sys
-import traceback
 import inspect
 import shlex
 import yaml
 import simplejson as json
 
-from twisted.internet import protocol
-from twisted.internet import reactor
-from twisted.internet import defer
+from twisted.internet import (defer, protocol, reactor)
 
 from hostexpand.HostExpander import HostExpander
 import yadtshell
@@ -194,6 +191,23 @@ def get_service_class_from_fallbacks(host, service_class_name):
     return service_class
 
 
+def initialize_artefacts(host, components):
+    for name_version in host.current_artefacts:
+        add_artefact(components, host, name_version, yadtshell.settings.CURRENT)
+
+    for name_version in host.next_artefacts:
+        add_artefact(components, host, name_version, yadtshell.settings.NEXT)
+
+    return host
+
+
+def add_artefact(components, host, name_version, revision):
+    name, version = name_version.split('/')
+    artefact = yadtshell.components.Artefact(host, name, version, revision)
+    components[artefact.uri] = artefact
+    components[artefact.revision_uri] = artefact
+
+
 def status(hosts=None, include_artefacts=True, **kwargs):
     yadtshell.settings.ybc.connect()
     if type(hosts) is str:
@@ -269,55 +283,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             dl = defer.DeferredList(local_state)
             dl.addCallback(lambda _: host)
             return dl
-        return host
-
-    def initialize_artefacts(host):
-        # TODO(rwill): needs documentation or simplification
-        try:
-            for version in getattr(host, 'current_artefacts', []):
-                artefact = yadtshell.components.Artefact(host, version, version)
-                artefact.state = yadtshell.settings.INSTALLED
-                components[artefact.uri] = artefact
-        except TypeError:
-            type_, value_, traceback_ = sys.exc_info()
-            traceback.format_tb(traceback_)
-
-        try:
-            for version in getattr(host, 'current_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-                artefact.revision = yadtshell.settings.CURRENT
-                current_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                                   host.host,
-                                                   artefact.name + '/' + yadtshell.settings.CURRENT)
-                components[uri] = artefact
-                components[current_uri] = artefact
-        except TypeError:
-            pass
-
-        try:
-            for version in getattr(host, 'next_artefacts', set()):
-                artefact = yadtshell.components.Artefact(host, version, version)
-                artefact.state = yadtshell.settings.INSTALLED
-                artefact.revision = yadtshell.settings.NEXT
-                components[artefact.uri] = artefact
-        except TypeError:
-            pass
-
-        try:
-            for version in getattr(host, 'next_artefacts', []):
-                uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.host, version)
-                artefact = components.get(uri, yadtshell.components.MissingComponent(uri))
-                artefact.revision = yadtshell.settings.NEXT
-                next_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT,
-                                                host.host,
-                                                artefact.name + '/' + yadtshell.settings.NEXT)
-                components[uri] = artefact
-                components[next_uri] = artefact
-                host.logger.debug('adding %(uri)s and %(next_uri)s' % locals())
-        except TypeError:
-            pass
-
         return host
 
     def check_responses(responses):
@@ -449,7 +414,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
-        deferred.addCallback(initialize_artefacts)
+        deferred.addCallback(initialize_artefacts, components)
         deferred.addErrback(yadtshell.twisted.report_error, logger.error)
         return deferred
 

@@ -37,30 +37,33 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
+    """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
 
-    def __init__(self, t, host, name=None, version=None):
-        """`host` can be a string/unicode or a Host instance.
-        But note that some subclasses require a Host instance in their constructors.
+    Note that the `.host` attribute is always a string, not a Host instance.
+    TODO(rwill): rename it to `.hostname` or change it to a Host instance (as passed into constructor anyway).
+    """
+
+    def __init__(self, t, host, name):
+        """Makes a component.
+
+        - `t` is one of the component types in yadtshell.settings
+        - `host` must be a true Host instance so we can set `fqdn` properly.
+        - `name` is a plain string and doesn't contain a version.
+
+        Note the constructor is written such that subclasses can call it first
+        and then overwrite any values if so desired. The pattern here is "initialize
+        with a default value and overwrite if needed".
         """
         self.type = t
-        if type(host) in [str, unicode]:
-            self.host = host
-        else:
-            self.host = host.host
-            self.fqdn = host.fqdn
-        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
-        self.name = getattr(self, 'name', name)
-        if self.name is not None:
-            self.name = self.name.rstrip('/').split('/', 1)[0]
-        self.version = version
-        if self.version is not None:
-            self.version = str(self.version)
-        self.uri = yadtshell.uri.create(self.type, self.host, self.name, self.version)
-        self.version = yadtshell.uri.parse(self.uri)['version']
-        self.name_and_version = yadtshell.uri.as_source_file(self.uri)
+        self.name = name
+        self.host = host.name
+        self.fqdn = host.fqdn
+        self.uri = yadtshell.uri.create(self.type, self.host, self.name)
+
+        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)  # TODO(rwill): seems like dead code
+
         self.state = yadtshell.settings.UNKNOWN
-        self.revision = yadtshell.settings.EMPTY
-        self.needs = getattr(self, 'needs', set())
+        self.needs = set()
         self.needed_by = set()
         self.config_prefix = yadtshell.settings.TARGET_SETTINGS['name']
 
@@ -154,10 +157,13 @@ class Component(object):
 
 
 class MissingComponent(Component):
+    """TODO(rwill): What is the usecase for this? Add tests or remove it.
+    """
 
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
-        Component.__init__(self, parts['type'], parts['host'], parts['name'], parts['version'])
+        Component.__init__(self, parts['type'], Host(parts['host']), parts['name'])
+        self.version = parts['version']
         self.state = yadtshell.settings.MISSING
 
 
@@ -169,7 +175,7 @@ class ComponentDict(dict):
 
     def _key_(self, key):
         try:
-            return self._key_(key.uri)
+            return self._key_(key.uri)  # TODO(rwill): looks like the intention here is to return key.uri ??
         except AttributeError:
             return key
 
@@ -182,12 +188,11 @@ class ComponentDict(dict):
     def get(self, key, default=None):
         if self._key_(key) not in self and self._add_when_missing_:
             logger.debug('missing' + key)
-            self[self._key_(key)] = MissingComponent(key)
+            self[self._key_(key)] = MissingComponent(key)  # (rwill) why no _key_ on RHS?
         return dict.get(self, self._key_(key), default)
 
     def __setitem__(self, key, value):
-        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value,
-        # 'state', ''))
+        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
 
 
@@ -208,8 +213,7 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
-            # logger.warning('known keys: ' + ',
-            # '.join(self.components.keys()))
+            # logger.warning('known keys: ' + ', '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
@@ -230,13 +234,29 @@ class ComponentSet(set):
         return self._key_(item) in self._set
 
 
-class Host(Component):
-
+class AbstractHost(Component):
     def __init__(self, fqdn):
+        # we need to set those values first, because Component.__init__ requires them on its `host` argument ;)
         self.fqdn = fqdn
         self.hostname = fqdn.split('.')[0]
+        Component.__init__(self, yadtshell.settings.HOST, self, self.hostname)
+        self.uri = yadtshell.uri.create(yadtshell.settings.HOST, self.name)
+
+        self.current_artefacts = []
         self.next_artefacts = []
         self.services = {}
+
+
+class Host(AbstractHost):
+    """Note: `Host.name`, `Host.host` and `Host.hostname` are all the same value.
+    We need `.host` and `.name` because they are part of Component, but when
+    `Component.host` is renamed to Component.hostname, we will at least have
+    one less redundant variable.
+    """
+
+    def __init__(self, fqdn):
+        AbstractHost.__init__(self, fqdn)
+
         self.lockstate = None
         self.is_locked = None
         self.is_locked_by_other = None
@@ -245,7 +265,6 @@ class Host(Component):
         self.reboot_required_to_activate_latest_kernel = False
         self.reboot_required_after_next_update = False
 
-        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
         self.logger = logging.getLogger(self.uri)
 
     def set_attrs_from_data(self, data):
@@ -384,22 +403,16 @@ class Host(Component):
             self.is_locked_by_me) + ", is_locked_by_other=" + repr(self.is_locked_by_other))
 
 
-class UnreachableHost(Component):
+class UnreachableHost(AbstractHost):
 
     def __init__(self, fqdn):
-        self.fqdn = fqdn
-        self.hostname = fqdn.split('.')[0]
-        Component.__init__(self, yadtshell.settings.HOST, self.hostname)
+        AbstractHost.__init__(self, fqdn)
 
     def is_reachable(self):
         return False
 
     def is_unknown(self):
         return True
-
-    @property
-    def next_artefacts(self):
-        return {}
 
     @property
     def is_locked_by_other(self):
@@ -411,10 +424,17 @@ class UnreachableHost(Component):
 
 
 class Artefact(Component):
+    """`version` is numeric
+    `revision` is either 'next' or 'current'. (Use constants in yadtshell.settings!)
+    """
 
-    def __init__(self, host, name, version=None):
-        Component.__init__(self, yadtshell.settings.ARTEFACT, host, name, version)
-        # self.needs.add(uri.create(settings.HOST, host.host))
+    def __init__(self, host, name, version, revision=yadtshell.settings.CURRENT):
+        Component.__init__(self, yadtshell.settings.ARTEFACT, host, name)
+        self.version = version
+        self.revision = revision
+        self.state = yadtshell.settings.INSTALLED  # only needed for yadtshell.util.is_up()
+        self.uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.name, name, version)
+        self.revision_uri = yadtshell.uri.create(yadtshell.settings.ARTEFACT, host.name, name, revision)
 
     def updateartefact(self):
         return self.remote_call('yadt-artefact-update %s' % self.name,
@@ -426,10 +446,8 @@ class Service(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
-        self.fqdn = host.fqdn
         self.needs_services = []
         self.needs_artefacts = []
-        self.needs = set()
         self.needs.add(host.uri)
 
         for k in settings:

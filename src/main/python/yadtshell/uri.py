@@ -24,7 +24,9 @@ import yadtshell.helper
 logger = logging.getLogger('uri')
 
 
-def create(type=None, host=None, name=None, version=None, **kwargs):
+def create(type, host, name=None, version=None, **kwargs):
+    # TODO(rwill): format depends on component type. For better sanity checking,
+    # move method into different Component subclass constructors.
     if version is None:
         version = ''
     if name is None:

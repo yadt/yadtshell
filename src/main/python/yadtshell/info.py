@@ -122,7 +122,9 @@ def _render_updates_based_on_name_schema(components, host, full):
 
         host_artefacts = {}
         for current_artefact in [
-            c for c in components.values() if c.host == host.hostname and c.revision == yadtshell.settings.CURRENT
+            c for c in components.values() if (c.type == yadtshell.settings.ARTEFACT
+                                               and c.host == host.hostname
+                                               and c.revision == yadtshell.settings.CURRENT)
         ]:
             artefact = host_artefacts.setdefault(current_artefact.name, {})
             artefact[yadtshell.settings.CURRENT] = current_artefact
