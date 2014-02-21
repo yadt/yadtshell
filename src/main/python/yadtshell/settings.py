@@ -55,6 +55,9 @@ console_stderr_handler.setFormatter(message_formatter)
 root_logger.addHandler(console_stdout_handler)
 root_logger.addHandler(console_stderr_handler)
 
+# default values used when file can't be loaded and in unit tests.
+VIEW_SETTINGS = {'info-view': ['matrix', 'color', 'maxcols']}
+
 
 class SettingsError(BaseException):
     pass
@@ -155,7 +158,7 @@ def expand_hosts(target_settings):
     return target_settings
 
 
-def load_settings(log_to_file=True):
+def load_settings_and_create_dirs(log_to_file=True):
     TARGET_BASENAME = 'target'
 
     global TARGET_SETTINGS
@@ -235,13 +238,11 @@ def load_settings(log_to_file=True):
         shutil.copy2(TARGET_BASENAME, OUT_TARGET_FILE)
 
     global VIEW_SETTINGS
-    VIEW_SETTINGS = {'info-view': ['matrix', 'color', 'maxcols']}
     VIEW_SETTINGS_FILE = 'view'
     try:
         view_file = open(VIEW_SETTINGS_FILE)
         VIEW_SETTINGS = yaml.load(view_file)
         view_file.close()
-
     except:
         logger.debug(
             '"view" file not found, falling back to default values: %s' %

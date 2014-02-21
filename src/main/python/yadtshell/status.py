@@ -79,7 +79,7 @@ def create_host(protocol, components):
         data = json.loads(protocol.data)
     except Exception, e:
         logger.debug('%s: %s, falling back to yaml parser' %
-                     (protocol.component, str(e))) 
+                     (protocol.component, str(e)))
         data = yaml.load(protocol.data, Loader=yaml_loader)
 
     host = None

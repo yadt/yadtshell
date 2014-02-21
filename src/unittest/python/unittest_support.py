@@ -2,6 +2,12 @@ from unittest import TestCase
 from StringIO import StringIO
 import yadtshell
 
+# initialize this to a arbitrary value so it is defined.
+# do not depend on this value in your test.
+yadtshell.settings.TARGET_SETTINGS = {
+    'name': 'initial name set in unittest_support.py',
+}
+
 
 def render_info_matrix_to_string(mocked_info_output):
     info_matrix = StringIO()
