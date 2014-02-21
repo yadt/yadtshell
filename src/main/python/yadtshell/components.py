@@ -65,7 +65,7 @@ class Component(object):
         self.state = yadtshell.settings.UNKNOWN
         self.needs = set()
         self.needed_by = set()
-        self.config_prefix = yadtshell.settings.TARGET_SETTINGS['name']
+        # self.config_prefix = yadtshell.settings.TARGET_SETTINGS['name']  # TODO(rwill): dead code?
 
     def is_touched_also(self, other):
         return True
