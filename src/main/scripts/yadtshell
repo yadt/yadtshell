@@ -21,6 +21,7 @@ The yadtshell
 Usage:
 yadtshell (status|info) [options]
 yadtshell (start|stop) SERVICE-URI ... [options]
+yadtshell restart SERVICE-URI... [options]
 yadtshell update [HOST-URI...] [-y] [--reboot | --no-reboot] [options]
 yadtshell updateartefact ARTEFACT-URI ... [options]
 yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
@@ -160,6 +161,15 @@ elif cmd == 'update':
 elif cmd in ['ignore', 'unignore', 'lock', 'unlock', 'updateartefact']:
     plan = create_simple_plan(cmd, uris)
     deferred = createDeferredFromPlan(plan)
+elif cmd == 'restart':
+    deferred = yadtshell.status()
+    deferred.addCallback(
+        yadtshell.restart,
+        uris,
+        **opts
+    )
+    am = yadtshell.ActionManager()
+    deferred.addCallback(am.action, **opts)
 else:
     try:
         plan = yadtshell.metalogic.metalogic(cmd, uris)
@@ -171,7 +181,8 @@ else:
         # TODO event failed needed here
         sys.exit(1)
 
-commands_that_change_state = ['stop', 'start', 'update', 'updateartefact',
+commands_that_change_state = ['stop', 'start', 'restart',
+                              'update', 'updateartefact',
                               'ignore', 'lock', 'unignore', 'unlock']
 if cmd in commands_that_change_state and not opts.get('no_final_status'):
     deferred.addCallback(yadtshell.status)

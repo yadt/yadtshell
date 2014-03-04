@@ -35,6 +35,7 @@ import yadtshell.info as _info  # NOQA
 from yadtshell.status import status  # NOQA
 from yadtshell.info import info  # NOQA
 from yadtshell.dump import dump  # NOQA
+from yadtshell.restart import restart   # NOQA
 
 
 VERSION = '${version}'
