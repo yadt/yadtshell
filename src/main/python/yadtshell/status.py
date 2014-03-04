@@ -116,7 +116,7 @@ def initialize_services(host, components):
         if settings is not None and "service" in settings:
             service_class_name = settings["service"]
         else:
-            logger.info("No service name found, using default: 'Service'")
+            logger.debug("No service name found, using default: 'Service'")
             service_class_name = "Service"
 
         service_class = get_service_class_from_loaded_modules(service_class_name)
