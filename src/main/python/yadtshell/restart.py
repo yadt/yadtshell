@@ -20,6 +20,7 @@ import logging
 
 logger = logging.getLogger('update')
 
+
 def restart(protocol=None, uris=None, **opts):
     logger.info("restarting %s" % uris)
     logger.info("opts: %s" % opts)
