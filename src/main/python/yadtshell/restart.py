@@ -18,11 +18,47 @@
 
 import logging
 
+import yadtshell
+
 logger = logging.getLogger('update')
 
 
 def restart(protocol=None, uris=None, **opts):
     logger.info("restarting %s" % uris)
     logger.info("opts: %s" % opts)
+
+    components = yadtshell.util.restore_current_state()
+
+    service_uris = yadtshell.helper.expand_hosts(uris)
+    service_uris = yadtshell.helper.glob_hosts(components, service_uris)
+
+    logging.info("service uris: %s" % service_uris)
+
+    stop_plan = yadtshell.metalogic.metalogic(
+        yadtshell.settings.STOP,
+        uris,
+        plan_post_handler=yadtshell.metalogic.identity)
+
+    orig_state = {}
+    for action in stop_plan.actions:
+        orig_state[action.uri] = components[action.uri].state
+
+    logging.info("current states: %s" % orig_state)
+
+    for line in stop_plan.dump(include_preconditions=True).splitlines():
+        logging.info(line)
+
+    logging.info("restarting NOW")
+    start_uris = [uri for uri, state in orig_state.iteritems()
+                  if state == "up"]
+    logging.info("starting %s" % start_uris)
+    start_plan = yadtshell.metalogic.metalogic(
+        yadtshell.settings.START,
+        start_uris,
+        plan_post_handler=yadtshell.metalogic.identity)
+
+    for line in start_plan.dump(include_preconditions=True).splitlines():
+        logging.info(line)
+
     logger.critical("Not Yet Implemented")
     raise Exception("Not Yet Implemented")
