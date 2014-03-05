@@ -18,47 +18,44 @@
 
 import logging
 
-import yadtshell
+from yadtshell.actions import ActionPlan
+from yadtshell.helper import expand_hosts, glob_hosts
+from yadtshell.metalogic import metalogic, identity, apply_instructions
+from yadtshell.settings import STOP, START, UP
+from yadtshell.util import restore_current_state, dump_action_plan
 
 logger = logging.getLogger('restart')
 
 
-def restart(protocol=None, uris=None, **opts):
-    logger.info("restarting %s" % uris)
-    logger.info("opts: %s" % opts)
+def restart(protocol=None, uris=None, parallel=None, **kwargs):
+    logger.debug("uris: %s" % uris)
+    logger.debug("parallel: %s" % parallel)
+    logger.debug("kwargs: %s" % kwargs)
 
-    components = yadtshell.util.restore_current_state()
+    components = restore_current_state()
+    service_uris = expand_hosts(uris)
+    service_uris = glob_hosts(components, service_uris)
 
-    service_uris = yadtshell.helper.expand_hosts(uris)
-    service_uris = yadtshell.helper.glob_hosts(components, service_uris)
+    logging.debug("service uris: %s" % service_uris)
 
-    logging.info("service uris: %s" % service_uris)
+    stop_plan = metalogic(STOP, uris, plan_post_handler=identity)
 
-    stop_plan = yadtshell.metalogic.metalogic(
-        yadtshell.settings.STOP,
-        uris,
-        plan_post_handler=yadtshell.metalogic.identity)
-
-    orig_state = {}
+    service_states = {}
     for action in stop_plan.actions:
-        orig_state[action.uri] = components[action.uri].state
+        service_states[action.uri] = components[action.uri].state
+    logging.debug("current states: %s" % service_states)
 
-    logging.info("current states: %s" % orig_state)
+    start_uris = [uri for uri, state in service_states.iteritems()
+                  if state == UP] + uris
+    start_uris = set(start_uris)
+    logging.info("restarting %s" % ", ".join(start_uris))
+    start_plan = metalogic(START, start_uris, plan_post_handler=identity)
 
-    for line in stop_plan.dump(include_preconditions=True).splitlines():
+    plan = ActionPlan('restart', [stop_plan, start_plan], nr_workers=1)
+
+    for line in plan.dump(include_preconditions=True).splitlines():
         logging.info(line)
 
-    logging.info("restarting NOW")
-    start_uris = [uri for uri, state in orig_state.iteritems()
-                  if state == "up"]
-    logging.info("starting %s" % start_uris)
-    start_plan = yadtshell.metalogic.metalogic(
-        yadtshell.settings.START,
-        start_uris,
-        plan_post_handler=yadtshell.metalogic.identity)
-
-    for line in start_plan.dump(include_preconditions=True).splitlines():
-        logging.info(line)
-
-    logger.critical("Not Yet Implemented")
-    raise Exception("Not Yet Implemented")
+    plan = apply_instructions(plan, parallel)
+    dump_action_plan('restart', plan)
+    return 'restart'
