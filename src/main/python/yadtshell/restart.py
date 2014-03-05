@@ -20,7 +20,7 @@ import logging
 
 import yadtshell
 
-logger = logging.getLogger('update')
+logger = logging.getLogger('restart')
 
 
 def restart(protocol=None, uris=None, **opts):
