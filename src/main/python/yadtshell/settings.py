@@ -228,11 +228,13 @@ def load_settings_and_create_dirs(log_to_file=True):
     OUT_TARGET_FILE = os.path.join(OUT_DIR, TARGET_BASENAME)
     try:
         changed = not filecmp.cmp(TARGET_BASENAME, OUT_TARGET_FILE)
+        if changed:
+            logger.info(
+                'target settings have changed since last call, thus cleaning cached data')
     except OSError:
         changed = True
+
     if changed:
-        logger.info(
-            'target settings have changed since last call, thus cleaning cached data')
         shutil.rmtree(OUT_DIR)
         os.makedirs(OUT_DIR)
         shutil.copy2(TARGET_BASENAME, OUT_TARGET_FILE)

@@ -98,7 +98,16 @@ if opts.get('dryrun'):
 yadtshell.settings.reboot_enabled = opts.get('reboot')
 
 if uris:
-    components = yadtshell.util.restore_current_state()
+    try:
+        components = yadtshell.util.restore_current_state()
+    except IOError, e:
+        logger.debug("an exception occured during restore_current_state: %s" % str(e))
+        logger.debug("no status found, calling 'yadtshell status' implicitly")
+        import subprocess
+        # TODO avoid subprocess?!
+        subprocess.call(["yadtshell", "status"])
+        components = yadtshell.util.restore_current_state()
+
     uris = yadtshell.helper.expand_hosts(uris)
     uris = yadtshell.helper.glob_hosts(components, uris)
 

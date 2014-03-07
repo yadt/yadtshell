@@ -18,6 +18,7 @@
 
 import logging
 import re
+import sys
 
 import util
 
@@ -31,7 +32,13 @@ def dump(args=[], mode='all', attribute=None, filter=None, **kwargs):
     if kwargs.get('show_current_artefacts'):
         args = ['host://']
         attribute = 'handled_artefacts'
-    components = util.restore_current_state()
+    try:
+        components = util.restore_current_state()
+    except IOError:
+        logger.critical("cannot restore the current state")
+        logger.info("call 'yadtshell status' first")
+        sys.exit(1)
+
     result = set()
     for uri in components.keys():
         if len(args) > 0:

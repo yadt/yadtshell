@@ -34,6 +34,7 @@ from yadtshell.validation import ServiceDefinitionValidator
 
 logger = logging.getLogger('util')
 
+
 try:
     import cPickle as pickle
     logger.debug("using C implementation of pickle")
@@ -92,11 +93,7 @@ def current_state():
 
 
 def restore_current_state():
-    try:
-        return restore(current_state())
-    except IOError:
-        logger.warning('no current state stored, try "status" first')
-        sys.exit(1)
+    return restore(current_state())
 
 
 def get_mtime_of_current_state():

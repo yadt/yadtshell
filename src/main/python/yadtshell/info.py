@@ -17,8 +17,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 import logging
-import time
+import sys
 from subprocess import Popen, PIPE
+import time
 
 import hostexpand
 import yadtshell
@@ -56,7 +57,12 @@ def _show_host_locking_or_unreachable(host):
 def info(logLevel=None, full=False, components=None, **kwargs):
     if not components:
         logger.debug("loading current state")
-        components = yadtshell.util.restore_current_state()
+        try:
+            components = yadtshell.util.restore_current_state()
+        except IOError:
+            logger.critical("cannot restore current state")
+            logger.info("call 'yadtshell status' first")
+            sys.exit(1)
 
     result = []
     for component in components.values():
