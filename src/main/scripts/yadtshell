@@ -68,6 +68,8 @@ uris = (arguments['ARTEFACT-URI'] + arguments['HOST-URI'] +
         arguments['SERVICE-URI'] + arguments['URI-PATTERN'])
 opts = infer_options_from_arguments(arguments)
 
+warning_after_error = None
+
 if opts.get('session_id'):
     yadtshell.helper.SESSION_ID = opts['session_id']
 
@@ -171,6 +173,7 @@ elif cmd in ['ignore', 'unignore', 'lock', 'unlock', 'updateartefact']:
     plan = create_simple_plan(cmd, uris)
     deferred = createDeferredFromPlan(plan)
 elif cmd == 'restart':
+    warning_after_error = "Do _not_ simply retry this command; for further details, see https://github.com/yadt/yadtshell/wiki/Command-Restart"
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.restart,
@@ -245,9 +248,13 @@ if reactor.return_code == 0:
 
 elif reactor.return_code == EXIT_CODE_CANCELED_BY_USER:
     print yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER${NORMAL}' % cmd.upper())
+    if warning_after_error:
+        logger.warn(warning_after_error)
 
 else:
     print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED${NORMAL}' % cmd.upper())
+    if warning_after_error:
+        logger.warn(warning_after_error)
     logger.critical('exit code: %i' % reactor.return_code)
     logger.info('For details see: "{0}"'.format(yadtshell.settings.log_file))
 sys.exit(reactor.return_code)
