@@ -113,8 +113,8 @@ def initialize_services(host, components):
 
     host.defined_services = []
     for name, settings in host.services.items():
-        if settings is not None and "service" in settings:
-            service_class_name = settings["service"]
+        if settings is not None and "class" in settings:
+            service_class_name = settings["class"]
         else:
             logger.debug("No service name found, using default: 'Service'")
             service_class_name = "Service"
