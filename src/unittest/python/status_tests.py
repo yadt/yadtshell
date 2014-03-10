@@ -149,7 +149,7 @@ some_attribute: some-value
         host.state = "uptodate"
         self.assertTrue(yadtshell.util.is_up(host.state), host.state)
 
-        host.services = {"fooService": {"service": "MyCustomService"},
+        host.services = {"fooService": {"class": "MyCustomService"},
                          "barService": {}
                          }
         components = {}
