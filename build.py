@@ -46,7 +46,7 @@ summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
 version = '1.8.2'
 
-default_task = ['clean', 'analyze', 'publish', 'generate_manpage_with_pandoc']
+default_task = ['clean', 'analyze', 'publish'] 
 
 
 @init
