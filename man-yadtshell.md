@@ -46,6 +46,10 @@ Starts all specified *SERVICES*, regarding the correct order
 * stop *SERVICES* :
 Stops all specified *SERVICES*, regarding the correct order
 
+* restart *SERVICE*:
+Stops the specified *SERVICE* (including all dependent services) and then 
+starts all services that had been stopped before. 
+
 * info :
 Shows the last known state of the target, does not retrieve data from hosts
 
