@@ -120,7 +120,7 @@ def initialize_services(host, components):
             service_class_name = "Service"
 
         service_class = get_service_class_from_loaded_modules(service_class_name)
-        if not service_class_name:
+        if not service_class:
             service_class = get_service_class_from_fallbacks(host, service_class_name)
 
         service = None
