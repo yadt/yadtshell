@@ -18,7 +18,7 @@
 
 export COMP_WORDBREAKS='"@><=;|&( '"'"  # ":" dropped
 
-YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact"
+YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact restart"
 
 get_yadtshell_dir() {
     echo $HOME/.yadtshell/tmp$(pwd)
