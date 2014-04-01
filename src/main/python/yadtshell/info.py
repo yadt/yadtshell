@@ -276,7 +276,7 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
                 service = servicedef.keys()[0]
             except:
                 service = servicedef
-            if not service in services:
+            if service not in services:
                 rank = components[yadtshell.uri.create(
                     yadtshell.settings.SERVICE, host.hostname, service)].dependency_score
                 services.append((rank, service))
