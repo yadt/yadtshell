@@ -29,6 +29,19 @@ host://*host*
 
 (Wildcards `*` and `?`, and ranges `[start..end]` allowed)
 
+# INTERACTIVE USAGE
+* enter an interactive session:
+
+  *init-yadtshell*
+
+  or
+
+  *init-yadtshell TARGET* (directly enter TARGET directory and fetch status)
+
+* Switch targets while in an interactive session:
+
+    *using TARGET* (enter TARGET directory and fetch status)
+
 # COMMANDS
 
 * status :
