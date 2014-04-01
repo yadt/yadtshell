@@ -499,7 +499,7 @@ class Service(Component):
             raise ValueError('the "message" parameter is mandatory')
         tag = "ignore_%s" % self.name
         force = kwargs.get('force', False)
-        return self.remote_call('yadt-service-ignore %s "%s"' % (self.name, message), tag, force)
+        return self.remote_call('yadt-service-ignore %s \'%s\'' % (self.name, message), tag, force)
 
     def unignore(self, **kwargs):
         tag = "unignore_%s" % self.name
