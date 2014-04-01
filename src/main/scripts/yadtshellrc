@@ -38,4 +38,15 @@ if [[ -n "$YADT_TARGET" ]]; then
     fi
 fi
 
+using() {
+    if [[ ! -n "$1" ]]; then
+        echo "Usage : using <TARGET>"
+        return 1
+    else
+        TARGET=$1
+        cd $TARGETS_DIR/$TARGET
+        yadtshell status
+    fi
+}
+
 return 0
