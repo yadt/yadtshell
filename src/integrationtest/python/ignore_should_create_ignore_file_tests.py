@@ -35,7 +35,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         status_return_code = self.execute_command('yadtshell status -v')
         ignore_return_code = self.execute_command(
-            'yadtshell ignore service://* -m "ignoring" -v')
+            'yadtshell ignore service://* -m "ignoring some service" -v')
 
         with self.verify() as verify:
             self.assertEqual(0, status_return_code)
@@ -47,10 +47,10 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 'it01.domain', '-O', 'check')
 
             verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-ignore backend-service ignoring')
+                'it01.domain', 'yadt-command yadt-service-ignore backend-service \'ignoring some service\'')
 
             verify.called('ssh').at_least_with_arguments(
-                'it01.domain', 'yadt-command yadt-service-ignore frontend-service ignoring')
+                'it01.domain', 'yadt-command yadt-service-ignore frontend-service \'ignoring some service\'')
 
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')

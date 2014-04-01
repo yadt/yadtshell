@@ -35,7 +35,7 @@ class ServiceTests(unittest.TestCase):
             self.mock_service, 'yes we can ignore the service')
 
         self.mock_service.remote_call.assert_called_with(
-            'yadt-service-ignore internet "yes we can ignore the service"', 'ignore_internet', False)
+            'yadt-service-ignore internet \'yes we can ignore the service\'', 'ignore_internet', False)
 
     def test_should_unignore_service(self):
         yadtshell.components.Service.unignore(self.mock_service)
