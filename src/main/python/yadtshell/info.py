@@ -54,6 +54,17 @@ def _show_host_locking_or_unreachable(host):
                   (host.host, lock_owner, "reason", reason)))
 
 
+def _show_ignored_services(services):
+    ignored_services = False
+    for service in services:
+        if hasattr(service, 'ignored'):
+            ignored_services = True
+            print(render_yellow('\n%20s is ignored\n%10s' % (service, service.ignored.get('message', 'no message'))))
+
+    if ignored_services:
+        print()  # separate ignored services from locked hosts
+
+
 def info(logLevel=None, full=False, components=None, **kwargs):
     if not components:
         logger.debug("loading current state")
@@ -74,6 +85,11 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     print()
     print('target status')
+
+    services = [component for component in components.values()
+                if isinstance(component, yadtshell.components.Service)]
+
+    _show_ignored_services(services)
 
     hosts = sorted(
         [c for c in components.values() if c.type == yadtshell.settings.HOST], key=lambda h: h.uri)
@@ -102,8 +118,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
         print(render_red('\nconfig problem: missing %s\n' %
               missing_component.uri))
 
-    for service in [component for component in components.values()
-                    if isinstance(component, yadtshell.components.Service)]:
+    for service in services:
         if getattr(service, 'service_artefact_problem', None):
             print(
                 render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service)))
