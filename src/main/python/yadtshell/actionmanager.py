@@ -278,8 +278,6 @@ class ActionManager(object):
         p.target_state = target_state
         p.state = yadtshell.settings.UNKNOWN
 
-        # if self.pi:
-            # self.pi.observables.append(p)
         cmdline = shlex.split(cmdline.encode('ascii'))
         self.logger.debug('cmd: %s' % cmdline)
         reactor.spawnProcess(p, cmdline[0], cmdline, None)
@@ -379,10 +377,8 @@ class ActionManager(object):
             f.close()
         except IOError, e:
             self.logger.warning(str(e))
-            # return defer.succeed(None)
             deferred = defer.Deferred()
             reactor.callLater(0, deferred.errback, e)
-                              # TODO mhhh: good practice?
             return deferred
 
         if not action_plan:

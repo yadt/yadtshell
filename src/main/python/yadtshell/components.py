@@ -390,7 +390,7 @@ class Host(AbstractHost):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
 
     def update_attributes_after_status(self):
-        self.is_locked = not self.lockstate is None
+        self.is_locked = self.lockstate is not None
 
         lockinfo = get_user_info()
         lock_owner = None
