@@ -171,16 +171,3 @@ class CurrentStateTests(unittest.TestCase):
         restore_current_state()
 
         restore_function.assert_called_with('/out/dir/current_state.components')
-
-    # TODO restore_current_state does not handle exceptions any longer
-    #@patch('yadtshell.util.logger')
-    #@patch('yadtshell.util.restore')
-    #@patch('yadtshell.util.sys')
-    #def test_should_exit_when_restore_fails(self, sys, restore, _):
-    #    def fail(_):
-    #        raise IOError()
-    #    restore.side_effect = fail
-    #
-    #    restore_current_state()
-    #
-    #    sys.exit.assert_called_with(1)

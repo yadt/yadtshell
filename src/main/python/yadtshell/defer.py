@@ -110,7 +110,6 @@ class DeferredPool(defer.Deferred):
     def _handle_error(self, failure):
         self.error_count += 1
         if self.error_count > self.nr_errors_tolerated:
-            #self.logger.error('stops: error count too high, %i > %i' % (self.error_count, self.nr_errors_tolerated))
             self._stop_workers()
             return failure
         self.logger.warn(

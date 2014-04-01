@@ -88,13 +88,8 @@ class Action(object):
             text += " (%s)" % " ".join(aux_text)
         if include_preconditions:
             text += '\n'
-#            if self.args:
-#                text += indent + '    args: ' + ', '.join(self.args) + '\n'
-#            if self.kwargs:
-#                text += indent + '    kwargs: ' + ', '.join(['%s: %s' % (key, value) for key, value in self.kwargs.iteritems()]) + '\n'
             for precondition in self.preconditions:
                 text += precondition.dump(depth + 1, 'when ')
-            #text += '\n'
         return text
 
     def mark_executed(self):

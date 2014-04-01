@@ -35,9 +35,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         status_return_code = self.execute_command('yadtshell status -v')
         update_return_code = self.execute_command(
-            'yadtshell updateartefact artefact://*/*/// -v')  # invalid due to
-                                                                                                    # trailing
-                                                                                                    # slashes
+            'yadtshell updateartefact artefact://*/*/// -v')  # invalid due to trailing slashes
 
         with self.verify() as verify:
             self.assertEqual(0, status_return_code)
