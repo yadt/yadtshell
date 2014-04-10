@@ -1,4 +1,5 @@
 from StringIO import StringIO
+from textwrap import dedent
 import unittest
 
 from mock import patch, MagicMock
@@ -23,10 +24,10 @@ class SettingsTests(unittest.TestCase):
         self.getcwd_patcher.stop()
 
     def test_should_load_target_file(self):
-        content = """
-hosts:
-    - foobar
-"""
+        content = dedent("""
+            hosts:
+                - foobar
+            """)
         self.mock_open.return_value = MagicMock(
             spec=file, wraps=StringIO(content))
 
@@ -37,16 +38,16 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_load_meta_target_file(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar42
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar42
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
@@ -63,22 +64,22 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_load_recursed_meta_target_files(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar42
-includes:
-    - sub-sub-target
-"""
-        subsubcontent = """
-hosts:
-    - foobar4242
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar42
+            includes:
+                - sub-sub-target
+            """)
+        subsubcontent = dedent("""
+            hosts:
+                - foobar4242
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
@@ -98,18 +99,18 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_load_recursed_meta_target_files_once(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar42
-includes:
-    - foobaz42
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar42
+            includes:
+                - foobaz42
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/sub-target/target':
@@ -126,18 +127,18 @@ includes:
         self.assertEqual(result, expect)
 
     def test_should_load_recursed_meta_target_files_once_with_same_host(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar01
-includes:
-    - foobaz42
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - foobaz42
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/../sub-target/target':
@@ -154,17 +155,17 @@ includes:
         self.assertEqual(result, expect)
 
     def test_should_add_hosts_only_once(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar42
-    - foobar01
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar42
+                - foobar01
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
@@ -181,17 +182,17 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_add_hosts_only_once_other_format(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar42 foobar23
-    - foobar01
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar42 foobar23
+                - foobar01
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
@@ -209,15 +210,15 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_cope_with_targets_only_containing_includes(self):
-        content = """
-includes:
-    -   sub-target
-"""
-        subcontent = """
-hosts:
-    - foobar01
-    - foobar42
-"""
+        content = dedent("""
+            includes:
+                -   sub-target
+            """)
+        subcontent = dedent("""
+            hosts:
+                - foobar01
+                - foobar42
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
@@ -234,12 +235,12 @@ hosts:
         self.assertEqual(result, expect)
 
     def test_should_raise_exception_when_loading_non_existing_file(self):
-        content = """
-hosts:
-    - foobar01
-includes:
-    - sub-target
-"""
+        content = dedent("""
+            hosts:
+                - foobar01
+            includes:
+                - sub-target
+            """)
 
         def my_open(filename):
             if filename == '/foo/bar/foobaz42/target':
