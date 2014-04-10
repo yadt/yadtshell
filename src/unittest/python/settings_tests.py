@@ -1,7 +1,9 @@
-import yadtshell
-import unittest
-from mock import patch, MagicMock
 from StringIO import StringIO
+import unittest
+
+from mock import patch, MagicMock
+
+import yadtshell
 from yadtshell.settings import SettingsError
 
 
