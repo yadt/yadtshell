@@ -249,11 +249,10 @@ def load_settings_and_create_dirs(log_to_file=True):
         logger.debug(
             '"view" file not found, falling back to default values: %s' %
             VIEW_SETTINGS)
-
-    hosts_condensed_file = open(os.path.join(OUT_DIR, 'hosts_condensed'), 'w')
-    print >> hosts_condensed_file, ' '.join(
-        condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts'])))
-    hosts_condensed_file.close()
+    hosts_condensed_filename = os.path.join(OUT_DIR, 'hosts_condensed')
+    with open(hosts_condensed_filename, 'w') as hosts_condensed_file:
+        condensed = condense_hosts2(condense_hosts(TARGET_SETTINGS['hosts']))
+        hosts_condensed_file.write(' '.join(condensed))
 
     def list_selected_hosts():
         return 'You are working now on %s\n\nas full list: %s\n' % (
