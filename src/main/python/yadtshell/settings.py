@@ -134,8 +134,7 @@ def _load_target_file(target_filename, targets_dir, target_basename, visited=Non
             targets_dir, include, target_basename)
         subtarget_settings = _load_target_file(
             subtarget_filename, targets_dir, target_basename, visited)
-        for host in subtarget_settings.get('hosts', []):
-            target_settings['hosts'].append(host)
+        target_settings['hosts'].extend(subtarget_settings.get('hosts', []))
     return target_settings
 
 
