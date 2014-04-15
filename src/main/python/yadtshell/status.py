@@ -227,7 +227,11 @@ def fetch_readonly_service(ignored, components):
 
 
 def handle_readonly_state(results, components):
-    print results
+    for success, protocol_or_failure in results:
+        actual_state = yadtshell.settings.UP if success else yadtshell.settings.DOWN
+        uri = protocol_or_failure.component.uri if success else protocol_or_failure.value.component.uri
+        components[uri].state = actual_state
+        logger.debug("Readonly status for %s : %s" % (uri, success))
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):

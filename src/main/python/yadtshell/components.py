@@ -37,6 +37,7 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
+
     """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
 
     Note that the `.host` attribute is always a string, not a Host instance.
@@ -157,6 +158,7 @@ class Component(object):
 
 
 class MissingComponent(Component):
+
     """TODO(rwill): What is the usecase for this? Add tests or remove it.
     """
 
@@ -174,9 +176,14 @@ class ReadonlyService(Component):
         self.state = yadtshell.settings.UNKNOWN
 
     def status(self):
-        return self.remote_call(
+        status_command = self.remote_call(
             self._retrieve_service_call(yadtshell.settings.STATUS),
             tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
+        status_protocol = YadtProcessProtocol(self, status_command, out_log_level=logging.INFO)
+        cmdline = shlex.split(status_protocol.cmd)
+        reactor.spawnProcess(status_protocol, cmdline[0], cmdline, None)
+
+        return status_protocol.deferred
 
     def _retrieve_service_call(self, action):
         return 'yadt-service-%s %s' % (action, self.name)
@@ -250,6 +257,7 @@ class ComponentSet(set):
 
 
 class AbstractHost(Component):
+
     def __init__(self, fqdn):
         # we need to set those values first, because Component.__init__ requires them on its `host` argument ;)
         self.fqdn = fqdn
@@ -263,6 +271,7 @@ class AbstractHost(Component):
 
 
 class Host(AbstractHost):
+
     """Note: `Host.name`, `Host.host` and `Host.hostname` are all the same value.
     We need `.host` and `.name` because they are part of Component, but when
     `Component.host` is renamed to Component.hostname, we will at least have
@@ -439,6 +448,7 @@ class UnreachableHost(AbstractHost):
 
 
 class Artefact(Component):
+
     """`version` is numeric
     `revision` is either 'next' or 'current'. (Use constants in yadtshell.settings!)
     """

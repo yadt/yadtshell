@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Arne Hilmann, Marcel Wolf'
+__author__ = 'Arne Hilmann, Marcel Wolf, Maximilien Riehl, Valentin Haenel'
 
 import string
 import unittest
@@ -52,6 +52,8 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain', template=STATUS_JSON_TEMPLATE))
+            when.calling('ssh').at_least_with_arguments('it01.domain',
+                                                        'yadt-command yadt-service-status missing_service').then_return(0)
 
         actual_return_code = self.execute_command('yadtshell status')
 
@@ -59,8 +61,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as verify:
+                # fetch full initial status
                 verify.called('ssh').at_least_with_arguments(
                     'it01.domain').and_input('/usr/bin/yadt-status')
+                # fetch missing read-only information
+                verify.called('ssh').at_least_with_arguments('it01.domain',
+                                                             'yadt-command yadt-service-status missing_service')
 
             complete_verify.finished()
 
