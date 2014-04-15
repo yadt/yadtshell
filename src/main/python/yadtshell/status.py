@@ -208,6 +208,28 @@ def add_artefact(components, host, name_version, revision):
     components[artefact.revision_uri] = artefact
 
 
+def filter_missing_services(components):
+    return [c for c in components.itervalues()
+            if isinstance(c, yadtshell.components.MissingComponent) and
+            c.type == yadtshell.settings.SERVICE]
+
+
+def fetch_readonly_service(ignored, components):
+    missings = filter_missing_services(components)
+    missing_deferreds = []
+    for missing in missings:
+        host = components.get("host://%s" % missing.host,
+                              yadtshell.components.Host(missing.host))
+        readonly_service = yadtshell.components.ReadonlyService(host, missing.name)
+        components[missing.uri] = readonly_service
+        missing_deferreds.append(readonly_service.status())
+    return defer.DeferredList(missing_deferreds, consumeErrors=True)
+
+
+def handle_readonly_state(results, components):
+    print results
+
+
 def status(hosts=None, include_artefacts=True, **kwargs):
     yadtshell.settings.ybc.connect()
     if type(hosts) is str:
@@ -426,6 +448,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(check_responses)
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
+    dl.addCallback(fetch_readonly_service, components)
+    dl.addCallback(handle_readonly_state, components)
     dl.addCallback(yadtshell.info, components=components)
     dl.addErrback(yadtshell.twisted.report_error, logger.error, include_stacktrace=False)
 

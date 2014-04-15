@@ -167,6 +167,21 @@ class MissingComponent(Component):
         self.state = yadtshell.settings.MISSING
 
 
+class ReadonlyService(Component):
+
+    def __init__(self, host, name, settings=None):
+        Component.__init__(self, yadtshell.settings.SERVICE, host, name)
+        self.state = yadtshell.settings.UNKNOWN
+
+    def status(self):
+        return self.remote_call(
+            self._retrieve_service_call(yadtshell.settings.STATUS),
+            tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
+
+    def _retrieve_service_call(self, action):
+        return 'yadt-service-%s %s' % (action, self.name)
+
+
 class ComponentDict(dict):
 
     def __init__(self):
