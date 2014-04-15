@@ -36,7 +36,7 @@ STATUS_JSON_TEMPLATE = string.Template("""
   },
   "services":[
     "service":{
-        "needs_services": ["missing_service"],
+        "needs_services": ["service://foo/missing_service"],
         "needs_artefacts": ["missing_artefact"],
     }
   ]
@@ -52,23 +52,20 @@ class Test (integrationtest_support.IntegrationTestSupport):
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain', template=STATUS_JSON_TEMPLATE))
-            when.calling('ssh').at_least_with_arguments('it01.domain',
+            when.calling('ssh').at_least_with_arguments('foo',
                                                         'yadt-command yadt-service-status missing_service').then_return(3)
 
-        actual_return_code = self.execute_command('yadtshell status')
+        actual_return_code = self.execute_command('yadtshell status -v')
 
         self.assertEqual(0, actual_return_code)
 
-        with self.verify() as complete_verify:
-            with complete_verify.filter_by_argument('it01.domain') as verify:
-                # fetch full initial status
-                verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
-                # fetch missing read-only information
-                verify.called('ssh').at_least_with_arguments('it01.domain',
-                                                             'yadt-command yadt-service-status missing_service')
-
-            complete_verify.finished()
+        with self.verify() as verify:
+            # fetch full initial status
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
+            # fetch missing read-only information
+            verify.called('ssh').at_least_with_arguments('foo',
+                                                         'yadt-command yadt-service-status missing_service')
 
 
 if __name__ == '__main__':

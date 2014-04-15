@@ -59,16 +59,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         self.assertEqual(0, actual_return_code)
 
-        with self.verify() as complete_verify:
-            with complete_verify.filter_by_argument('it01.domain') as verify:
-                # fetch full initial status
-                verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
-                # fetch missing read-only information
-                verify.called('ssh').at_least_with_arguments('it01.domain',
-                                                             'yadt-command yadt-service-status missing_service')
+        with self.verify() as verify:
+            # fetch full initial status
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
+            # fetch missing read-only information
+            verify.called('ssh').at_least_with_arguments('it01.domain',
+                                                         'yadt-command yadt-service-status missing_service')
 
-            complete_verify.finished()
 
 if __name__ == '__main__':
     unittest.main()
