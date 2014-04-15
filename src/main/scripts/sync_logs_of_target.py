@@ -32,6 +32,7 @@ log_dir = yadtshell.settings.LOG_DIR_PREFIX
 logger.info('syncing/cleaning target %s' % name)
 logger.info('local log dir: %s' % log_dir)
 
+
 def log_output(output, logger):
     for line in output.splitlines():
         if line:
@@ -61,4 +62,3 @@ for host in hosts:
     host_logger.info('--------')
 
 logger.info('done')
-
