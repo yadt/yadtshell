@@ -23,8 +23,10 @@ import yadtshell.util
 
 logger = logging.getLogger('analyzetarget')
 
+
 def pretty_name(name):
     return name.replace('service://', '')
+
 
 def analyze():
     components = yadtshell.util.restore_current_state()
@@ -43,4 +45,3 @@ def analyze():
 
 if __name__ == "__main__":
     analyze()
-
