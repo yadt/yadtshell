@@ -4,12 +4,72 @@ import unittest
 from mock import Mock, patch, call
 from twisted.internet import defer
 
+from yadtshell.status import (handle_readonly_state, fetch_readonly_service)
+from yadtshell.components import MissingComponent
+
+
+class ReadonlyStateTests(unittest.TestCase):
+
+    def test_should_set_state_to_up_when_status_deferred_succeeds(self):
+        components = {
+            'service://example/stuff': Mock()
+        }
+        # uri -> protocol.component.uri
+        protocol = Mock(component=Mock(uri="service://example/stuff"))
+        results = [(True, protocol)]
+
+        handle_readonly_state(results, components)
+
+        self.assertEquals(components['service://example/stuff'].state, 'up')
+
+    def test_should_set_state_to_down_when_status_deferred_succeeds(self):
+        components = {
+            'service://example/stuff': Mock()
+        }
+        # uri -> failure.value.component.uri
+        failure = Mock(value=Mock(component=Mock(uri="service://example/stuff")))
+        results = [(False, failure)]
+
+        handle_readonly_state(results, components)
+
+        self.assertEquals(components['service://example/stuff'].state, 'down')
+
+    def test_should_set_mixed_states_based_on_deferred_success(self):
+        components = {
+            'service://example/win': Mock(),
+            'service://example/fail': Mock(),
+        }
+        win_protocol = Mock(component=Mock(uri="service://example/win"))
+        failure = Mock(value=Mock(component=Mock(uri="service://example/fail")))
+        results = [(True, win_protocol), (False, failure)]
+
+        handle_readonly_state(results, components)
+
+        self.assertEquals(components['service://example/fail'].state, 'down')
+        self.assertEquals(components['service://example/win'].state, 'up')
+
+    def test_fetch_readonly_service_returns_empty_on_empty_components(self):
+        received = fetch_readonly_service('', {})
+        self.assertEquals([], received.result)
+
+    @patch('yadtshell.components.ReadonlyService.status')
+    @patch('yadtshell._status.defer.DeferredList')
+    def test_fetch_readonly_service(self, deferred_list_mock, status_mock):
+        components = {
+            'service://foo/missing': MissingComponent('service://foo/missing'),
+            'service://bar/missing': MissingComponent('service://bar/missing'),
+        }
+        status_mock.return_value = 'foo'
+        fetch_readonly_service('', components)
+        deferred_list_mock.assert_called_with(['foo', 'foo'], consumeErrors=True)
+
 
 class MyCustomService(yadtshell.components.Service):
     pass
 
-
 # TODO(rwill): break up tests into different classes so we can have different setUp() for each group.
+
+
 class StatusTests(unittest.TestCase):
     # TODO(rwill): make sure no actual files are read or written. (Always mock `os` module...??)
 
