@@ -106,7 +106,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
     @patch('yadtshell.util.restore_current_state')
     def TEMPORARILY_IGNORED_test_should_render_unreachable_hosts(self,
-                                             component_pool):
+                                                                 component_pool):
         components = yadtshell.components.ComponentDict()
         components['foobar42'] = yadtshell.components.UnreachableHost(
             'foobar42')
@@ -205,7 +205,7 @@ ${NORMAL}
 
     @patch('yadtshell.util.restore_current_state')
     def TEMPORARILY_IGNORED_test_should_render_artefact_problems_when_state_is_not_up(self,
-                                                                  component_pool):
+                                                                                      component_pool):
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED,
             artefact_state=yadtshell.settings.MISSING)
@@ -256,8 +256,8 @@ ${NORMAL}
     @patch('time.time')
     @patch('yadtshell.util.restore_current_state')
     def TEMPORARILY_IGNORED_test_should_render_matrix_for_one_host(self,
-                                               component_pool,
-                                               mock_time):
+                                                                   component_pool,
+                                                                   mock_time):
         mock_time.return_value = 1
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
