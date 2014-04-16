@@ -471,6 +471,7 @@ class Service(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
+        settings = settings or {}
         self.needs_services = []
         self.needs_artefacts = []
         self.needs.add(host.uri)
