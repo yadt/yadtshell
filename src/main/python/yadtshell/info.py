@@ -101,23 +101,24 @@ def info(logLevel=None, full=False, components=None, **kwargs):
         else:
             _render_updates_based_on_name_schema(components, host, full)
 
-    print()
+#    print()
+#
+#    condensed = yadtshell.helper.condense_hosts2(
+#        yadtshell.helper.condense_hosts(result))
+#    components_with_problems = [c for c in condensed
+#                                if (c[0].startswith(yadtshell.settings.ARTEFACT) or c[0].startswith(yadtshell.settings.CONFIG))
+#                                and yadtshell.util.not_up(c[1])]
+#    if components_with_problems:
+#        print('problems')
+#        for c in components_with_problems:
+#            print(yadtshell.util.render_component_state(c[0], c[1]))
+#        print()
 
-    condensed = yadtshell.helper.condense_hosts2(
-        yadtshell.helper.condense_hosts(result))
-    components_with_problems = [c for c in condensed
-                                if (c[0].startswith(yadtshell.settings.ARTEFACT) or c[0].startswith(yadtshell.settings.CONFIG))
-                                and yadtshell.util.not_up(c[1])]
-    if components_with_problems:
-        print('problems')
-        for c in components_with_problems:
-            print(yadtshell.util.render_component_state(c[0], c[1]))
-        print()
-
+    many_spaces = " " * 70  # TODO needs smarter algorithm for colored box
     for missing_component in [c for c in components.values() if isinstance(c,
                               yadtshell.components.MissingComponent)]:
-        print(render_red('\nconfig problem: missing %s\n' %
-              missing_component.uri))
+        print(render_red('%s\nconfig problem: missing %s\n%s' %
+              (many_spaces, missing_component.uri, many_spaces)))
 
     for service in services:
         if getattr(service, 'service_artefact_problem', None):
