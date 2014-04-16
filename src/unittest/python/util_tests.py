@@ -9,9 +9,41 @@ from yadtshell.util import (inbound_deps_on_same_host,
                             calculate_max_tries_for_interval_and_delay,
                             render_state,
                             restore_current_state,
-                            get_mtime_of_current_state)
+                            get_mtime_of_current_state,
+                            filter_missing_services)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
-from yadtshell.components import (Host, Service)
+from yadtshell.components import (Host,
+                                  Service,
+                                  MissingComponent,
+                                  )
+
+
+class MissingServiceTests(unittest.TestCase):
+
+    def test_should_return_missing_services(self):
+        components = {
+            'service://foo/exists': Service(Mock(), 'exists'),
+            'service://foo/missing': MissingComponent('service://foo/missing'),
+            'service://bar/missing': MissingComponent('service://bar/missing'),
+            'artefact://bar/artefact': MissingComponent('artefact://bar/artefact')
+        }
+
+        missing_services = filter_missing_services(components)
+
+        self.assertEquals(missing_services, [
+            components['service://foo/missing'],
+            components['service://bar/missing'],
+        ])
+
+    def test_should_return_empty_list_when_no_services_are_missing(self):
+        components = {
+            'service://foo/exists': Service(Mock(), 'exists'),
+            'artefact://bar/artefact': MissingComponent('artefact://bar/artefact')
+        }
+
+        missing_services = filter_missing_services(components)
+
+        self.assertEquals(missing_services, [])
 
 
 class ServiceOrderingTests(unittest.TestCase):
