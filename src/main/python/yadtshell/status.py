@@ -234,9 +234,7 @@ def handle_readonly_state(results, components):
         actual_state = yadtshell.settings.UP if success else yadtshell.settings.DOWN
         uri = protocol_or_failure.component.uri if success else protocol_or_failure.value.component.uri
         components[uri].state = actual_state
-        logger.debug("Readonly status for %s : %s -> %s" %
-                     (uri, success, actual_state))
-        print(inspect.getmembers(components[uri]))
+        logger.debug("Readonly status for %s : %s -> %s" % (uri, success, actual_state))
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
@@ -370,6 +368,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         compute_dependency_scores(components)
 
+    def store_status_locally(ignored, components):
         def _open_component_file(component_type):
             return open(os.path.join(yadtshell.settings.OUT_DIR, component_type), 'w')
 
@@ -467,6 +466,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(build_unified_dependencies_tree)
     dl.addCallback(fetch_readonly_service, components)
     dl.addCallback(handle_readonly_state, components)
+    dl.addCallback(store_status_locally, components)
     dl.addCallback(yadtshell.info, components=components)
     dl.addErrback(yadtshell.twisted.report_error,
                   logger.error, include_stacktrace=False)
