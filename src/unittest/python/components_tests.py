@@ -77,7 +77,7 @@ class ReadonlyServiceTests(unittest.TestCase):
         host = yadtshell.components.Host('example.com')
         readonly_service = yadtshell.components.ReadonlyService(host, 'service_name')
         yadt_process_protocol_mock.return_value = Mock(cmd='command argument')
-        readonly_service.status()
+        status_deferred = readonly_service.status()
         MOCK_POSITIONAL_ARGS, SECOND_ARG = 0, 1
         command_string = yadt_process_protocol_mock.call_args[MOCK_POSITIONAL_ARGS][SECOND_ARG]
         yadt_process_protocol_mock.assert_called_once_with(readonly_service, ANY, out_log_level=ANY)
@@ -87,6 +87,7 @@ class ReadonlyServiceTests(unittest.TestCase):
                      '"yadt-command yadt-service-status service_name" $',
                      command_string
                      ) is not None)
+        self.assertTrue(status_deferred is yadt_process_protocol_mock.return_value.deferred)
 
 
 class ArtefactTests(unittest.TestCase):
