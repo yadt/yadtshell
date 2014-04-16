@@ -59,7 +59,8 @@ def _show_ignored_services(services):
     for service in services:
         if hasattr(service, 'ignored'):
             ignored_services = True
-            print(render_yellow('\n%20s is ignored\n%10s' % (service, service.ignored.get('message', 'no message'))))
+            print(render_yellow('\n%20s is ignored\n%10s' %
+                  (service, service.ignored.get('message', 'no message'))))
 
     if ignored_services:
         print()  # separate ignored services from locked hosts
@@ -217,7 +218,8 @@ def render_highlighted_differences(*args):
 def calculate_info_view_settings():
     original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
     try:
-        stty = Popen(['stty', 'size'], stdout=PIPE, stderr=PIPE).communicate()[0]
+        stty = Popen(
+            ['stty', 'size'], stdout=PIPE, stderr=PIPE).communicate()[0]
         cols = int(stty.split()[1])
     except:
         cols = 80
@@ -239,6 +241,11 @@ def calculate_info_view_settings():
     return ['matrix', 'color', width]
 
 
+def render_readonly_services(components):
+    for ro_service in yadtshell.util.filter_missing_services(components):
+        print("%s: %s" % (ro_service.uri, ro_service.state))
+
+
 def render_services_matrix(components=None, **kwargs):
     if not components:
         components = yadtshell.util.restore_current_state()
@@ -247,6 +254,7 @@ def render_services_matrix(components=None, **kwargs):
     for hosts in yadtshell.settings.TARGET_SETTINGS['original_hosts']:
         _render_services_matrix(
             components, he.expand(hosts), info_view_settings, *kwargs)
+    render_readonly_services(components)
     render_legend(info_view_settings)
 
 
