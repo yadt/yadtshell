@@ -224,6 +224,7 @@ def fetch_readonly_service(ignored, components):
                               yadtshell.components.Host(missing.host))
         readonly_service = yadtshell.components.ReadonlyService(
             host, missing.name)
+        readonly_service.needed_by = missing.needed_by
         components[missing.uri] = readonly_service
         missing_deferreds.append(readonly_service.status())
     return defer.DeferredList(missing_deferreds, consumeErrors=True)
