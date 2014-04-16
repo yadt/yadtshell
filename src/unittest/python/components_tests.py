@@ -145,7 +145,6 @@ class HostTests(unittest.TestCase):
     @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_create_wrapping_command_with_adequate_environment(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
-        yadtshell.settings.SSH = 'super-ssh'
         mock_host = Mock(yadtshell.components.Host)
         mock_host.create_remote_log_filename.return_value = 'logfilename'
         mock_host.fqdn = 'foobar42.domain'
@@ -154,12 +153,11 @@ class HostTests(unittest.TestCase):
         command = yadtshell.components.Host.remote_call(mock_host, 'test')
 
         self.assertEqual(
-            command, 'super-ssh foobar42.domain WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+            command, 'ssh foobar42.domain WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
     @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_use_host_when_component_has_no_fqdn(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
-        yadtshell.settings.SSH = 'super-ssh'
         mock_host = Mock(yadtshell.components.Host)
         mock_host.create_remote_log_filename.return_value = 'logfilename'
         mock_host.host = 'foobar42'
@@ -168,7 +166,7 @@ class HostTests(unittest.TestCase):
         command = yadtshell.components.Host.remote_call(mock_host, 'test')
 
         self.assertEqual(
-            command, 'super-ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+            command, 'ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
     def test_set_attrs_with_obsolete_services_format(self):
         data = {"fqdn": "foo-boing",
