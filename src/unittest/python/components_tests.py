@@ -1,7 +1,10 @@
+import re
 import unittest
-from mock import Mock, patch
-import yadtshell
 import yaml
+
+from mock import Mock, patch, ANY
+
+import yadtshell
 
 
 class ServiceTests(unittest.TestCase):
@@ -48,6 +51,42 @@ class ServiceTests(unittest.TestCase):
             self.mock_service, 'test')
 
         self.assertEqual(service_call, 'yadt-service-test internet')
+
+
+class ReadonlyServiceTests(unittest.TestCase):
+
+    def test_should_default_to_unknown_state(self):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'NAME')
+        self.assertEquals(yadtshell.settings.UNKNOWN, readonly_service.state)
+
+    @patch('yadtshell.components.reactor')
+    def test_status_calls_spawn_process_with_service_status(self, reactor_mock):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'NAME')
+        readonly_service.status()
+        expected_command = ['ssh', 'example.com',
+                            ANY, ANY, 'yadt-command yadt-service-status NAME']
+        reactor_mock.spawnProcess.assert_called_once_with(
+            ANY, 'ssh', expected_command, None)
+
+    @patch('yadtshell.components.reactor')
+    @patch('yadtshell.components.YadtProcessProtocol')
+    def test_status_returns_yadt_process_protocol_deferred(self,
+                                                           yadt_process_protocol_mock, _):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'service_name')
+        yadt_process_protocol_mock.return_value = Mock(cmd='command argument')
+        readonly_service.status()
+        MOCK_POSITIONAL_ARGS, SECOND_ARG = 0, 1
+        command_string = yadt_process_protocol_mock.call_args[MOCK_POSITIONAL_ARGS][SECOND_ARG]
+        yadt_process_protocol_mock.assert_called_once_with(readonly_service, ANY, out_log_level=ANY)
+        self.assertTrue(
+            re.match('^ssh example.com WHO=".*"'
+                     ' YADT_LOG_FILE=".*" '
+                     '"yadt-command yadt-service-status service_name" $',
+                     command_string
+                     ) is not None)
 
 
 class ArtefactTests(unittest.TestCase):

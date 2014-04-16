@@ -177,7 +177,7 @@ class ReadonlyService(Component):
 
     def status(self):
         status_command = self.remote_call(
-            self._retrieve_service_call(yadtshell.settings.STATUS),
+            'yadt-service-%s %s' % (yadtshell.settings.STATUS, self.name),
             tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
         status_protocol = YadtProcessProtocol(self, status_command, out_log_level=logging.INFO)
         cmdline = shlex.split(status_protocol.cmd)
