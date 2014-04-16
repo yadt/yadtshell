@@ -243,8 +243,13 @@ def calculate_info_view_settings():
 
 
 def render_readonly_services(components):
-    for ro_service in yadtshell.util.filter_missing_services(components):
-        print("%s: %s" % (ro_service.uri, ro_service.state))
+    ro_services = [c for c in components.itervalues()
+                   if isinstance(c, yadtshell.components.ReadonlyService)]
+    if ro_services:
+        for ro_service in ro_services:
+            print("readonly %s is %s" % (ro_service.uri, ro_service.state))
+            print("    needed by %s" % " ".join(ro_service.needed_by))
+        print()
 
 
 def render_services_matrix(components=None, **kwargs):
