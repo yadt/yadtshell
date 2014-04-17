@@ -26,6 +26,7 @@ import yaml
 import shlex
 
 from twisted.internet import reactor, task
+import twisted.internet.defer as defer
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
@@ -186,11 +187,9 @@ class ReadonlyService(Component):
         return status_protocol.deferred
 
     def start(self):
-        import twisted.internet.defer as defer
         return defer.succeed(None)
 
     def stop(self):
-        import twisted.internet.defer as defer
         return defer.fail(None)
 
     def _retrieve_service_call(self, action):
