@@ -216,7 +216,7 @@ def add_artefact(components, host, name_version, revision):
     components[artefact.revision_uri] = artefact
 
 
-def fetch_readonly_service(ignored, components):
+def fetch_missing_services_as_readonly(ignored, components):
     missings = filter_missing_services(components)
     missing_deferreds = []
     for missing in missings:
@@ -230,7 +230,7 @@ def fetch_readonly_service(ignored, components):
     return defer.DeferredList(missing_deferreds, consumeErrors=True)
 
 
-def handle_readonly_state(results, components):
+def handle_readonly_service_states(results, components):
     for success, protocol_or_failure in results:
         actual_state = yadtshell.settings.UP if success else yadtshell.settings.DOWN
         uri = protocol_or_failure.component.uri if success else protocol_or_failure.value.component.uri
@@ -465,8 +465,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(check_responses)
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
-    dl.addCallback(fetch_readonly_service, components)
-    dl.addCallback(handle_readonly_state, components)
+    dl.addCallback(fetch_missing_services_as_readonly, components)
+    dl.addCallback(handle_readonly_service_states, components)
     dl.addCallback(store_status_locally, components)
     dl.addCallback(yadtshell.info, components=components)
     dl.addErrback(yadtshell.twisted.report_error,

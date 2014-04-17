@@ -95,7 +95,7 @@ class ActionManager(object):
                               (component.uri, component.state))
             self.orig_components[component.uri].state = component.state
             return
-        if isinstance(component, yadtshell.components.Service):
+        if isinstance(component, yadtshell.components.Service) or isinstance(component, yadtshell.components.ReadonlyService):
             status_cmd = 'status'
             if hasattr(component, 'immediate_status'):
                 status_cmd = 'immediate_status'

@@ -26,6 +26,7 @@ import yaml
 import shlex
 
 from twisted.internet import reactor, task
+import twisted.internet.defer as defer
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
@@ -179,11 +180,17 @@ class ReadonlyService(Component):
         status_command = self.remote_call(
             'yadt-service-%s %s' % (yadtshell.settings.STATUS, self.name),
             tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
-        status_protocol = YadtProcessProtocol(self, status_command, out_log_level=logging.INFO)
+        status_protocol = YadtProcessProtocol(self, status_command, out_log_level=logging.DEBUG)
         cmdline = shlex.split(status_protocol.cmd)
         reactor.spawnProcess(status_protocol, cmdline[0], cmdline, None)
 
         return status_protocol.deferred
+
+    def start(self):
+        return defer.succeed(None)
+
+    def stop(self):
+        return defer.fail(None)
 
     def _retrieve_service_call(self, action):
         return 'yadt-service-%s %s' % (action, self.name)
