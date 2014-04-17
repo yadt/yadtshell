@@ -216,8 +216,15 @@ def render_highlighted_differences(*args):
     return yadtshell.settings.term.render(highlight_differences(*args))
 
 
-def calculate_info_view_settings():
-    original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
+def calculate_info_view_settings(nr_of_hosts=None):
+    if not nr_of_hosts:
+        original_hosts = yadtshell.settings.TARGET_SETTINGS['original_hosts']
+
+        logger.debug("expanding hosts")
+        he = hostexpand.HostExpander.HostExpander()
+        nr_of_hosts = max([len(he.expand(hosts)) for hosts in original_hosts])
+        logger.debug("expanded hosts")
+
     try:
         stty = Popen(
             ['stty', 'size'], stdout=PIPE, stderr=PIPE).communicate()[0]
@@ -225,18 +232,12 @@ def calculate_info_view_settings():
     except:
         cols = 80
 
-    logger.debug("expanding hosts")
-    he = hostexpand.HostExpander.HostExpander()
-    max_row_length = max([len(he.expand(hosts)) for hosts in original_hosts])
-    logger.debug("expanded hosts")
-
-    width = '1col'
-
     RIGHT_MARGIN_WIDTH = 40
 
-    if max_row_length * 4 + RIGHT_MARGIN_WIDTH <= cols:
+    width = '1col'
+    if nr_of_hosts * 4 + RIGHT_MARGIN_WIDTH <= cols:
         width = '3cols'
-    if max_row_length * 10 + RIGHT_MARGIN_WIDTH <= cols:
+    if nr_of_hosts * 10 + RIGHT_MARGIN_WIDTH <= cols:
         width = 'maxcols'
 
     return ['matrix', 'color', width]
@@ -245,11 +246,55 @@ def calculate_info_view_settings():
 def render_readonly_services(components):
     ro_services = [c for c in components.itervalues()
                    if isinstance(c, yadtshell.components.ReadonlyService)]
-    if ro_services:
-        for ro_service in ro_services:
-            print("readonly %s is %s" % (ro_service.uri, ro_service.state))
-            print("    needed by %s" % " ".join(ro_service.needed_by))
+    if not ro_services:
+        return
+    info_view_settings = calculate_info_view_settings(1)
+    hosts = {}
+    for ro_service in ro_services:
+        hosts.setdefault(ro_service.host, []).append(ro_service)
+    icons, _ = calc_icon_strings(info_view_settings)
+    for hostname in sorted(hosts.keys()):
+        print("  %s" % hostname)
         print()
+        for s in hosts[hostname]:
+            print("  %s  readonly-service %s (needed by %s)" % (calc_state_string(s, icons), s.name, " ".join(s.needed_by)))
+        print()
+    print()
+
+
+def calc_state_string(service, icons):
+    if not service:
+        return icons['NA']
+    if getattr(service, 'ignored', False):
+        if service.is_up():
+            return icons['UP_IGNORED']
+        elif service.is_unknown():
+            return icons['UNKNOWN_IGNORED']
+        else:
+            return icons['DOWN_IGNORED']
+    else:
+        if service.is_up():
+            return icons['UP']
+        elif service.is_unknown():
+            return icons['UNKNOWN']
+        else:
+            return icons['DOWN']
+
+
+def calc_icon_strings(info_view_settings):
+    icons = get_icons()
+    separator = ''
+    if 'maxcols' in info_view_settings:
+        separator = '  '
+        for icon, string in icons.iteritems():
+            icons[icon] = '    %s    ' % string
+    elif '3cols' in info_view_settings:
+        separator = ' '
+        for icon, string in icons.iteritems():
+            icons[icon] = ' %s ' % string
+    if 'color' in info_view_settings:
+        icons = colorize(icons)
+    return icons, separator
 
 
 def render_services_matrix(components=None, **kwargs):
@@ -298,18 +343,7 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
     for rank, name in services:
         ranks[name] = rank
 
-    icons = get_icons()
-    separator = ''
-    if 'maxcols' in info_view_settings:
-        separator = '  '
-        for icon, string in icons.iteritems():
-            icons[icon] = '    %s    ' % string
-    elif '3cols' in info_view_settings:
-        separator = ' '
-        for icon, string in icons.iteritems():
-            icons[icon] = ' %s ' % string
-    if 'color' in info_view_settings:
-        icons = colorize(icons)
+    icons, separator = calc_icon_strings(info_view_settings)
     if 'maxcols' in info_view_settings:
         print('  %s' % separator.join(['%-9s' % host.host for host in hosts]))
     elif '3cols' in info_view_settings:
@@ -352,23 +386,7 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
             uri = yadtshell.uri.create(
                 yadtshell.settings.SERVICE, host.host, name)
             service = components.get(uri, None)
-            if service:
-                if getattr(service, 'ignored', False):
-                    if service.is_up():
-                        s.append(icons['UP_IGNORED'])
-                    elif service.is_unknown():
-                        s.append(icons['UNKNOWN_IGNORED'])
-                    else:
-                        s.append(icons['DOWN_IGNORED'])
-                else:
-                    if service.is_up():
-                        s.append(icons['UP'])
-                    elif service.is_unknown():
-                        s.append(icons['UNKNOWN'])
-                    else:
-                        s.append(icons['DOWN'])
-            else:
-                s.append(icons['NA'])
+            s.append(calc_state_string(service, icons))
             suffix = ''
             if getattr(service, 'is_frontservice', False):
                 suffix = '(frontservice)'
