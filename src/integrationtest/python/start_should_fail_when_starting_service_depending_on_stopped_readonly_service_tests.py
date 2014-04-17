@@ -52,17 +52,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it01.domain', template=STATUS_TEMPLATE))
             when.calling('ssh').at_least_with_arguments('foo',
-                                                        'yadt-command yadt-service-status readonly').then_return(0)
-            when.calling('ssh').at_least_with_arguments('it01.domain',
-                                                        'yadt-command yadt-service-start service').then_return(0)
-            when.calling('ssh').at_least_with_arguments('it01.domain',
-                                                        'yadt-command yadt-service-status service').then_return(0)
+                                                        'yadt-command yadt-service-status readonly').then_return(3)
+            when.calling('ssh').at_least_with_arguments('it01.domain').then_return(0)
 
         status_return_code = self.execute_command('yadtshell status')
         start_return_code = self.execute_command('yadtshell start service://it01/service -v')
 
         self.assertEqual(0, status_return_code)
-        self.assertEqual(0, start_return_code)
+        self.assertEqual(1, start_return_code)
 
         with self.verify() as verify:
 
@@ -72,21 +69,14 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments('foo',
                                                          'yadt-command yadt-service-status readonly')
 
+            # SSH multiplexing
+            verify.called('ssh').at_least_with_arguments('it01.domain', '-O', 'check')
+
             # check if dependent readonly service is still running
             verify.called('ssh').at_least_with_arguments('foo',
                                                          'yadt-command yadt-service-status readonly')
 
-            # ok runs, now we can start the actual service
-            verify.called('ssh').at_least_with_arguments('it01.domain',
-                                                         'yadt-command yadt-service-start service')
-            verify.called('ssh').at_least_with_arguments('it01.domain',
-                                                         'yadt-command yadt-service-status service')
-
-            # fetch final status
-            verify.called('ssh').at_least_with_arguments(
-                'it01.domain').and_input('/usr/bin/yadt-status')
-            verify.called('ssh').at_least_with_arguments('foo',
-                                                         'yadt-command yadt-service-status readonly')
+            # we cannot start the service, because the readonly service is stopped (return 3)
 
 if __name__ == '__main__':
     unittest.main()
