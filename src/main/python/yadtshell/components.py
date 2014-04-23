@@ -160,9 +160,6 @@ class Component(object):
 
 class MissingComponent(Component):
 
-    """TODO(rwill): What is the usecase for this? Add tests or remove it.
-    """
-
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
         Component.__init__(self, parts['type'], Host(parts['host']), parts['name'])
@@ -190,7 +187,7 @@ class ReadonlyService(Component):
         return defer.succeed(None)
 
     def stop(self):
-        return defer.fail(None)
+        return defer.fail(RuntimeError("Not allowed to stop readonly {0}".format(self.uri)))
 
     def _retrieve_service_call(self, action):
         return 'yadt-service-%s %s' % (action, self.name)

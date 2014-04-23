@@ -115,9 +115,10 @@ if uris:
 
     def is_a_valid_host_uri_or_other_uri(uri):
         if 'host://' not in uri:
-            return True
+            return not isinstance(components[uri], yadtshell.components.ReadonlyService)
         component = components[uri]
         return component.is_reachable()
+
     uris = filter(is_a_valid_host_uri_or_other_uri, uris)
 
     if not uris:
