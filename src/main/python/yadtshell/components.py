@@ -155,8 +155,6 @@ class Component(object):
 
 
 class MissingComponent(Component):
-    """TODO(rwill): What is the usecase for this? Add tests or remove it.
-    """
 
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
