@@ -173,6 +173,10 @@ class ReadonlyService(Component):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
         self.state = yadtshell.settings.UNKNOWN
 
+    def immediate_status(self):
+        logger.debug("Immediate status of readonly %s (no-op)" % self.uri)
+        return defer.succeed(0)
+
     def status(self):
         status_command = self.remote_call(
             'yadt-service-%s %s' % (yadtshell.settings.STATUS, self.name),
