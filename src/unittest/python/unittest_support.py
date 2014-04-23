@@ -99,7 +99,6 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
         components['service://foobar42/ro_up'] = ro_up
         components['service://foobar42/ro_down'] = ro_down
 
-
     return components
 
 
