@@ -105,8 +105,8 @@ class InfoMatrixRenderingTests(unittest.TestCase):
         return render_info_matrix_to_string(mock_print)
 
     @patch('yadtshell.util.restore_current_state')
-    def TEMPORARILY_IGNORED_test_should_render_unreachable_hosts(self,
-                                                                 component_pool):
+    def test_should_render_unreachable_hosts(self,
+                                             component_pool):
         components = yadtshell.components.ComponentDict()
         components['foobar42'] = yadtshell.components.UnreachableHost(
             'foobar42')
@@ -118,7 +118,6 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 ${BG_RED}${WHITE}${BOLD}
   foobar42 is unreachable!
 ${NORMAL}
-
   f
   o
   o
@@ -255,9 +254,9 @@ ${NORMAL}
 
     @patch('time.time')
     @patch('yadtshell.util.restore_current_state')
-    def TEMPORARILY_IGNORED_test_should_render_matrix_for_one_host(self,
-                                                                   component_pool,
-                                                                   mock_time):
+    def test_should_render_matrix_for_one_host(self,
+                                               component_pool,
+                                               mock_time):
         mock_time.return_value = 1
         component_pool.return_value = create_component_pool_for_one_host(
             host_state=yadtshell.settings.UPDATE_NEEDED)
@@ -271,7 +270,6 @@ ${BOLD}yadt info | test${NORMAL}
 target status
   foobar42                                       yit  0:0.0.1
                        (next) ${REVERSE}foo${NORMAL}  0:0.0.${REVERSE}0${NORMAL}
-
   f
   o
   o
