@@ -188,7 +188,6 @@ class ComponentDict(dict):
         return dict.get(self, self._key_(key), default)
 
     def __setitem__(self, key, value):
-        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
 
 
@@ -209,7 +208,6 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
-            # logger.warning('known keys: ' + ', '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
