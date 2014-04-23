@@ -182,10 +182,11 @@ class ComponentDict(dict):
         return dict.__getitem__(self, self._key_(key))
 
     def get(self, key, default=None):
-        if self._key_(key) not in self and self._add_when_missing_:
+        key = self._key_(key)
+        if key not in self and self._add_when_missing_:
             logger.debug('missing' + key)
-            self[self._key_(key)] = MissingComponent(key)  # (rwill) why no _key_ on RHS?
-        return dict.get(self, self._key_(key), default)
+            self[key] = MissingComponent(key)
+        return dict.get(self, key, default)
 
     def __setitem__(self, key, value):
         return dict.__setitem__(self, self._key_(key), value)
