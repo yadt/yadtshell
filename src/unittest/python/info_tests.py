@@ -230,6 +230,24 @@ ${NORMAL}
                        info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
+    def test_should_render_colored_readonly_services(self,
+                                                     component_pool):
+        yadtshell._info.calculate_info_view_settings = lambda *args: {'color': 'yes'}
+        component_pool.return_value = create_component_pool_for_one_host(add_readonly_services=True)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        rendered_ro_services = '''
+  foobar42
+
+  ${BG_RED}${WHITE}${BOLD}O${NORMAL}  readonly-service ro_down (needed by something a_dog)
+  ${BG_GREEN}${WHITE}${BOLD}|${NORMAL}  readonly-service ro_up (needed by me you)
+'''
+
+        self.assert_in(rendered_ro_services,
+                       info_matrix)
+
+    @patch('yadtshell.util.restore_current_state')
     def test_should_render_artefact_problems_when_state_is_not_up(self,
                                                                   component_pool):
         component_pool.return_value = create_component_pool_for_one_host(
