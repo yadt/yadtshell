@@ -184,7 +184,11 @@ class ReadonlyService(Component):
         return status_protocol.deferred
 
     def start(self):
-        return defer.succeed(None)
+        d = self.status()
+        def handle_error(failure):
+            raise RuntimeError("Cannot start readonly %s" % self.uri)
+        d.addErrback(handle_error)
+        return d
 
     def stop(self):
         return defer.fail(RuntimeError("Not allowed to stop readonly {0}".format(self.uri)))
