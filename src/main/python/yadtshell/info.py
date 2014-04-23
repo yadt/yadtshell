@@ -101,16 +101,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
         else:
             _render_updates_based_on_name_schema(components, host, full)
 
-    condensed = yadtshell.helper.condense_hosts2(
-        yadtshell.helper.condense_hosts(result))
-    components_with_problems = [c for c in condensed
-                                if (c[0].startswith(yadtshell.settings.ARTEFACT) or c[0].startswith(yadtshell.settings.CONFIG))
-                                and yadtshell.util.not_up(c[1])]
-    if components_with_problems:
-        print('problems')
-        for c in components_with_problems:
-            print(yadtshell.util.render_component_state(c[0], c[1]))
-        print()
+    print()
 
     many_spaces = " " * 70  # TODO needs smarter algorithm for colored box
     for missing_component in [c for c in components.values() if isinstance(c,

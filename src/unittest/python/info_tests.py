@@ -128,6 +128,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 ${BG_RED}${WHITE}${BOLD}
   foobar42 is unreachable!
 ${NORMAL}
+
   f
   o
   o
@@ -230,6 +231,18 @@ ${NORMAL}
                        info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
+    def test_should_render_missing_artefact_problems(self,
+                                                     component_pool):
+        component_pool.return_value = create_component_pool_for_one_host(
+            missing_artefact=True)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        self.assert_in(
+            "config problem: missing artefact://foobar42/missing",
+            info_matrix)
+
+    @patch('yadtshell.util.restore_current_state')
     def test_should_render_colored_readonly_services(self,
                                                      component_pool):
         yadtshell._info.calculate_info_view_settings = lambda *args: {'color': 'yes'}
@@ -246,22 +259,6 @@ ${NORMAL}
 
         self.assert_in(rendered_ro_services,
                        info_matrix)
-
-    @patch('yadtshell.util.restore_current_state')
-    def test_should_render_artefact_problems_when_state_is_not_up(self,
-                                                                  component_pool):
-        component_pool.return_value = create_component_pool_for_one_host(
-            host_state=yadtshell.settings.UPDATE_NEEDED,
-            artefact_state=yadtshell.settings.MISSING)
-
-        info_matrix = self._call_info_and_render_output_to_string()
-
-        self.assert_in('''
-problems
-${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/yit/0:0.0.1
-${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
-
-''', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_host_locked_by_other(self,
@@ -308,13 +305,13 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertEqual(info_matrix,
-                         '''
+        expected = '''
 ${BOLD}yadt info | test${NORMAL}
 
 target status
   foobar42                                       yit  0:0.0.1
                        (next) ${REVERSE}foo${NORMAL}  0:0.0.${REVERSE}0${NORMAL}
+
   f
   o
   o
@@ -335,7 +332,10 @@ legend: | up(todate),accessible  O down  ? unknown  io? ignored (up,down,unknown
 queried ${BG_GREEN}${WHITE}${BOLD}  0  ${NORMAL} seconds ago
 
 status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
-''')
+'''
+
+        self.assert_in(expected, info_matrix)
+        self.assertEqual(expected, info_matrix)
 
 
 class ValidateHighlightingTest(unittest.TestCase):

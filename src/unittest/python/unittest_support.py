@@ -31,7 +31,8 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
                                        artefact_state=yadtshell.settings.UP,
                                        host_locked_by_other=False,
                                        host_locked_by_me=False,
-                                       next_artefacts_present=False):
+                                       next_artefacts_present=False,
+                                       missing_artefact=False):
     components = yadtshell.components.ComponentDict()
 
     # create host components
@@ -98,6 +99,11 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
 
         components['service://foobar42/ro_up'] = ro_up
         components['service://foobar42/ro_down'] = ro_down
+
+    if missing_artefact:
+        uri = "artefact://foobar42/missing"
+        missing_artefact = yadtshell.components.MissingComponent(uri)
+        components[uri] = missing_artefact
 
     return components
 
