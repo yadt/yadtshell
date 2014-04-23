@@ -171,7 +171,7 @@ class ComponentDict(dict):
 
     def _key_(self, key):
         try:
-            return self._key_(key.uri)  # TODO(rwill): looks like the intention here is to return key.uri ??
+            return key.uri
         except AttributeError:
             return key
 
