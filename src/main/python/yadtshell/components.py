@@ -185,6 +185,7 @@ class ReadonlyService(Component):
 
     def start(self):
         d = self.status()
+
         def handle_error(failure):
             raise RuntimeError("Cannot start readonly %s" % self.uri)
         d.addErrback(handle_error)
