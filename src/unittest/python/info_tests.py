@@ -86,7 +86,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
-        yadtshell._info.calculate_info_view_settings = lambda: {}
+        yadtshell._info.calculate_info_view_settings = lambda *args: {}
         self.mock_term = Mock()
         self.mock_render = lambda unrendered: unrendered
         yadtshell.settings.term = self.mock_term
@@ -201,6 +201,23 @@ ${NORMAL}
         info_matrix = self._call_info_and_render_output_to_string()
 
         self.assert_in(' R  reboot required', info_matrix)
+
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_readonly_services(self,
+                                             component_pool):
+        component_pool.return_value = create_component_pool_for_one_host(add_readonly_services=True)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        rendered_ro_services = '''
+  foobar42
+
+  O  readonly-service ro_down (needed by )
+  |  readonly-service ro_up (needed by )
+'''
+
+        self.assert_in(rendered_ro_services,
+                       info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_artefact_problems_when_state_is_not_up(self,

@@ -23,6 +23,7 @@ def render_info_matrix_to_string(mocked_info_output):
 
 
 def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
+                                       add_readonly_services=False,
                                        add_services=False,
                                        service_state=yadtshell.settings.UP,
                                        host_reboot_after_update=False,
@@ -86,6 +87,16 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
         baz_service.dependency_score = 1
         components['service://foobar42/barservice'] = bar_service
         components['service://foobar42/bazservice'] = baz_service
+
+    if add_readonly_services:
+        ro_up = yadtshell.components.ReadonlyService(host, 'ro_up')
+        ro_up.state = yadtshell.settings.UP
+        ro_down = yadtshell.components.ReadonlyService(host, 'ro_down')
+        ro_down.state = yadtshell.settings.DOWN
+
+        components['service://foobar42/ro_up'] = ro_up
+        components['service://foobar42/ro_down'] = ro_down
+
 
     return components
 
