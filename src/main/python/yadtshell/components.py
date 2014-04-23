@@ -59,7 +59,7 @@ class Component(object):
         self.fqdn = host.fqdn
         self.uri = yadtshell.uri.create(self.type, self.host, self.name)
 
-        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)  # TODO(rwill): seems like dead code
+        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
 
         self.state = yadtshell.settings.UNKNOWN
         self.needs = set()
