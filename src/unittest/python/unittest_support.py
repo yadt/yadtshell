@@ -91,8 +91,10 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     if add_readonly_services:
         ro_up = yadtshell.components.ReadonlyService(host, 'ro_up')
         ro_up.state = yadtshell.settings.UP
+        ro_up.needed_by = ['me', 'you']
         ro_down = yadtshell.components.ReadonlyService(host, 'ro_down')
         ro_down.state = yadtshell.settings.DOWN
+        ro_down.needed_by = ['something', 'a_dog']
 
         components['service://foobar42/ro_up'] = ro_up
         components['service://foobar42/ro_down'] = ro_down

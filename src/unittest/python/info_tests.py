@@ -212,8 +212,8 @@ ${NORMAL}
         rendered_ro_services = '''
   foobar42
 
-  O  readonly-service ro_down (needed by )
-  |  readonly-service ro_up (needed by )
+  O  readonly-service ro_down (needed by something a_dog)
+  |  readonly-service ro_up (needed by me you)
 '''
 
         self.assert_in(rendered_ro_services,
