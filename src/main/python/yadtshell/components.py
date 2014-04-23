@@ -464,7 +464,6 @@ class Service(Component):
             self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT,
                                                 host.host,
                                                 n % locals() + "/" + yadtshell.settings.CURRENT))
-        # self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
 
         self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
             settings.get('state'),
