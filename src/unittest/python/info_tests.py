@@ -69,14 +69,24 @@ class CalculateInfoViewSettings(unittest.TestCase):
 class InfoMatrixRenderingTests(unittest.TestCase):
 
     def _patch_assert_in(self):
-        try:
-            self.assert_in = self.assertIn
-        except AttributeError:
-            def assert_in(element, container):
-                if element not in container:
-                    raise AssertionError(
-                        '{0} not found in {1}'.format(element, container))
-            self.assert_in = assert_in
+        def assert_in(element, container):
+            if element not in container:
+                separator_start = "< " * 36
+                separator_end = "> " * 36
+
+                raise AssertionError("""
+                     Expected to find
+{2}
+{0}
+{3}
+
+                     in
+
+{2}
+{1}
+{3}
+                     """.format(element, container, separator_start, separator_end))
+        self.assert_in = assert_in
 
     def setUp(self):
         self.he_patcher = patch(
