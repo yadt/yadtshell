@@ -40,7 +40,6 @@ class Component(object):
     """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
 
     Note that the `.host` attribute is always a string, not a Host instance.
-    TODO(rwill): rename it to `.hostname` or change it to a Host instance (as passed into constructor anyway).
     """
 
     def __init__(self, t, host, name):
