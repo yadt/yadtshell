@@ -184,6 +184,10 @@ def _determine_issued_command(failure):
 
 
 def report_error(failure, line_fun=None, include_stacktrace=True):
+    if getattr(failure, "handled", False):
+        return failure
+    failure.handled = True
+
     if line_fun is None:
         def line_fun(line):
             logger.debug(line)
