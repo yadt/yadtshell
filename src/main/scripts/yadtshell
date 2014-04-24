@@ -115,8 +115,12 @@ if uris:
 
     def is_a_valid_host_uri_or_other_uri(uri):
         if uri.startswith('host://'):
-            component = components[uri]
-            return component.is_reachable()
+            try:
+                component = components[uri]
+                return component.is_reachable()
+            except KeyError:
+                logger.warning("Skipping unknown %s" % uri)
+                return False
         if uri.startswith('artefact://'):
             return True
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
