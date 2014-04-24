@@ -176,19 +176,11 @@ class ActionManagerActionTests(ActionManagerTestBase):
                                                  mock_stop_and_return,
                                                  mock_stdout,
                                                  _):
-        """ TODO(rwill): rewrite test to be more comprehensive and to use less mocks.
-
-            Problem: hier sind gleichzeitig zwei Dinge, die nicht zum Abbruch fuehren:
-                     - keine Befehle sind dangerous
-                     - der Nutzer stimmt zu
-            Nur eines davon muss funktionieren, damit der Test gruen ist.
-        """
         mock_stdout.isatty.return_value = True
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
-        dangerous.cmd = 'reboot'  # TODO: is this dangerous?
-        # TODO: how do we test kwargs(reboot_required...) ??
+        dangerous.cmd = 'reboot'
         mock_load_action_plan.return_value.list_actions = [noop, dangerous]
         self.user_accepts_transaction()
 

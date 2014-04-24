@@ -37,6 +37,9 @@ import yadtshell
 from yadtshell.commandline import (confirm_transaction_by_user,
                                    EXIT_CODE_CANCELED_BY_USER)
 
+YADT_MINION_EXIT_CODE_HOST_LOCKED = 150
+YADT_MINION_EXIT_CODE_SERVICE_IGNORED = 151
+
 
 class ActionManager(object):
 
@@ -187,13 +190,13 @@ class ActionManager(object):
 
     def handle_ignored_or_locked(self, failure, cmd, component, target_state):
         exitCode = getattr(failure.value, 'exitCode', None)
-        if exitCode == 151:   # TODO use constant here
+        if exitCode == YADT_MINION_EXIT_CODE_SERVICE_IGNORED:
             self.logger.info(
                 '%s is ignored, assuming successfull %s' % (component.uri, cmd))
             component.state = target_state
             self.pi.update((cmd, component), 'i')
             return
-        if exitCode == 150:   # TODO use constant here
+        if exitCode == YADT_MINION_EXIT_CODE_HOST_LOCKED:
             self.logger.critical('%s %s failed, because %s is locked' %
                                  (cmd, component.uri, component.host_uri))
         return failure

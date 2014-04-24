@@ -42,7 +42,6 @@ class Component(object):
     """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
 
     Note that the `.host` attribute is always a string, not a Host instance.
-    TODO(rwill): rename it to `.hostname` or change it to a Host instance (as passed into constructor anyway).
     """
 
     def __init__(self, t, host, name):
@@ -62,12 +61,11 @@ class Component(object):
         self.fqdn = host.fqdn
         self.uri = yadtshell.uri.create(self.type, self.host, self.name)
 
-        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)  # TODO(rwill): seems like dead code
+        self.host_uri = yadtshell.uri.create(yadtshell.settings.HOST, self.host)
 
         self.state = yadtshell.settings.UNKNOWN
         self.needs = set()
         self.needed_by = set()
-        # self.config_prefix = yadtshell.settings.TARGET_SETTINGS['name']  # TODO(rwill): dead code?
 
     def is_touched_also(self, other):
         return True
@@ -210,7 +208,7 @@ class ComponentDict(dict):
 
     def _key_(self, key):
         try:
-            return self._key_(key.uri)  # TODO(rwill): looks like the intention here is to return key.uri ??
+            return key.uri
         except AttributeError:
             return key
 
@@ -221,13 +219,13 @@ class ComponentDict(dict):
         return dict.__getitem__(self, self._key_(key))
 
     def get(self, key, default=None):
-        if self._key_(key) not in self and self._add_when_missing_:
+        key = self._key_(key)
+        if key not in self and self._add_when_missing_:
             logger.debug('missing' + key)
-            self[self._key_(key)] = MissingComponent(key)  # (rwill) why no _key_ on RHS?
-        return dict.get(self, self._key_(key), default)
+            self[key] = MissingComponent(key)
+        return dict.get(self, key, default)
 
     def __setitem__(self, key, value):
-        # logger.debug('adding ' + self._key_(key) + ' ' + getattr(value, 'state', ''))
         return dict.__setitem__(self, self._key_(key), value)
 
 
@@ -248,7 +246,7 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
-            # logger.warning('known keys: ' + ', '.join(self.components.keys()))
+            logger.debug('known keys: ' + ', '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
@@ -508,7 +506,6 @@ class Service(Component):
             self.needs.add(yadtshell.uri.create(yadtshell.settings.ARTEFACT,
                                                 host.host,
                                                 n % locals() + "/" + yadtshell.settings.CURRENT))
-        # self.needs.add(uri.create(yadtshell.settings.HOST, host.host))
 
         self.state = yadtshell.settings.STATE_DESCRIPTIONS.get(
             settings.get('state'),
