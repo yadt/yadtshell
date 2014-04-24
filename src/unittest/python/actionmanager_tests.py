@@ -180,8 +180,7 @@ class ActionManagerActionTests(ActionManagerTestBase):
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
-        dangerous.cmd = 'reboot'  # TODO: is this dangerous?
-        # TODO: how do we test kwargs(reboot_required...) ??
+        dangerous.cmd = 'reboot'
         mock_load_action_plan.return_value.list_actions = [noop, dangerous]
         self.user_accepts_transaction()
 
