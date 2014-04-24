@@ -26,6 +26,7 @@ import yaml
 import shlex
 
 from twisted.internet import reactor, task
+import twisted.internet.defer as defer
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
@@ -37,6 +38,7 @@ logger = logging.getLogger('components')
 
 
 class Component(object):
+
     """Abstract superclass for Host, Service, Artefacts, and some special cases thereof.
 
     Note that the `.host` attribute is always a string, not a Host instance.
@@ -157,14 +159,47 @@ class Component(object):
 
 
 class MissingComponent(Component):
-    """TODO(rwill): What is the usecase for this? Add tests or remove it.
-    """
 
     def __init__(self, s):
         parts = yadtshell.uri.parse(s)
         Component.__init__(self, parts['type'], Host(parts['host']), parts['name'])
         self.version = parts['version']
         self.state = yadtshell.settings.MISSING
+
+
+class ReadonlyService(Component):
+
+    def __init__(self, host, name, settings=None):
+        Component.__init__(self, yadtshell.settings.SERVICE, host, name)
+        self.state = yadtshell.settings.UNKNOWN
+
+    def immediate_status(self):
+        logger.debug("Immediate status of readonly %s (no-op)" % self.uri)
+        return defer.succeed(0)
+
+    def status(self):
+        status_command = self.remote_call(
+            'yadt-service-%s %s' % (yadtshell.settings.STATUS, self.name),
+            tag='%s_%s' % (self.name, yadtshell.settings.STATUS))
+        status_protocol = YadtProcessProtocol(self, status_command, out_log_level=logging.DEBUG)
+        cmdline = shlex.split(status_protocol.cmd)
+        reactor.spawnProcess(status_protocol, cmdline[0], cmdline, None)
+
+        return status_protocol.deferred
+
+    def start(self):
+        d = self.status()
+
+        def handle_error(failure):
+            raise RuntimeError("Cannot start readonly %s" % self.uri)
+        d.addErrback(handle_error)
+        return d
+
+    def stop(self):
+        return defer.fail(RuntimeError("Not allowed to stop readonly {0}".format(self.uri)))
+
+    def _retrieve_service_call(self, action):
+        return 'yadt-service-%s %s' % (action, self.name)
 
 
 class ComponentDict(dict):
@@ -235,6 +270,7 @@ class ComponentSet(set):
 
 
 class AbstractHost(Component):
+
     def __init__(self, fqdn):
         # we need to set those values first, because Component.__init__ requires them on its `host` argument ;)
         self.fqdn = fqdn
@@ -248,6 +284,7 @@ class AbstractHost(Component):
 
 
 class Host(AbstractHost):
+
     """Note: `Host.name`, `Host.host` and `Host.hostname` are all the same value.
     We need `.host` and `.name` because they are part of Component, but when
     `Component.host` is renamed to Component.hostname, we will at least have
@@ -424,6 +461,7 @@ class UnreachableHost(AbstractHost):
 
 
 class Artefact(Component):
+
     """`version` is numeric
     `revision` is either 'next' or 'current'. (Use constants in yadtshell.settings!)
     """
@@ -446,6 +484,7 @@ class Service(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
 
+        settings = settings or {}
         self.needs_services = []
         self.needs_artefacts = []
         self.needs.add(host.uri)

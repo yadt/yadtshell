@@ -69,14 +69,24 @@ class CalculateInfoViewSettings(unittest.TestCase):
 class InfoMatrixRenderingTests(unittest.TestCase):
 
     def _patch_assert_in(self):
-        try:
-            self.assert_in = self.assertIn
-        except AttributeError:
-            def assert_in(element, container):
-                if element not in container:
-                    raise AssertionError(
-                        '{0} not found in {1}'.format(element, container))
-            self.assert_in = assert_in
+        def assert_in(element, container):
+            if element not in container:
+                separator_start = "< " * 36
+                separator_end = "> " * 36
+
+                raise AssertionError("""
+                     Expected to find
+{2}
+{0}
+{3}
+
+                     in
+
+{2}
+{1}
+{3}
+                     """.format(element, container, separator_start, separator_end))
+        self.assert_in = assert_in
 
     def setUp(self):
         self.he_patcher = patch(
@@ -86,7 +96,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
-        yadtshell._info.calculate_info_view_settings = lambda: {}
+        yadtshell._info.calculate_info_view_settings = lambda *args: {}
         self.mock_term = Mock()
         self.mock_render = lambda unrendered: unrendered
         yadtshell.settings.term = self.mock_term
@@ -204,20 +214,51 @@ ${NORMAL}
         self.assert_in(' R  reboot required', info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
-    def test_should_render_artefact_problems_when_state_is_not_up(self,
-                                                                  component_pool):
-        component_pool.return_value = create_component_pool_for_one_host(
-            host_state=yadtshell.settings.UPDATE_NEEDED,
-            artefact_state=yadtshell.settings.MISSING)
+    def test_should_render_readonly_services(self,
+                                             component_pool):
+        component_pool.return_value = create_component_pool_for_one_host(add_readonly_services=True)
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assert_in('''
-problems
-${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/yit/0:0.0.1
-${RED}${BOLD}   missing${NORMAL}  artefact://foobar42/foo/0:0.0.0
+        rendered_ro_services = '''
+  foobar42
 
-''', info_matrix)
+  O  readonly-service ro_down (needed by something a_dog)
+  |  readonly-service ro_up (needed by me you)
+'''
+
+        self.assert_in(rendered_ro_services,
+                       info_matrix)
+
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_missing_artefact_problems(self,
+                                                     component_pool):
+        component_pool.return_value = create_component_pool_for_one_host(
+            missing_artefact=True)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        self.assert_in(
+            "config problem: missing artefact://foobar42/missing",
+            info_matrix)
+
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_colored_readonly_services(self,
+                                                     component_pool):
+        yadtshell._info.calculate_info_view_settings = lambda *args: {'color': 'yes'}
+        component_pool.return_value = create_component_pool_for_one_host(add_readonly_services=True)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        rendered_ro_services = '''
+  foobar42
+
+  ${BG_RED}${WHITE}${BOLD}O${NORMAL}  readonly-service ro_down (needed by something a_dog)
+  ${BG_GREEN}${WHITE}${BOLD}|${NORMAL}  readonly-service ro_up (needed by me you)
+'''
+
+        self.assert_in(rendered_ro_services,
+                       info_matrix)
 
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_host_locked_by_other(self,
@@ -264,8 +305,7 @@ ${NORMAL}
 
         info_matrix = self._call_info_and_render_output_to_string()
 
-        self.assertEqual(info_matrix,
-                         '''
+        expected = '''
 ${BOLD}yadt info | test${NORMAL}
 
 target status
@@ -292,7 +332,10 @@ legend: | up(todate),accessible  O down  ? unknown  io? ignored (up,down,unknown
 queried ${BG_GREEN}${WHITE}${BOLD}  0  ${NORMAL} seconds ago
 
 status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
-''')
+'''
+
+        self.assert_in(expected, info_matrix)
+        self.assertEqual(expected, info_matrix)
 
 
 class ValidateHighlightingTest(unittest.TestCase):

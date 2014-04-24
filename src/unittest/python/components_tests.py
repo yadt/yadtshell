@@ -1,7 +1,10 @@
+import re
 import unittest
-from mock import Mock, patch
-import yadtshell
 import yaml
+
+from mock import Mock, patch, ANY
+
+import yadtshell
 
 
 class ServiceTests(unittest.TestCase):
@@ -48,6 +51,43 @@ class ServiceTests(unittest.TestCase):
             self.mock_service, 'test')
 
         self.assertEqual(service_call, 'yadt-service-test internet')
+
+
+class ReadonlyServiceTests(unittest.TestCase):
+
+    def test_should_default_to_unknown_state(self):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'NAME')
+        self.assertEquals(yadtshell.settings.UNKNOWN, readonly_service.state)
+
+    @patch('yadtshell.components.reactor')
+    def test_status_calls_spawn_process_with_service_status(self, reactor_mock):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'NAME')
+        readonly_service.status()
+        expected_command = ['ssh', 'example.com',
+                            ANY, ANY, 'yadt-command yadt-service-status NAME']
+        reactor_mock.spawnProcess.assert_called_once_with(
+            ANY, 'ssh', expected_command, None)
+
+    @patch('yadtshell.components.reactor')
+    @patch('yadtshell.components.YadtProcessProtocol')
+    def test_status_returns_yadt_process_protocol_deferred(self,
+                                                           yadt_process_protocol_mock, _):
+        host = yadtshell.components.Host('example.com')
+        readonly_service = yadtshell.components.ReadonlyService(host, 'service_name')
+        yadt_process_protocol_mock.return_value = Mock(cmd='command argument')
+        status_deferred = readonly_service.status()
+        MOCK_POSITIONAL_ARGS, SECOND_ARG = 0, 1
+        command_string = yadt_process_protocol_mock.call_args[MOCK_POSITIONAL_ARGS][SECOND_ARG]
+        yadt_process_protocol_mock.assert_called_once_with(readonly_service, ANY, out_log_level=ANY)
+        self.assertTrue(
+            re.match('^ssh example.com WHO=".*"'
+                     ' YADT_LOG_FILE=".*" '
+                     '"yadt-command yadt-service-status service_name" $',
+                     command_string
+                     ) is not None)
+        self.assertTrue(status_deferred is yadt_process_protocol_mock.return_value.deferred)
 
 
 class ArtefactTests(unittest.TestCase):
@@ -145,7 +185,6 @@ class HostTests(unittest.TestCase):
     @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_create_wrapping_command_with_adequate_environment(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
-        yadtshell.settings.SSH = 'super-ssh'
         mock_host = Mock(yadtshell.components.Host)
         mock_host.create_remote_log_filename.return_value = 'logfilename'
         mock_host.fqdn = 'foobar42.domain'
@@ -154,12 +193,11 @@ class HostTests(unittest.TestCase):
         command = yadtshell.components.Host.remote_call(mock_host, 'test')
 
         self.assertEqual(
-            command, 'super-ssh foobar42.domain WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+            command, 'ssh foobar42.domain WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
     @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_use_host_when_component_has_no_fqdn(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
-        yadtshell.settings.SSH = 'super-ssh'
         mock_host = Mock(yadtshell.components.Host)
         mock_host.create_remote_log_filename.return_value = 'logfilename'
         mock_host.host = 'foobar42'
@@ -168,7 +206,7 @@ class HostTests(unittest.TestCase):
         command = yadtshell.components.Host.remote_call(mock_host, 'test')
 
         self.assertEqual(
-            command, 'super-ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
+            command, 'ssh foobar42 WHO="badass" YADT_LOG_FILE="logfilename" "yadt-command test" ')
 
     def test_set_attrs_with_obsolete_services_format(self):
         data = {"fqdn": "foo-boing",

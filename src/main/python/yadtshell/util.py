@@ -265,3 +265,9 @@ def compute_dependency_scores(components):
 
 def calculate_max_tries_for_interval_and_delay(interval, delay):
     return (interval + delay - 1) / delay
+
+
+def filter_missing_services(components):
+    return [c for c in components.itervalues()
+            if isinstance(c, yadtshell.components.MissingComponent) and
+            c.type == yadtshell.settings.SERVICE]

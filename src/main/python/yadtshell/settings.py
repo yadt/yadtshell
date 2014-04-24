@@ -39,6 +39,9 @@ USER_INFO = get_user_info()
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
 
 OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
+TODAY = None
+STARTED_ON = None
+SSH = 'ssh'  # overwritten later for SSH multiplexing
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)

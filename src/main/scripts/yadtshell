@@ -114,10 +114,16 @@ if uris:
     uris = yadtshell.helper.glob_hosts(components, uris)
 
     def is_a_valid_host_uri_or_other_uri(uri):
-        if 'host://' not in uri:
+        if uri.startswith('host://'):
+            component = components[uri]
+            return component.is_reachable()
+        if uri.startswith('artefact://'):
             return True
-        component = components[uri]
-        return component.is_reachable()
+        if isinstance(components[uri], yadtshell.components.ReadonlyService):
+            logger.warning("Skipping %s because it is read-only" % uri)
+            return False
+        return uri in components
+
     uris = filter(is_a_valid_host_uri_or_other_uri, uris)
 
     if not uris:
