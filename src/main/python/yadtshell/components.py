@@ -209,6 +209,7 @@ class ComponentSet(set):
         logger.debug('adding ' + key)
         if key not in self.components and check:
             logger.warning('key %(key)s not found, ignoring' % locals())
+            logger.debug('known keys: ' + ', '.join(self.components.keys()))
             return None
         return self._set.add(key)
 
