@@ -122,7 +122,8 @@ if uris:
                 logger.warning("Skipping unknown %s" % uri)
                 return False
         if uri.startswith('artefact://'):
-            return True
+            return True  # Artefact uris have /current or /next at the end,
+                         # so just accept everything starting with artefact.
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
             logger.warning("Skipping %s because it is read-only" % uri)
             return False
