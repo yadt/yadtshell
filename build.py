@@ -70,6 +70,9 @@ def set_properties(project):
     project.set_property('flake8_ignore', 'E501')
     project.set_property('flake8_break_build', True)
 
+    FROSTED_BARE_EXCEPT_WARNING = 'W101'
+    project.set_property('frosted_ignore', [FROSTED_BARE_EXCEPT_WARNING])
+
     project.set_property('verbose', True)
 
     project.set_property('coverage_threshold_warn', 50)
