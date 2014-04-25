@@ -106,7 +106,6 @@ if uris:
         logger.debug("an exception occured during restore_current_state: %s" % str(e))
         logger.debug("no status found, calling 'yadtshell status' implicitly")
         import subprocess
-        # TODO avoid subprocess?!
         subprocess.call(["yadtshell", "status"])
         components = yadtshell.util.restore_current_state()
 
