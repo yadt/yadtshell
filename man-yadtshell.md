@@ -77,6 +77,9 @@ updates the specified artefacts, but _disregarding any service dependencies_.
 Locks the host(s), ensuring that only you can perform operations on it.
 Requires a message option.
 
+* unlock *HOSTS* :
+Releases the host(s) from your lock. This command assumes you own the lock and will fail if you do not. If you do not own the lock on the hosts, use *lock --force* on it first.
+
 # OPTIONS
 * --reboot :
 Reboots machines during an update, either if a pending artefact is configured to
