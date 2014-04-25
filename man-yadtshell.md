@@ -137,6 +137,9 @@ the yadt project
 sources at github
 :   https://github.com/yadt
 
+the yadtshell wiki
+:   https://github.com/yadt/yadtshell/wiki
+
 Alternatives
 :   puppet, chef
 
