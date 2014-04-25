@@ -64,18 +64,18 @@ Stops the specified *SERVICE* (including all dependent services) and then
 starts all services that had been stopped before. 
 
 * info :
-Shows the last known state of the target, does not retrieve data from hosts
+Shows the last known state of the target, does not retrieve data from hosts.
 
 * ignore *SERVICES* :
 ignores the specified services all following actions will be skipped and
-its results are always successfull
+its results are always successful.
 
 * updateartefact *ARTEFACTS* :
-updates the specified artefacts, but _disregarding any service dependencies_
+updates the specified artefacts, but _disregarding any service dependencies_.
 
 * lock *HOSTS* :
 Locks the host(s), ensuring that only you can perform operations on it.
-Needs a message option.
+Requires a message option.
 
 # OPTIONS
 * --reboot :
