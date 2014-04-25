@@ -183,7 +183,7 @@ def _determine_issued_command(failure):
         return ''
 
 
-def report_error(failure, line_fun=None, include_stacktrace=True):
+def report_error(failure, line_fun=None, include_stacktrace=False):
     if getattr(failure, "handled", False):
         return failure
     failure.handled = True
