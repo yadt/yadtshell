@@ -113,20 +113,19 @@ if uris:
     uris = yadtshell.helper.glob_hosts(components, uris)
 
     def is_a_reachable_host_uri_or_known_uri(uri):
-        if uri.startswith('host://'):
-            try:
-                component = components[uri]
-                return component.is_reachable()
-            except KeyError:
-                logger.warning("Skipping unknown %s" % uri)
-                return False
         if uri.startswith('artefact://'):
             return True  # Artefact uris have /current or /next at the end,
                          # so just accept everything starting with artefact.
+        if uri not in components:
+            logger.warning("Skipping unknown %s" % uri)
+            return False
+        if uri.startswith('host://'):
+                component = components[uri]
+                return component.is_reachable()
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
             logger.warning("Skipping read-only %s" % uri)
             return False
-        return uri in components
+        return True
 
     uris = filter(is_a_reachable_host_uri_or_known_uri, uris)
 
