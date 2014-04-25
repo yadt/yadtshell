@@ -125,7 +125,7 @@ if uris:
             return True  # Artefact uris have /current or /next at the end,
                          # so just accept everything starting with artefact.
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
-            logger.warning("Skipping %s because it is read-only" % uri)
+            logger.warning("Skipping read-only %s" % uri)
             return False
         return uri in components
 
