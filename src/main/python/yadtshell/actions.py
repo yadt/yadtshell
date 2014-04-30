@@ -16,6 +16,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from yadtshell.components import ReadonlyService
+
 
 class ActionException(Exception):
 
@@ -176,6 +178,10 @@ class ActionPlan(object):
         return not self.is_empty
 
     def remove_actions_on_unhandled_hosts(self, handled_hosts, components):
-        actions_on_handled_hosts = [
-            action for action in self.actions if components[action.uri].host_uri in handled_hosts]
-        self.actions = tuple(sorted(actions_on_handled_hosts))
+        def needs_to_be_handled(action):
+            action_component = components[action.uri]
+            if action_component.host_uri in handled_hosts:
+                return True  # We called the command on this host
+            if type(action_component) == ReadonlyService:
+                return True  # RO-services are not mutable
+        self.actions = tuple(sorted(filter(needs_to_be_handled, self.actions)))
