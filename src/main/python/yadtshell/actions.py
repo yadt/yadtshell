@@ -16,8 +16,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from yadtshell.components import ReadonlyService
-
 
 class ActionException(Exception):
 
@@ -182,8 +180,6 @@ class ActionPlan(object):
             action_component = components[action.uri]
             if action_component.host_uri in handled_hosts:
                 return True  # We called the command on this host
-            if type(action_component) == ReadonlyService:
-                return True  # RO-services are not mutable
             for needing in action_component.needed_by:
                 if components[needing].host_uri in handled_hosts:
                     return True  # One of the handled hosts needs this action
