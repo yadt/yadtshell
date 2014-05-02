@@ -254,8 +254,7 @@ class ActionManager(object):
                         except TypeError:
                             cmdline = fun()
         except ValueError, ve:
-            print(str(ve))
-            # self.logger.exception(ve)
+            self.logger.exception(ve)
             raise ve
         except Exception, ae:
             print(str(ae))
@@ -267,10 +266,11 @@ class ActionManager(object):
             raise yadtshell.actions.ActionException(
                 'problem during %s %s: could not determine the cmdline' % (cmd, component.uri), 1, None)
 
-        if isinstance(cmdline, defer.Deferred):  # TODO rename cmdline here
+        if isinstance(cmdline, defer.Deferred):
+            deferred = cmdline
             self.logger.debug('deferred returned directly')
             self.pi.update((cmd, component))
-            return cmdline
+            return deferred
 
         p = yadtshell.twisted.YadtProcessProtocol(component,
                                                   cmd,
