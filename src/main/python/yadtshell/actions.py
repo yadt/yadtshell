@@ -184,4 +184,7 @@ class ActionPlan(object):
                 return True  # We called the command on this host
             if type(action_component) == ReadonlyService:
                 return True  # RO-services are not mutable
+            for needing in action_component.needed_by:
+                if components[needing].host_uri in handled_hosts:
+                    return True  # One of the handled hosts needs this action
         self.actions = tuple(sorted(filter(needs_to_be_handled, self.actions)))

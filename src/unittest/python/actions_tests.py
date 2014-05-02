@@ -15,10 +15,13 @@ class ActionPlanTests(unittest.TestCase):
 
         mock_service0 = Mock()
         mock_service0.host_uri = 'host://cowsay'
+        mock_service0.needed_by = []
         mock_service1 = Mock()
         mock_service1.host_uri = 'host://foobar'
+        mock_service1.needed_by = []
         mock_service2 = Mock()
         mock_service2.host_uri = 'host://foobaz'
+        mock_service2.needed_by = []
         components = {'service://cowsay/service0': mock_service0,
                       'service://foobar/service1': mock_service1,
                       'service://foobaz/service2': mock_service2}
@@ -28,6 +31,29 @@ class ActionPlanTests(unittest.TestCase):
 
         self.assertEqual(len(plan.actions), 1)
         self.assertEqual(plan.actions[0].uri, 'service://foobar/service1')
+
+    def test_should_not_remove_needed_actions_on_unhandled_hosts(self):
+        actions = [
+            yadtshell.actions.Action('start', 'service://host1/handled'),
+            yadtshell.actions.Action('start', 'service://host2/unhandled_but_required')]
+        plan = yadtshell.actions.ActionPlan('plan', actions)
+
+        handled_service = Mock()
+        handled_service.host_uri = 'host://host1'
+        handled_service.needed_by = []
+        unhandled_but_required_service = Mock()
+        unhandled_but_required_service.host_uri = 'host://host2'
+        unhandled_but_required_service.needed_by = ['service://host1/handled']
+        components = {'service://host1/handled': handled_service,
+                      'service://host2/unhandled_but_required': unhandled_but_required_service
+                      }
+
+        handled_hosts = ['host://host1']
+        plan.remove_actions_on_unhandled_hosts(handled_hosts, components)
+
+        self.assertEqual(len(plan.actions), 2)
+        self.assertEqual(plan.actions[0].uri, 'service://host1/handled')
+        self.assertEqual(plan.actions[1].uri, 'service://host2/unhandled_but_required')
 
     def test_should_not_affect_actions_on_handled_hosts(self):
         actions = [yadtshell.actions.Action(
