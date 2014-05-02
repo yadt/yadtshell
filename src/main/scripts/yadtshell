@@ -113,6 +113,8 @@ if uris:
     uris = yadtshell.helper.glob_hosts(components, uris)
 
     def is_a_reachable_host_uri_or_known_uri(uri):
+        if cmd == 'dump':  # in case of a dump we don't care about URI validity
+            return True
         if uri.startswith('artefact://'):
             return True  # Artefact uris have /current or /next at the end,
                          # so just accept everything starting with artefact.
