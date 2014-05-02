@@ -57,6 +57,7 @@ from yadtshell.commandline import (EXIT_CODE_CANCELED_BY_USER,
 import yadtshell.helper
 
 from yadtshell.settings import SettingsError
+from yadtshell.util import first_error_line
 
 from docopt import docopt
 arguments = docopt(__doc__)
@@ -268,4 +269,5 @@ else:
         logger.warn(warning_after_error)
     logger.critical('exit code: %i' % reactor.return_code)
     logger.info('For details see: "{0}"'.format(yadtshell.settings.log_file))
+    logger.info("The first error was:\n\t\t%s\n" % first_error_line(yadtshell.settings.log_file))
 sys.exit(reactor.return_code)

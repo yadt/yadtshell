@@ -1,6 +1,6 @@
 import unittest
 
-from mock import Mock, patch
+from mock import Mock, patch, MagicMock
 
 import yadtshell
 from yadtshell.util import (inbound_deps_on_same_host,
@@ -10,12 +10,59 @@ from yadtshell.util import (inbound_deps_on_same_host,
                             render_state,
                             restore_current_state,
                             get_mtime_of_current_state,
-                            filter_missing_services)
+                            filter_missing_services,
+                            first_error_line)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
 from yadtshell.components import (Host,
                                   Service,
-                                  MissingComponent,
-                                  )
+                                  MissingComponent)
+
+
+class FirstErrorLineTests(unittest.TestCase):
+
+    def test_should_return_nothing_when_logging_is_not_enabled(self):
+        self.assertEquals(first_error_line(None), "")
+
+    @patch("yadtshell.util.open", create=True)
+    def test_should_return_first_error_line(self, mock_open):
+        mock_open.return_value = MagicMock(spec=file)
+        mock_readlines_function = mock_open.return_value.__enter__.return_value.readlines
+        mock_readlines_function.return_value = ["DEBUG: Some stuff",
+                                                "INFO: Other stuff",
+                                                "<a timestamp> ERROR: WTF happened",
+                                                "DEBUG: debug output after an error"]
+
+        self.assertEquals(
+            first_error_line("/foo/bar"),
+            "<a timestamp> ERROR: WTF happened"
+        )
+
+    @patch("yadtshell.util.open", create=True)
+    def test_should_return_first_critical_line(self, mock_open):
+        mock_open.return_value = MagicMock(spec=file)
+        mock_readlines_function = mock_open.return_value.__enter__.return_value.readlines
+        mock_readlines_function.return_value = ["DEBUG: Some stuff",
+                                                "CRITICAL: uh oh, this is going to blow up",
+                                                "INFO: Other stuff",
+                                                "<a timestamp> ERROR: WTF happened",
+                                                "DEBUG: debug output after an error"]
+
+        self.assertEquals(
+            first_error_line("/foo/bar"),
+            "CRITICAL: uh oh, this is going to blow up"
+        )
+
+    @patch("yadtshell.util.open", create=True)
+    def test_should_return_nothing_when_no_error_in_log(self, mock_open):
+        mock_open.return_value = MagicMock(spec=file)
+        mock_readlines_function = mock_open.return_value.__enter__.return_value.readlines
+        mock_readlines_function.return_value = ["DEBUG: Some stuff",
+                                                "INFO: Other stuff"]
+
+        self.assertEquals(
+            first_error_line("/foo/bar"),
+            None
+        )
 
 
 class MissingServiceTests(unittest.TestCase):

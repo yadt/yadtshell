@@ -271,3 +271,12 @@ def filter_missing_services(components):
     return [c for c in components.itervalues()
             if isinstance(c, yadtshell.components.MissingComponent) and
             c.type == yadtshell.settings.SERVICE]
+
+
+def first_error_line(logfile):
+    if not logfile:
+        return ""
+    with open(logfile, 'r') as log:
+        for line in log.readlines():
+            if "ERROR" in line or "CRITICAL" in line:
+                return line
