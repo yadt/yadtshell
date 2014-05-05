@@ -174,13 +174,3 @@ class ActionPlan(object):
     @property
     def is_not_empty(self):
         return not self.is_empty
-
-    def remove_actions_on_unhandled_hosts(self, handled_hosts, components):
-        def needs_to_be_handled(action):
-            action_component = components[action.uri]
-            if action_component.host_uri in handled_hosts:
-                return True  # We called the command on this host
-            for needing in action_component.needed_by:
-                if components[needing].host_uri in handled_hosts:
-                    return True  # One of the handled hosts needs this action
-        self.actions = tuple(sorted(filter(needs_to_be_handled, self.actions)))
