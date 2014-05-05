@@ -53,11 +53,11 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         logger.debug('User requested update for all hosts.')
 
     # create the base rules for starting all services
-    all_services = set(
-        [s.uri for s in components.values() if isinstance(s, yadtshell.components.Service)])
+    all_handled_services = set(
+        [s.uri for s in components.values() if isinstance(s, yadtshell.components.Service) and s.host_uri in handled_hosts])
 
     start_plan = yadtshell.metalogic.metalogic(
-        yadtshell.settings.START, all_services, plan_post_handler=yadtshell.metalogic.identity)
+        yadtshell.settings.START, all_handled_services, plan_post_handler=yadtshell.metalogic.identity)
 
     hosts_with_update = set(
         [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
@@ -148,8 +148,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     for possible_prestart_chunk in all_plan.actions:
         if possible_prestart_chunk in update_chunks:
             continue
-        possible_prestart_chunk.remove_actions_on_unhandled_hosts(
-            handled_hosts, components)
         if possible_prestart_chunk.is_not_empty:
             prestart_chunks.add(possible_prestart_chunk)
 
