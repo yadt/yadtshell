@@ -64,5 +64,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
             verify.called('ssh').at_least_with_arguments(
                 'yadt-command yadt-host-update yat-0:0.0.8 foo-0:0.0.0', 'it01.domain')
 
+
 if __name__ == '__main__':
     unittest.main()
