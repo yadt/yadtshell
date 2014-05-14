@@ -87,7 +87,6 @@ except SettingsError, e:
     logger.critical(e)
     sys.exit(1)
 
-broadcast_yadtshell_call_information()
 
 if opts.get('tracking_id'):
     yadtshell.settings.tracking_id = opts.get('tracking_id')
@@ -216,6 +215,8 @@ if cmd in commands_that_change_state and not opts.get('no_final_status'):
 
 
 def publish_result():
+    broadcast_yadtshell_call_information()
+
     if reactor.return_code == 0:
         state = 'finished'
     else:
