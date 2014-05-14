@@ -27,9 +27,9 @@ import yaml
 import hostexpand.HostExpander
 
 import yadtshell.TerminalController
+import yadtshell.helper
 from yadtshell.helper import condense_hosts, condense_hosts2, get_user_info
 from yadtshell.loggingtools import create_next_log_file_name_with_command_arguments_as_tag
-import yadtshell.helper
 from yadtshell.loggingtools import configure_logger_output_stream_by_level
 
 sys.path.append('/etc/yadtshell')

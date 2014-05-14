@@ -58,6 +58,7 @@ import yadtshell.helper
 
 from yadtshell.settings import SettingsError
 from yadtshell.util import first_error_line
+from yadtshell.broadcast import broadcast_yadtshell_call_information
 
 from docopt import docopt
 arguments = docopt(__doc__)
@@ -85,6 +86,8 @@ try:
 except SettingsError, e:
     logger.critical(e)
     sys.exit(1)
+
+broadcast_yadtshell_call_information()
 
 if opts.get('tracking_id'):
     yadtshell.settings.tracking_id = opts.get('tracking_id')
@@ -217,13 +220,6 @@ def publish_result():
         state = 'finished'
     else:
         state = 'failed'
-        import socket
-        yadtshell.settings.ybc._sendEvent(
-            'error-info', data=None,
-            tracking_id=yadtshell.settings.tracking_id,
-            target=yadtshell.settings.ybc.target,
-            host=socket.gethostname(),
-            log_file=yadtshell.settings.log_file)
     yadtshell.settings.ybc.publish_cmd(
         cmd=cmd, state=state, tracking_id=yadtshell.settings.tracking_id)
 
