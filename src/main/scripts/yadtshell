@@ -215,7 +215,6 @@ if cmd in commands_that_change_state and not opts.get('no_final_status'):
 
 
 def publish_result():
-
     if reactor.return_code == 0:
         state = 'finished'
     else:
