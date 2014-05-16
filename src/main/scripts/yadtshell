@@ -136,7 +136,7 @@ if uris:
 
     if not uris:
         logger.error(
-            'Could not resolve URIs. Check for typos or syntax issues.')
+            'Could not resolve any URIs. Check for typos or syntax issues.')
         sys.exit(1)
 
 
