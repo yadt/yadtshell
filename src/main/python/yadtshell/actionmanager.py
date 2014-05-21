@@ -223,7 +223,7 @@ class ActionManager(object):
                         component, delay=delay, target_state=target_state)
                     deferred.addCallback(
                         self.handle_output, cmd, component, target_state, tries + 1)
-                    error_function = self.logger.error if max_tries == 1 else self.logger.warning
+                    error_function = self.logger.error if tries + 1 == max_tries else self.logger.warning
                     deferred.addErrback(
                         yadtshell.twisted.report_error, error_function)
                     return deferred
