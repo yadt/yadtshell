@@ -282,7 +282,7 @@ class ActionManager(object):
         p.target_state = target_state
         p.state = yadtshell.settings.UNKNOWN
 
-        cmdline = shlex.split(cmdline.encode('ascii'))
+        cmdline = shlex.split(cmdline)
         self.logger.debug('cmd: %s' % cmdline)
         reactor.spawnProcess(p, cmdline[0], cmdline, None)
         return p.deferred
