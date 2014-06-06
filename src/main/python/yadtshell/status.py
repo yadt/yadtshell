@@ -385,7 +385,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             f.close()
 
         f = _open_component_file('current_state.components')
-        pickle.dump(components, f)
+        pickle.dump(components, f, pickle.HIGHEST_PROTOCOL)
         f.close()
 
         groups = []

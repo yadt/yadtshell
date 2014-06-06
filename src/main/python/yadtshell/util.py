@@ -48,7 +48,7 @@ def determine_loc_type(s):
 
 def store(o, filename):
     with open(filename, "w") as f:
-        pickle.dump(o, f)
+        pickle.dump(o, f, pickle.HIGHEST_PROTOCOL)
 
 
 def restore(filename):

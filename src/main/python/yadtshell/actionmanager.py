@@ -418,7 +418,7 @@ class ActionManager(object):
                     pass
             f = open(
                 os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'), "w")
-            pickle.dump(self.orig_components, f)
+            pickle.dump(self.orig_components, f, pickle.HIGHEST_PROTOCOL)
             f.close()
             return result
 
