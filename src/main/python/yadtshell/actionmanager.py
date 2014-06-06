@@ -19,7 +19,10 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import yaml
+try:
+    from yaml import CLoader as yaml_loader
+except ImportError:
+    from yaml import Loader as yaml_loader
 try:
     import cPickle as pickle
 except ImportError:
@@ -36,6 +39,7 @@ import twisted.internet.reactor as reactor
 import twisted.internet.defer as defer
 import twisted.python.failure as failure
 from twisted.internet.task import deferLater
+import yaml
 
 import yadtshell
 from yadtshell.commandline import (confirm_transaction_by_user,
@@ -381,7 +385,7 @@ class ActionManager(object):
         action_plan = None
         try:
             f = open(action_plan_file)
-            action_plan = yaml.load(f)
+            action_plan = yaml.load(f, Loader=yaml_loader)
             f.close()
         except IOError, e:
             self.logger.warning(str(e))
