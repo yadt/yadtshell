@@ -57,7 +57,7 @@ def status_cb(protocol=None):
 
 def query_status(component_name, pi=None):
     p = yadtshell.twisted.YadtProcessProtocol(
-        component_name, '/usr/bin/yadt-status', pi)
+        component_name, '/usr/bin/yadt-status', pi, out_log_level=logging.NOTSET)
     p.deferred.name = component_name
     cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
     reactor.spawnProcess(p, cmd[0], cmd, os.environ)
@@ -77,6 +77,11 @@ def handle_unreachable_host(failure, components):
 
 
 def create_host(protocol, components):
+    status_filename = yadtshell.settings.log_file + ".%s.status" % protocol.component
+    logger.debug("Status of %s is at %s" % (protocol.component, status_filename))
+    with open(status_filename, "w") as status_file:
+        status_file.write(protocol.data)
+
     try:
         data = json.loads(protocol.data)
     except Exception, e:
