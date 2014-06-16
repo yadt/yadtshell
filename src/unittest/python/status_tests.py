@@ -104,7 +104,11 @@ class StatusTests(unittest.TestCase):
         yadtshell._status.create_host(protocol_with_json_data, components)
 
         write_host_data_to_file.assert_called_with('host://foobar42',
-                                                   '{\n"fqdn": "foobar42.acme.com",\n"next_artefacts": {},\n"some_attribute": "some-value"\n}')
+                                                   '''{
+"fqdn": "foobar42.acme.com",
+"next_artefacts": {},
+"some_attribute": "some-value"
+}''')
 
     @patch('yadtshell._status.glob')
     @patch('yadtshell._status.os')
