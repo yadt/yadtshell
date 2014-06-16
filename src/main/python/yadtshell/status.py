@@ -76,11 +76,16 @@ def handle_unreachable_host(failure, components):
     return failure
 
 
+def write_host_data_to_file(host, host_data):
+    host.replace("host://", "")
+    file_path = yadtshell.settings.log_file + ".%s.status" % host
+    logger.debug("Status of %s is at %s" % (host, file_path))
+    with open(file_path, "w") as status_file:
+        status_file.write(host_data)
+
+
 def create_host(protocol, components):
-    status_filename = yadtshell.settings.log_file + ".%s.status" % protocol.component
-    logger.debug("Status of %s is at %s" % (protocol.component, status_filename))
-    with open(status_filename, "w") as status_file:
-        status_file.write(protocol.data)
+    write_host_data_to_file(protocol.component, protocol.data)
 
     try:
         data = json.loads(protocol.data)

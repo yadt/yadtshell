@@ -1,9 +1,10 @@
-import yadtshell
-# from twisted.trial
+import logging
 import unittest
+
 from mock import Mock, patch, call
 from twisted.internet import defer
 
+import yadtshell
 from yadtshell.status import (handle_readonly_service_states, fetch_missing_services_as_readonly)
 from yadtshell.components import MissingComponent
 
@@ -87,6 +88,22 @@ class StatusTests(unittest.TestCase):
     def tearDown(self):
         self.pi_patcher.stop()
 
+    @patch("yadtshell._status.write_host_data_to_file")
+    def test_should_persist_host_data_to_file_when_creating_host(self, write_host_data_to_file):
+        components = {}
+        protocol_with_json_data = Mock()
+        protocol_with_json_data.component = 'host://foobar42'
+        protocol_with_json_data.data = '''{
+"fqdn": "foobar42.acme.com",
+"next_artefacts": {},
+"some_attribute": "some-value"
+}'''
+
+        yadtshell._status.create_host(protocol_with_json_data, components)
+
+        write_host_data_to_file.assert_called_with('host://foobar42',
+                                                   '{\n"fqdn": "foobar42.acme.com",\n"next_artefacts": {},\n"some_attribute": "some-value"\n}')
+
     @patch('yadtshell._status.glob')
     @patch('yadtshell._status.os')
     def test_should_remove_globbed_old_state_files_when_calling_status_without_hosts(self, os, glob):
@@ -119,7 +136,7 @@ class StatusTests(unittest.TestCase):
     def test_query_status_should_spawn_status_process(self, protocol, spawn_process, environment):
         yadtshell._status.query_status(component_name='host://foobar42')
         protocol.assert_called_with(
-            'host://foobar42', '/usr/bin/yadt-status', None)
+            'host://foobar42', '/usr/bin/yadt-status', None, out_log_level=logging.NOTSET)
         spawn_process.assert_called_with(
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
 
@@ -136,7 +153,8 @@ class StatusTests(unittest.TestCase):
         self.assertTrue('host://foobar42' in components)
         self.assertEqual(components['host://foobar42'], result, "components.keys() = %s" % components.keys())
 
-    def test_should_create_host_from_json(self):
+    @patch("yadtshell._status.write_host_data_to_file")
+    def test_should_create_host_from_json(self, _):
         components = {}
         protocol_with_json_data = Mock()
         protocol_with_json_data.component = 'host://foobar42'
@@ -155,7 +173,8 @@ class StatusTests(unittest.TestCase):
         self.assertEqual(result_host.loc_type, {
                          'loc': 'foo', 'host': 'foobar42', 'type': 'bar', 'loctype': 'foobar', 'nr': '42'})
 
-    def test_should_create_host_with_update_needed_when_next_artefacts_is_not_empty(self):
+    @patch("yadtshell._status.write_host_data_to_file")
+    def test_should_create_host_with_update_needed_when_next_artefacts_is_not_empty(self, _):
         components = {}
         protocol_with_json_data = Mock()
         protocol_with_json_data.component = 'host://foobar42'
@@ -169,7 +188,8 @@ class StatusTests(unittest.TestCase):
 
         self.assertEqual(result_host.is_update_needed(), True)
 
-    def test_should_create_host_from_yaml(self):
+    @patch("yadtshell._status.write_host_data_to_file")
+    def test_should_create_host_from_yaml(self, _):
         components = {}
         protocol_with_yaml_data = Mock()
         protocol_with_yaml_data.component = 'host://foobar42'
