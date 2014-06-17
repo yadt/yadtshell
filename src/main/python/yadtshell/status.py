@@ -77,7 +77,7 @@ def handle_unreachable_host(failure, components):
 
 
 def write_host_data_to_file(host, host_data):
-    host.replace("host://", "")
+    host = host.replace("host://", "")
     file_path = "%s.%s.status" % (yadtshell.settings.log_file, host)
     logger.debug("Status of %s is at %s" % (host, file_path))
     with open(file_path, "w") as status_file:

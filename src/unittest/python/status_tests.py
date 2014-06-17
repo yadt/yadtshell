@@ -296,12 +296,23 @@ services:
 class HostStatusToFileTests(unittest.TestCase):
 
     @patch("yadtshell._status.open", create=True)
-    def test_should_write_host_data_to_file(self, mock_open):
+    def test_should_write_host_data_to_file_when_component_name_is_hostname(self, mock_open):
+        yadtshell.settings.log_file = "/tmp/yadtshell-logs/yadtshell.log"
+        mock_open.return_value = MagicMock(spec=file)
+        fake_file = mock_open.return_value.__enter__.return_value
+
+        write_host_data_to_file("somehost", "{'key': 'value',\n}")
+
+        mock_open.assert_called_with('/tmp/yadtshell-logs/yadtshell.log.somehost.status', 'w')
+        fake_file.write.assert_called_with("{'key': 'value',\n}")
+
+    @patch("yadtshell._status.open", create=True)
+    def test_should_write_host_data_to_file_when_component_name_is_uri(self, mock_open):
         yadtshell.settings.log_file = "/tmp/yadtshell-logs/yadtshell.log"
         mock_open.return_value = MagicMock(spec=file)
         fake_file = mock_open.return_value.__enter__.return_value
 
         write_host_data_to_file("host://somehost", "{'key': 'value',\n}")
 
-        mock_open.assert_called_with('/tmp/yadtshell-logs/yadtshell.log.host://somehost.status', 'w')
+        mock_open.assert_called_with('/tmp/yadtshell-logs/yadtshell.log.somehost.status', 'w')
         fake_file.write.assert_called_with("{'key': 'value',\n}")
