@@ -436,7 +436,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             groups, tracking_id=yadtshell.settings.tracking_id)
 
         status_line = yadtshell.util.get_status_line(components)
-        logger.debug('\nstatus: %s' % status_line)
+        logger.debug('status: %s' % status_line)
         print status_line
         f = open(os.path.join(yadtshell.settings.OUT_DIR, 'statusline'), 'w')
         f.write('\n'.join(['', status_line]))
