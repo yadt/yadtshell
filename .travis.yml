@@ -3,7 +3,7 @@ python:
   - "2.6"
   - "2.7"
 before_script:
-  - sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
+  - sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm # make posix semaphores work for multiprocessing
 install:
   - pip install pybuilder
   - pyb install_dependencies
