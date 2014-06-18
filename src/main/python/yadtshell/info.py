@@ -19,7 +19,6 @@ from __future__ import print_function
 import logging
 import sys
 from subprocess import Popen, PIPE
-import time
 
 import hostexpand
 import yadtshell
@@ -117,8 +116,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     render_services_matrix(components)
 
-    now = time.time()
-    max_age = now - yadtshell.util.get_mtime_of_current_state()
+    max_age = yadtshell.util.get_age_of_current_state_in_seconds()
     if max_age > 20:
         max_age = render_red('  %.0f  ' % max_age)
     else:
