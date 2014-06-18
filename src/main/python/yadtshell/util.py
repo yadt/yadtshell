@@ -21,6 +21,7 @@ from __future__ import absolute_import
 import logging
 import os.path
 import yaml
+import time
 import shlex
 
 from twisted.internet import defer, reactor
@@ -28,7 +29,8 @@ from twisted.internet import defer, reactor
 import yadtshell.settings
 import yadtshell.components
 
-from yadtshell.constants import STANDALONE_SERVICE_RANK
+from yadtshell.constants import (STANDALONE_SERVICE_RANK,
+                                 MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS)
 from yadtshell.validation import ServiceDefinitionValidator
 
 logger = logging.getLogger('util')
@@ -91,8 +93,16 @@ def current_state():
     return os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components')
 
 
-def restore_current_state():
-    return restore(current_state())
+def get_age_of_current_state_in_seconds():
+    age_of_state = time.time() - get_mtime_of_current_state()
+    return age_of_state
+
+
+def restore_current_state(must_be_fresh=True):
+    deserialized_state = restore(current_state())
+    if get_age_of_current_state_in_seconds() >= MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS and must_be_fresh:
+        raise IOError("Serialized state is too old")
+    return deserialized_state
 
 
 def get_mtime_of_current_state():

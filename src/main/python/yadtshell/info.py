@@ -70,7 +70,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
     if not components:
         logger.debug("loading current state")
         try:
-            components = yadtshell.util.restore_current_state()
+            components = yadtshell.util.restore_current_state(must_be_fresh=False)
         except IOError:
             logger.critical("cannot restore current state")
             logger.info("call 'yadtshell status' first")
@@ -288,7 +288,7 @@ def calc_icon_strings(info_view_settings):
 
 def render_services_matrix(components=None, **kwargs):
     if not components:
-        components = yadtshell.util.restore_current_state()
+        components = yadtshell.util.restore_current_state(must_be_fresh=False)
     info_view_settings = calculate_info_view_settings()
     he = hostexpand.HostExpander.HostExpander()
     for hosts in yadtshell.settings.TARGET_SETTINGS['original_hosts']:

@@ -10,6 +10,7 @@ from yadtshell.util import (inbound_deps_on_same_host,
                             render_state,
                             restore_current_state,
                             get_mtime_of_current_state,
+                            get_age_of_current_state_in_seconds,
                             filter_missing_services,
                             first_error_line)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
@@ -241,12 +242,39 @@ class CurrentStateTests(unittest.TestCase):
 
     @patch('yadtshell.util.os.path.getmtime')
     def test_should_return_mtime_of_current_state(self, mtime_function):
-        get_mtime_of_current_state()
+        mtime_function.return_value = 42
+
+        self.assertEqual(get_mtime_of_current_state(), 42)
 
         mtime_function.assert_called_with('/out/dir/current_state.components')
 
+    @patch('yadtshell.util.get_age_of_current_state_in_seconds')
     @patch('yadtshell.util.restore')
-    def test_should_restore_current_state(self, restore_function):
+    def test_should_restore_current_state(self, restore_function, age_of_state):
+        age_of_state.return_value = 0
+
         restore_current_state()
 
         restore_function.assert_called_with('/out/dir/current_state.components')
+
+    @patch('yadtshell.util.get_age_of_current_state_in_seconds')
+    @patch('yadtshell.util.restore')
+    def test_should_raise_when_restored_state_is_too_old_and_must_be_fresh(self, _, age_of_state):
+        age_of_state.return_value = 1337  # the limit is 600 for 10 minutes
+
+        self.assertRaises(IOError, restore_current_state, must_be_fresh=True)
+
+    @patch('yadtshell.util.get_age_of_current_state_in_seconds')
+    @patch('yadtshell.util.restore')
+    def test_should_not_raise_when_restored_state_is_too_old_and_must_not_be_fresh(self, _, age_of_state):
+        age_of_state.return_value = 1337  # the limit is 600 for 10 minutes
+
+        restore_current_state(must_be_fresh=False)  # this should not raise
+
+    @patch('yadtshell.util.time.time')
+    @patch('yadtshell.util.get_mtime_of_current_state')
+    def test_should_return_age_of_state_in_seconds(self, mtime, time):
+        mtime.return_value = 2
+        time.return_value = 44
+
+        self.assertEqual(get_age_of_current_state_in_seconds(), 42)
