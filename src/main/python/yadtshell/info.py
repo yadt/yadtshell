@@ -19,10 +19,10 @@ from __future__ import print_function
 import logging
 import sys
 from subprocess import Popen, PIPE
-import time
 
 import hostexpand
 import yadtshell
+from yadtshell.constants import MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS
 
 logger = logging.getLogger('info')
 
@@ -70,7 +70,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
     if not components:
         logger.debug("loading current state")
         try:
-            components = yadtshell.util.restore_current_state()
+            components = yadtshell.util.restore_current_state(must_be_fresh=False)
         except IOError:
             logger.critical("cannot restore current state")
             logger.info("call 'yadtshell status' first")
@@ -117,9 +117,8 @@ def info(logLevel=None, full=False, components=None, **kwargs):
 
     render_services_matrix(components)
 
-    now = time.time()
-    max_age = now - yadtshell.util.get_mtime_of_current_state()
-    if max_age > 20:
+    max_age = yadtshell.util.get_age_of_current_state_in_seconds()
+    if max_age > MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS:
         max_age = render_red('  %.0f  ' % max_age)
     else:
         max_age = render_green('  %.0f  ' % max_age)
@@ -288,7 +287,7 @@ def calc_icon_strings(info_view_settings):
 
 def render_services_matrix(components=None, **kwargs):
     if not components:
-        components = yadtshell.util.restore_current_state()
+        components = yadtshell.util.restore_current_state(must_be_fresh=False)
     info_view_settings = calculate_info_view_settings()
     he = hostexpand.HostExpander.HostExpander()
     for hosts in yadtshell.settings.TARGET_SETTINGS['original_hosts']:

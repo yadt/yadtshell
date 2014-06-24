@@ -294,6 +294,34 @@ ${NORMAL}
 
         self.assert_in(' l  host access', info_matrix)
 
+    @patch('yadtshell.util.get_age_of_current_state_in_seconds')
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_cache_in_green_when_it_is_fresh(self,
+                                                           component_pool,
+                                                           cache_age):
+        cache_age.return_value = 42
+        component_pool.return_value = create_component_pool_for_one_host(
+            host_state=yadtshell.settings.UPDATE_NEEDED)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        self.assert_in("queried ${BG_GREEN}${WHITE}${BOLD}  42  ${NORMAL} seconds ago",
+                       info_matrix)
+
+    @patch('yadtshell.util.get_age_of_current_state_in_seconds')
+    @patch('yadtshell.util.restore_current_state')
+    def test_should_render_cache_in_red_when_it_is_old(self,
+                                                       component_pool,
+                                                       cache_age):
+        cache_age.return_value = 900
+        component_pool.return_value = create_component_pool_for_one_host(
+            host_state=yadtshell.settings.UPDATE_NEEDED)
+
+        info_matrix = self._call_info_and_render_output_to_string()
+
+        self.assert_in("queried ${BG_RED}${WHITE}${BOLD}  900  ${NORMAL} seconds ago",
+                       info_matrix)
+
     @patch('time.time')
     @patch('yadtshell.util.restore_current_state')
     def test_should_render_matrix_for_one_host(self,
@@ -338,7 +366,7 @@ status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
         self.assertEqual(expected, info_matrix)
 
 
-class ValidateHighlightingTest(unittest.TestCase):
+class ValidateHighlightingTests(unittest.TestCase):
 
     def test_should_highlight_nothing_when_no_difference(self):
         text = highlight_differences("foo", "foo")

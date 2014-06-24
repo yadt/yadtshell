@@ -125,8 +125,8 @@ if uris:
             logger.warning("Skipping unknown %s" % uri)
             return False
         if uri.startswith('host://'):
-                component = components[uri]
-                return component.is_reachable()
+            component = components[uri]
+            return component.is_reachable()
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
             logger.warning("Skipping read-only %s" % uri)
             return False
