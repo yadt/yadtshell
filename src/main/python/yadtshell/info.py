@@ -22,6 +22,7 @@ from subprocess import Popen, PIPE
 
 import hostexpand
 import yadtshell
+from yadtshell.constants import MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS
 
 logger = logging.getLogger('info')
 
@@ -117,7 +118,7 @@ def info(logLevel=None, full=False, components=None, **kwargs):
     render_services_matrix(components)
 
     max_age = yadtshell.util.get_age_of_current_state_in_seconds()
-    if max_age > 20:
+    if max_age > MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS:
         max_age = render_red('  %.0f  ' % max_age)
     else:
         max_age = render_green('  %.0f  ' % max_age)
