@@ -338,7 +338,7 @@ status:   0%   0% | 0/0 services up, 0/1 hosts uptodate
         self.assertEqual(expected, info_matrix)
 
 
-class ValidateHighlightingTest(unittest.TestCase):
+class ValidateHighlightingTests(unittest.TestCase):
 
     def test_should_highlight_nothing_when_no_difference(self):
         text = highlight_differences("foo", "foo")
