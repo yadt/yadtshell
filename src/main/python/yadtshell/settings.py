@@ -195,7 +195,7 @@ def load_settings_and_create_dirs(log_to_file=True):
     else:
         ybc = DummyBroadcaster()
 
-    LOG_DIR = os.path.join(LOG_DIR_PREFIX, TODAY, TARGET_SETTINGS['name'], USER_INFO['user'])
+    LOG_DIR = os.path.join(LOG_DIR_PREFIX, TODAY, TARGET_SETTINGS['name'])
     try:
         os.makedirs(LOG_DIR)
     except OSError as e:
