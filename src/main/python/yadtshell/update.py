@@ -52,13 +52,6 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         handled_hosts = [h.uri for h in all_hosts]
         logger.debug('User requested update for all hosts.')
 
-    # create the base rules for starting all services
-    all_handled_services = set(
-        [s.uri for s in components.values() if isinstance(s, yadtshell.components.Service) and s.host_uri in handled_hosts])
-
-    start_plan = yadtshell.metalogic.metalogic(
-        yadtshell.settings.START, all_handled_services, plan_post_handler=yadtshell.metalogic.identity)
-
     hosts_with_update = set(
         [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
     if hosts_with_update:
@@ -98,15 +91,27 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
     diff = next_artefacts | current_artefacts | host_uris_with_reboot
     logger.debug('diff: ' + ', '.join(diff))
 
-    if not diff:
-        yadtshell.util.dump_action_plan('update', start_plan)
-        return 'update'
-
     stop_plan = yadtshell.metalogic.metalogic(
         yadtshell.settings.STOP, diff, plan_post_handler=yadtshell.metalogic.identity)
     stopped_services = set()
     for action in stop_plan.actions:
         stopped_services.add(action.uri)
+
+    # create the base rules for starting all services
+    def is_a_handled_service(service):
+        is_a_service = isinstance(s, yadtshell.components.Service)
+        is_on_a_handled_host = s.host_uri in handled_hosts
+        is_a_stopped_service = s.uri in stopped_services
+        return is_a_service and (is_on_a_handled_host or is_a_stopped_service)
+
+    all_handled_services = set([s.uri for s in components.values() if is_a_handled_service(s)])
+
+    start_plan = yadtshell.metalogic.metalogic(
+        yadtshell.settings.START, all_handled_services, plan_post_handler=yadtshell.metalogic.identity)
+
+    if not diff:
+        yadtshell.util.dump_action_plan('update', start_plan)
+        return 'update'
 
     host_uris_with_update = map(str, hosts_with_update)
     for action in start_plan.actions:
