@@ -99,9 +99,9 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 
     # create the base rules for starting all services
     def is_a_handled_service(service):
-        is_a_service = isinstance(s, yadtshell.components.Service)
-        is_on_a_handled_host = s.host_uri in handled_hosts
-        is_a_stopped_service = s.uri in stopped_services
+        is_a_service = isinstance(service, yadtshell.components.Service)
+        is_on_a_handled_host = service.host_uri in handled_hosts
+        is_a_stopped_service = service.uri in stopped_services
         return is_a_service and (is_on_a_handled_host or is_a_stopped_service)
 
     all_handled_services = set([s.uri for s in components.values() if is_a_handled_service(s)])
