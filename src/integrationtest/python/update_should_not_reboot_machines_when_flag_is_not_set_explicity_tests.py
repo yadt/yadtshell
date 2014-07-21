@@ -32,7 +32,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 .then_write(yadt_status_answer.stdout('it01.domain', reboot_required_to_activate_latest_kernel=True))
             when.calling('ssh').at_least_with_arguments('it01.domain').then_return(0)
 
-        actual_return_code = self.execute_command('yadtshell update')
+        actual_return_code = self.execute_command('yadtshell update --no-final-status')
 
         self.assertEqual(0, actual_return_code)
 
@@ -53,8 +53,6 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain', 'yadt-command yadt-host-update yit-config-it01-0:0.0.1-2')
-
-            verify.called('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status')
 
 
 if __name__ == '__main__':
