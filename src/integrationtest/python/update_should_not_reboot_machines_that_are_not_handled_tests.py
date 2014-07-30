@@ -37,7 +37,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 .then_return(0)
 
         self.execute_command('yadtshell status')
-        actual_return_code = self.execute_command('yadtshell update host://it02 --reboot')
+        actual_return_code = self.execute_command('yadtshell update host://it02')
 
         self.assertEqual(0, actual_return_code)
 

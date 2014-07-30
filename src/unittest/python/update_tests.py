@@ -49,7 +49,6 @@ class UpdateTests(unittest.TestCase):
         yadtshell.settings.TARGET_SETTINGS = {
             'name': 'test', 'original_hosts': ['foobar42']}
         yadtshell.settings.VIEW_SETTINGS = {}
-        yadtshell.settings.reboot_enabled = False
         yadtshell.update.logger = Mock()
 
     @patch('yadtshell.util.dump_action_plan')

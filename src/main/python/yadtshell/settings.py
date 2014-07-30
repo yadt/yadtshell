@@ -37,6 +37,8 @@ sys.path.append('/etc/yadtshell')
 DEFAULT_LOG_DIR = '/tmp/logs/yadtshell'
 USER_INFO = get_user_info()
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
+reboot_disabled = False
+
 
 OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
 TODAY = None

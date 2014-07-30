@@ -86,6 +86,10 @@ Reboots machines during an update, either if a pending artefact is configured to
 induce a reboot, or if the machine is running an outdated kernel.
 If a set of host URIs was passed to the update command, then only those hosts
 are eligible for a reboot.
+*NOTE* This is a no-op, as rebooting is the default!
+
+* --no-reboot :
+Prevents machines from being rebooted if necessary.
 
 * -n :
 No operation: change nothing, just show what *would* be done (aka dryrun).
@@ -120,11 +124,17 @@ stops all services
 * yadtshell update host://foo1 host://foo2 :
 updates both hosts
 
-* yadtshell update host://foo1 --reboot :
+* yadtshell update host://foo1 :
 updates or reboots (or possibly both) but only on foo1
 
-* yadtshell update --reboot :
+* yadtshell update :
 updates (and possibly reboots) all servers from the target
+
+* yadtshell update --no-reboot :
+updates (but does not reboot) all servers from the target
+
+* yadtshell update host://foo1 --no-reboot :
+updates foo1, but does not reboot in any case
 
 * yadtshell updateartefact artefact://foo1/some-config :
 updates the package _some-config_ without regarding service dependencies

@@ -72,7 +72,7 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
                          and artefact.host_uri in handled_hosts
                           ])
 
-    if yadtshell.settings.reboot_enabled:
+    if not yadtshell.settings.reboot_disabled:
         hosts_with_reboot = set(
             [h for h in all_hosts if h.reboot_required and h.uri in handled_hosts])
     else:

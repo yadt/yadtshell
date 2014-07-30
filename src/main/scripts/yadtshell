@@ -100,7 +100,7 @@ if opts.get('verbose'):
 if opts.get('dryrun'):
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()
 
-yadtshell.settings.reboot_enabled = opts.get('reboot')
+yadtshell.settings.reboot_disabled = opts.get('no_reboot')
 
 if uris:
     try:
