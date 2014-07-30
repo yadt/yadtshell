@@ -40,9 +40,11 @@ Options:
 -p --parallel PSPEC       how to execute actions in parallel [default: 1]
 -y --forcedyes            say yes to all questions
 --force                   force execution
---reboot                  reboot servers if needed during an update
+--reboot                  reboot servers if needed during an update (no-op,
+                          enabled by default)
 --no-reboot               do not reboot servers during an update, even if needed
 --session-id SESSIONID    optional ID for session handling
+--version                 show version
 """
 
 import logging
