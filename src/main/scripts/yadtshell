@@ -16,7 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-The yadtshell
+The yadtshell v${version}
 
 Usage:
 yadtshell (status|info) [options]
@@ -61,7 +61,7 @@ from yadtshell.util import first_error_line
 from yadtshell.broadcast import broadcast_yadtshell_call_information
 
 from docopt import docopt
-arguments = docopt(__doc__)
+arguments = docopt(__doc__, version='${version}')
 
 reactor.return_code = 127
 

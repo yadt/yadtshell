@@ -1,6 +1,6 @@
 % YADTshell(1) YADTshell User Manuals
 % The YADT project team
-% April 25, 2014
+% July 30th, 2014
 
 # NAME
 
@@ -151,7 +151,7 @@ the yadtshell wiki
 :   https://github.com/yadt/yadtshell/wiki
 
 Alternatives
-:   puppet, chef
+:   ansible, saltstack, fabric
 
 # LICENSE
 
