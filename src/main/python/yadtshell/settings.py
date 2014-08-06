@@ -176,7 +176,8 @@ def load_settings_and_create_dirs(log_to_file=True):
         os.makedirs(OUT_DIR)
     except OSError as e:
         if e.errno != 17:   # 17: file exists
-            root_logger.critical('cannot write to out dir %s' % OUT_DIR)
+            root_logger.critical('Cannot create cache directory %s on %s'
+                                 % (OUT_DIR, USER_INFO['yadt_host']))
             root_logger.exception(e)
             sys.exit(1)
         pass
