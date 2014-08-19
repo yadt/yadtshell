@@ -23,6 +23,7 @@ import time
 import filecmp
 import shutil
 import yaml
+import socket
 
 import hostexpand.HostExpander
 
@@ -36,7 +37,7 @@ sys.path.append('/etc/yadtshell')
 
 DEFAULT_LOG_DIR = '/tmp/logs/yadtshell'
 USER_INFO = get_user_info()
-OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell' % USER_INFO['user'])
+OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell/%s' % (USER_INFO['user'], socket.gethostname()))
 reboot_disabled = False
 
 
