@@ -46,7 +46,7 @@ name = 'yadtshell'
 license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
-version = '1.9.0'
+version = '1.9.1'
 
 default_task = ['clean', 'analyze', 'publish']
 
@@ -86,7 +86,6 @@ def set_properties(project):
     project.get_property('copy_resources_glob').extend(['setup.cfg', 'docs/man/yadtshell.1.man.gz'])
 
     project.get_property('filter_resources_glob').extend(['**/yadtshell/__init__.py',
-                                                         '**/scripts/yadtshell',
                                                          '**/setup.cfg'])
 
     project.set_property('dir_dist_scripts', 'scripts')
