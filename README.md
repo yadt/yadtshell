@@ -14,7 +14,7 @@ The yadtshell controls hosts with a _yadt-minion_ via ssh, handles service depen
 On stock Ubuntu you'll already have Python, but you need to
 ```apt-get install python-dev```
 
-Also, if ```pyb install dependencies``` hangs this might be because pip (which is called in the background) tries to ask for a password. Do ```pip install --upgrade pip``` to get the newest version which doesn't have that problem.
+Also, if ```pyb install_dependencies``` hangs this might be because pip (which is called in the background) tries to ask for a password. Do ```pip install --upgrade pip``` to get the newest version which doesn't have that problem.
 
 ## Installation with pip
 It is considered good practice to install all packages available via pip & easy_install in a
