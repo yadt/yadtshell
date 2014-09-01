@@ -31,7 +31,7 @@ use_plugin('copy_resources')
 use_plugin('filter_resources')
 
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
-           Author('Marcel Wolf', 'marcel.wolf@immobilienscout24.de'),
+           Author('Marcel Wolf', 'marcel.wolf@me.com'),
            Author('Maximilien Riehl', 'max@riehl.io')]
 
 description = """YADT - an Augmented Deployment Tool - The Shell Part

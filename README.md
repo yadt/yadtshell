@@ -4,7 +4,7 @@
 [![Build Status](https://drone.io/github.com/yadt/yadtshell/status.png)](https://drone.io/github.com/yadt/yadtshell/latest)
 [![PyPI version](https://badge.fury.io/py/yadtshell.png)](https://badge.fury.io/py/yadtshell)
 
-# try-it-out
+# try it out
 
 If you want to try out how ```yadt``` works, please check out our [how to](https://github.com/yadt/try-it-yourself) and the [project](http://www.yadt-project.org/) page.
 
@@ -25,6 +25,8 @@ We're running CI builds on [travis-ci](http://travis-ci.org/yadt/yadtshell) and 
 - ```python 2.6/2.7```
 - ```python-devel```
 - ```virtualenv```
+
+### getting started
 
 ```bash
 git clone https://github.com/yadt/yadtshell
