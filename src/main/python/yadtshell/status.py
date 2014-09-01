@@ -155,6 +155,8 @@ def initialize_services(host, components):
 
 def get_service_class_from_loaded_modules(service_class_name):
     for module_name in sys.modules.keys()[:]:
+        if module_name.startswith("six.moves"):
+            continue  # six.moves is horrible and inspecting it causes a crash
         for classname, service_class in inspect.getmembers(sys.modules[module_name], inspect.isclass):
             if classname == service_class_name:
                 return service_class
