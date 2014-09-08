@@ -21,7 +21,7 @@ export COMP_WORDBREAKS='"@><=;|&( '"'"  # ":" dropped
 YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact restart"
 
 get_yadtshell_dir() {
-    echo $HOME/.yadtshell/tmp$(pwd)
+    echo $HOME/.yadtshell/$(python -c "import socket, sys; sys.stdout.write(socket.gethostname())")/tmp$(pwd)
 }
 
 _yadtshellCompletion() {
