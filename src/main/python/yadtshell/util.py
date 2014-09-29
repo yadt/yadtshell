@@ -58,13 +58,6 @@ def restore(filename):
         return pickle.load(f)
 
 
-def store2(data, filename):
-    f = open(filename, 'w')
-    for d in data:
-        print >> f, d
-    f.close()
-
-
 def restore2(filename):
     f = open(filename)
     result = []
