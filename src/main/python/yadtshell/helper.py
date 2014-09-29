@@ -16,6 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import fnmatch
 import re
 import pwd
@@ -207,6 +208,6 @@ def _traceit(frame, event, arg):
             filename = filename[:-1]
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
-        print "%s  # %s:%s" % (line.rstrip(), name, lineno,)
+        print("%s  # %s:%s" % (line.rstrip(), name, lineno,))
     return _traceit
 #    sys.settrace(_traceit)
