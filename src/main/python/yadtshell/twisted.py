@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, print_function)
 
 from twisted.internet import protocol, reactor, defer
 import twisted.python.failure as failure
@@ -63,7 +63,7 @@ class ProgressIndicator(object):
 
     def _overwrite_remaining_progress_with_blanks(self):
         remaining_progress_character_count = len(self.PROGRESS_LABEL) + 1
-        print '\r' + remaining_progress_character_count * ' ' + '\r'
+        print('\r' + remaining_progress_character_count * ' ' + '\r')
 
     def _render_value(self, value):
         if not value:
@@ -206,5 +206,5 @@ def report_error(failure, line_fun=None, include_stacktrace=False):
 
 
 def trace(arg, args='argh'):
-    print 'trace: ' + args
+    print('trace: ' + args)
     return arg
