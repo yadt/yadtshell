@@ -14,14 +14,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Arne Hilmann, Marcel Wolf'
+from __future__ import print_function
 
 import unittest
+import threading
 import integrationtest_support
 
 import yadt_status_answer
 
-import threading
 
 parallel = False
 
@@ -37,9 +37,9 @@ class Chunk (threading.Thread):
         self.exitcode = None
 
     def run(self):
-        print "starting %s: %s '%s'" % (self.chunkId, self.fun.__name__, " ".join(self.args))
+        print("starting %s: %s '%s'" % (self.chunkId, self.fun.__name__, " ".join(self.args)))
         self.exitcode = self.fun(*self.args, **self.kwargs)
-        print "exiting %s, exitcode %s" % (self.chunkId, self.exitcode)
+        print("exiting %s, exitcode %s" % (self.chunkId, self.exitcode))
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
@@ -76,9 +76,9 @@ class Test (integrationtest_support.IntegrationTestSupport):
             [chunk.join(20) for chunk in chunks]
             for chunk in chunks:
                 if chunk.isAlive():
-                    print "%s timed out!" % chunk.chunkId
+                    print("%s timed out!" % chunk.chunkId)
                 else:
-                    print "%s returned %s" % (chunk.chunkId, chunk.exitcode)
+                    print("%s returned %s" % (chunk.chunkId, chunk.exitcode))
             stop1_return_code = chunks[0].exitcode
             stop2_return_code = chunks[1].exitcode
         else:
