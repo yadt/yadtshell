@@ -16,7 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, print_function)
 
 import glob
 import os
@@ -391,7 +391,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
             yadtshell.settings.HOST: _open_component_file('hosts'),
         }
         for component in components.values():
-            print >> component_files[component.type], component.uri
+            component_files[component.type].write(component.uri + "\n")
 
         for f in component_files.values():
             f.close()
@@ -439,7 +439,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
         status_line = yadtshell.util.get_status_line(components)
         logger.debug('status: %s' % status_line)
-        print status_line
+        print(status_line)
         f = open(os.path.join(yadtshell.settings.OUT_DIR, 'statusline'), 'w')
         f.write('\n'.join(['', status_line]))
         f.close()
