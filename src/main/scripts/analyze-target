@@ -17,6 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import logging
 
 import yadtshell.util
@@ -31,17 +32,17 @@ def pretty_name(name):
 def analyze():
     components = yadtshell.util.restore_current_state()
 
-    print "digraph G {"
-    print "graph [ rankdir=LR ];"
-    print "node [ shape=none ];"
+    print("digraph G {")
+    print("graph [ rankdir=LR ];")
+    print("node [ shape=none ];")
     for uri, component in components.iteritems():
         if isinstance(component, yadtshell.components.Service):
-            print '"%s";' % pretty_name(uri)
+            print('"%s";' % pretty_name(uri))
             for needed_uri in component.needs:
                 needed_component = components[needed_uri]
                 if isinstance(needed_component, yadtshell.components.Service):
-                    print '"%s" -> "%s"' % (pretty_name(uri), pretty_name(needed_uri))
-    print "}"
+                    print('"%s" -> "%s"' % (pretty_name(uri), pretty_name(needed_uri)))
+    print("}")
 
 if __name__ == "__main__":
     analyze()
