@@ -16,6 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import logging
 import re
 import sys
@@ -62,7 +63,7 @@ def dump(args=[], mode='all', attribute=None, filter=None, **kwargs):
                 result.add(a)
         else:
             if uri != component.uri:
-                print uri, '- also known as'
-            print component.dump()
+                print(uri, '- also known as')
+            print(component.dump())
     if attribute:
-        print '\n'.join(result)
+        print('\n'.join(result))
