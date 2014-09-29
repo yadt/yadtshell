@@ -47,6 +47,7 @@ Options:
 --version                 show version
 """
 
+from __future__ import print_function
 import logging
 import sys
 
@@ -254,15 +255,15 @@ except BaseException as e:
     logger.critical(str(e))
 
 if reactor.return_code == 0:
-    print yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL${NORMAL}' % cmd.upper())
+    print(yadtshell.settings.term.render('${GREEN}${BOLD}%s SUCCESSFUL${NORMAL}' % cmd.upper()))
 
 elif reactor.return_code == EXIT_CODE_CANCELED_BY_USER:
-    print yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER${NORMAL}' % cmd.upper())
+    print(yadtshell.settings.term.render('${BG_YELLOW}${BOLD}%s CANCELLED BY USER${NORMAL}' % cmd.upper()))
     if warning_after_error:
         logger.warn(warning_after_error)
 
 else:
-    print yadtshell.settings.term.render('${RED}${BOLD}%s FAILED${NORMAL}' % cmd.upper())
+    print(yadtshell.settings.term.render('${RED}${BOLD}%s FAILED${NORMAL}' % cmd.upper()))
     if warning_after_error:
         logger.warn(warning_after_error)
     logger.critical('exit code: %i' % reactor.return_code)
