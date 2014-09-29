@@ -16,7 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, print_function)
 
 import logging
 import os
@@ -122,7 +122,7 @@ class Component(object):
             cmds = cmd
         else:
             cmds = '\n'.join(cmd)
-        print cmds
+        print(cmds)
         if no_subprocess:
             return cmds
         if guard:
