@@ -344,7 +344,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         all_ok = True
         for ok, response in responses:
             if not ok:
-                logger.error(response)
+                logger.debug("Found errored status response: %s" % response)
                 all_ok = False
         if not all_ok:
             raise Exception('errors occured during status')
