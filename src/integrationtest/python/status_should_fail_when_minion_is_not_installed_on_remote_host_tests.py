@@ -32,7 +32,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
         actual_return_code, stdout, stderr = self.execute_command_and_capture_output('yadtshell status')
 
         self.assertEqual(1, actual_return_code)
-        message_for_missing_minion = "No yadt-minion installed on remote host it01.test.domainz"
+        message_for_missing_minion = "No yadt-minion installed on remote host it01.test.domain"
         if message_for_missing_minion not in stderr:
             self.fail("""
 Did not find expected wording '{0}' in output:
