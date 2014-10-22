@@ -64,7 +64,9 @@ def query_status(component_name, pi=None):
     return p.deferred
 
 
-def handle_unreachable_host(failure, components):
+def handle_failing_status(failure, components):
+    if failure.value.exitCode == 127:
+        logger.critical('No yadt-minion installed on remote host %s' % failure.value.component)
     if failure.value.exitCode == 255:
         logger.critical(
             'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
@@ -462,7 +464,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     def query_and_initialize_host(host):
         deferred = query_status(host, pi)
         deferred.addCallbacks(callback=create_host, callbackArgs=[components],
-                              errback=handle_unreachable_host, errbackArgs=[components])
+                              errback=handle_failing_status, errbackArgs=[components])
 
         deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
