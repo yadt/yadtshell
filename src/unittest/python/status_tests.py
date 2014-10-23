@@ -152,7 +152,7 @@ class StatusTests(unittest.TestCase):
         failure.value.component = 'foobar42.domain.tld'
         failure.value.exitCode = 255
         components = {}
-        result = yadtshell._status.handle_unreachable_host(failure, components)
+        result = yadtshell._status.handle_failing_status(failure, components)
         self.assertTrue(isinstance(result, yadtshell.components.UnreachableHost))
         self.assertEqual(result.fqdn, 'foobar42.domain.tld')
         # self.assertIn('host://foobar42', components)  # use this when we have Python >= 2.7
