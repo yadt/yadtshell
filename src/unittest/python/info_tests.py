@@ -223,8 +223,8 @@ ${NORMAL}
         rendered_ro_services = '''
   foobar42
 
-  O  readonly-service ro_down (needed by something a_dog)
   |  readonly-service ro_up (needed by me you)
+  O  readonly-service ro_down (needed by something a_dog)
 '''
 
         self.assert_in(rendered_ro_services,
@@ -253,8 +253,8 @@ ${NORMAL}
         rendered_ro_services = '''
   foobar42
 
-  ${BG_RED}${WHITE}${BOLD}O${NORMAL}  readonly-service ro_down (needed by something a_dog)
   ${BG_GREEN}${WHITE}${BOLD}|${NORMAL}  readonly-service ro_up (needed by me you)
+  ${BG_RED}${WHITE}${BOLD}O${NORMAL}  readonly-service ro_down (needed by something a_dog)
 '''
 
         self.assert_in(rendered_ro_services,

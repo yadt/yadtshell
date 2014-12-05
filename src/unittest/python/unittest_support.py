@@ -41,7 +41,7 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
     host.reboot_required_after_next_update = host_reboot_after_update
     host.reboot_required_to_activate_latest_kernel = host_reboot_now
     host.hostname = 'foobar42'
-    components['foobar42'] = host
+    components['host://foobar42'] = host
     if host_locked_by_other:
         host.lockstate = {'owner': 'foobar',
                           'message': 'yes we can (lock the host)'}
