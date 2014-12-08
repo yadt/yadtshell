@@ -25,17 +25,18 @@ import yadtshell.helper
 import yadtshell.update
 import yadtshell.uri
 from yadtshell.actionmanager import ActionManager  # NOQA
-
 import yadtshell.twisted
 import yadtshell.defer  # NOQA
 
 import yadtshell.status as _status  # NOQA
 import yadtshell.info as _info  # NOQA
+import yadtshell.reboot as _reboot  # NOQA
 
 from yadtshell.status import status  # NOQA
 from yadtshell.info import info  # NOQA
 from yadtshell.dump import dump  # NOQA
 from yadtshell.restart import restart   # NOQA
+from yadtshell.reboot import reboot  # NOQA
 
 
 VERSION = '${version}'

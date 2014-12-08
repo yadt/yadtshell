@@ -25,6 +25,7 @@ yadtshell restart SERVICE-URI... [options]
 yadtshell update [HOST-URI...] [-y] [--reboot | --no-reboot] [options]
 yadtshell updateartefact ARTEFACT-URI ... [options]
 yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
+yadtshell reboot HOST-URI ... [options]
 yadtshell unlock HOST-URI ... [options]
 yadtshell ignore -m MESSAGE SERVICE-URI ... [options] [--force]
 yadtshell unignore SERVICE-URI ... [options]
@@ -199,6 +200,15 @@ elif cmd == 'restart':
     )
     am = yadtshell.ActionManager()
     deferred.addCallback(am.action, **opts)
+elif cmd == 'reboot':
+    deferred = yadtshell.status()
+    deferred.addCallback(
+        yadtshell.reboot,
+        uris,
+        **opts
+    )
+    am = yadtshell.ActionManager()
+    deferred.addCallback(am.action, **opts)
 else:
     try:
         plan = yadtshell.metalogic.metalogic(cmd, uris)
@@ -212,7 +222,8 @@ else:
 
 commands_that_change_state = ['stop', 'start', 'restart',
                               'update', 'updateartefact',
-                              'ignore', 'lock', 'unignore', 'unlock']
+                              'ignore', 'lock', 'unignore', 'unlock',
+                              'reboot']
 if cmd in commands_that_change_state and not opts.get('no_final_status'):
     deferred.addCallback(yadtshell.status)
 

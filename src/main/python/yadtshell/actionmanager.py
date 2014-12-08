@@ -215,9 +215,9 @@ class ActionManager(object):
                 self.pi.update((cmd, component), '0')
                 self.logger.debug(
                     'successfully %sed %s' % (cmd, component.uri))
-            elif target_state == yadtshell.settings.UPTODATE:
+            elif target_state in [yadtshell.settings.UPTODATE, 'rebooted']:
                 component.state = target_state
-                self.logger.debug('successfully updated %s' % component.uri)
+                self.logger.debug('successfully %sed %s' % (target_state, component.uri))
             else:
                 max_tries = getattr(component, 'status_max_tries', 1)
                 if tries < max_tries:
@@ -471,7 +471,10 @@ class ActionManager(object):
 
 def filter_dangerous_actions(actions):
     def is_a_dangerous_action(action):
-        return action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)
+        return (
+            (action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False))
+            or action.cmd in ['reboot']
+        )
     return filter(is_a_dangerous_action, actions)
 
 

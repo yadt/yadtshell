@@ -82,10 +82,13 @@ def create_component_pool_for_one_host(host_state=yadtshell.settings.UPTODATE,
         bar_service = yadtshell.components.Service(host, 'barservice', {})
         bar_service.state = service_state
         bar_service.dependency_score = -1
-        baz_service = yadtshell.components.Service(host, 'barservice', {})
+        baz_service = yadtshell.components.Service(host, 'bazservice', {})
         bar_service.needs_artefacts = ['artefact://foobar42/foo']
         baz_service.state = service_state
+        baz_service.needs_services = bar_service
         baz_service.dependency_score = 1
+        host.defined_services = [bar_service, baz_service]
+        host.needed_by = [baz_service.uri, bar_service.uri]
         components['service://foobar42/barservice'] = bar_service
         components['service://foobar42/bazservice'] = baz_service
 

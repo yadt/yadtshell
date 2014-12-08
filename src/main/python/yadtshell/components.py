@@ -325,7 +325,7 @@ class Host(AbstractHost):
     def is_reachable(self):
         return True
 
-    def update(self, reboot_required=False):
+    def update(self, reboot_required=False, upgrade_packages=True):
         next_artefacts = [uri.replace('/', '-', 1)
                           for uri in self.next_artefacts]
         if not reboot_required:
@@ -333,7 +333,7 @@ class Host(AbstractHost):
                                     '%s_%s' % (self.hostname, yadtshell.settings.UPDATE))
 
         update_and_reboot_command = self.remote_call(
-            'yadt-host-update -r %s' % ' '.join(next_artefacts),
+            'yadt-host-update -r %s' % ' '.join(next_artefacts if upgrade_packages else []),
             '%s_%s' % (self.hostname, yadtshell.settings.UPDATE))
         p = YadtProcessProtocol(self, update_and_reboot_command, out_log_level=logging.INFO)
         p.target_state = yadtshell.settings.UPTODATE
