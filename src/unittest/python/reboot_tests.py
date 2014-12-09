@@ -129,7 +129,7 @@ class StartPlanTests(TestCase):
                          '        when state of host://foobar42 is "rebooted"\n')
 
 
-class RebootTests(SilencedErrorLoggerTestCase):
+class RebootActionPlanTests(SilencedErrorLoggerTestCase):
 
     def test_should_raise_exception_when_uri_is_a_service(self):
         self.assertRaises(ValueError, reboot, uris=["service://foobar42/barservice"])
@@ -156,26 +156,16 @@ class RebootTests(SilencedErrorLoggerTestCase):
         dump_plan_call_name, dump_plan_args = dump_plan_call[0]
         actual_reboot_plan = dump_plan_args
 
-        actual_plan_actions = sorted(actual_reboot_plan.list_actions)
-        # Careful here, there's no missing comma here (string concatenation)
+        # Careful, there's no missing comma here (string concatenation)
         expected_plan_actions = [
-            'update the host://foobar42, set state to "rebooted" (reboot_required)\n'
-            '    when state of service://foobar42/barservice is "down"\n'
-            '    when state of service://foobar42/bazservice is "down"\n',
-            'start the service://foobar42/barservice, set state to "up"\n'
-            '    when state of host://foobar42 is "rebooted"\n',
-            'stop the service://foobar42/barservice, set state to "down"\n',
-            'stop the service://foobar42/bazservice, set state to "down"\n',
-            'start the service://foobar42/bazservice, set state to "up"\n'
-            '    when state of host://foobar42 is "rebooted"\n']
-        expected_plan_actions = sorted([
-            Action("update", "host://foobar42", "state", "rebooted", kwargs={"reboot_required": True}, preconditions=[TargetState("service://foobar42/bazservice", "state", "down"), TargetState("service://foobar42/barservice", "state", "down")]),
+            Action("update", "host://foobar42", "state", "rebooted", kwargs={"reboot_required": True, "upgrade_packages": False}, preconditions=[TargetState("service://foobar42/bazservice", "state", "down"), TargetState("service://foobar42/barservice", "state", "down")]),
             Action("start", "service://foobar42/barservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
             Action("start", "service://foobar42/bazservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
             Action("stop", "service://foobar42/barservice", "state", "down"),
             Action("stop", "service://foobar42/bazservice", "state", "down")
-        ])
+        ]
 
-        for position, actual_action in enumerate(actual_plan_actions):
-            expected_action = expected_plan_actions[position]
-            self.assertEqual(actual_action, expected_action)
+        for position, expected_action in enumerate(expected_plan_actions):
+            self.assertTrue(expected_action in actual_reboot_plan.list_actions,
+                            "Expected %s, but not found in:\n%s" % (expected_action,
+                                                                    actual_reboot_plan.dump()))

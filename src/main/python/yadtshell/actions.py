@@ -40,6 +40,14 @@ class TargetState(object):
     def __str__(self):
         return self.dump(0)
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, TargetState)
+            and self.uri == other.uri
+            and self.attr == other.attr
+            and self.target_value == other.target_value
+        )
+
     def dump(self, depth, prefix=''):
         indent = ' ' * depth * 4
         return indent + prefix + '%(attr)s of %(uri)s is "%(target_value)s"\n' % vars(self)
@@ -77,7 +85,11 @@ class Action(object):
         return self.dump(include_preconditions=False)
 
     def __eq__(self, other):
-        print("comparing %s and %s" % (self.dump(), other.dump()))
+        preconditions_match = reduce(lambda a, b: a and b,
+                                     # we use the list __contains__ for value equality
+                                     [own_precondition in list(getattr(other, "preconditions", []))
+                                      for own_precondition in self.preconditions],
+                                     True)
         return (
             isinstance(other, Action)
             and self.cmd == other.cmd
@@ -86,7 +98,8 @@ class Action(object):
             and self.target_value == other.target_value
             and self.kwargs == other.kwargs
             and self.executed == other.executed
-            and set(self.preconditions) == set(other.preconditions)
+            and len(self.preconditions) == len(other.preconditions)
+            and preconditions_match
         )
 
     def dump(self, depth=0, include_preconditions=True, include_target_value=True):
