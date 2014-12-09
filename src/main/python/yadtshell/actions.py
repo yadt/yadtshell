@@ -76,6 +76,19 @@ class Action(object):
     def __str__(self):
         return self.dump(include_preconditions=False)
 
+    def __eq__(self, other):
+        print("comparing %s and %s" % (self.dump(), other.dump()))
+        return (
+            isinstance(other, Action)
+            and self.cmd == other.cmd
+            and self.uri == other.uri
+            and self.attr == other.attr
+            and self.target_value == other.target_value
+            and self.kwargs == other.kwargs
+            and self.executed == other.executed
+            and set(self.preconditions) == set(other.preconditions)
+        )
+
     def dump(self, depth=0, include_preconditions=True, include_target_value=True):
         indent = ' ' * depth * 4
         text = indent

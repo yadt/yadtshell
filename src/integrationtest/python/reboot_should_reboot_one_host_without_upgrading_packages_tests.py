@@ -35,9 +35,11 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it01.domain', 'yadt-command yadt-service-status backend-service').then_return(3).then_return(0)
             when.calling('ssh').at_least_with_arguments('it01.domain').then_return(0)
 
-        actual_return_code = self.execute_command('yadtshell reboot host://it01 -v')
+        status_return_code = self.execute_command('yadtshell status')
+        reboot_return_code = self.execute_command('yadtshell reboot host://it01 -v')
 
-        self.assertEqual(0, actual_return_code)
+        self.assertEqual(0, status_return_code)
+        self.assertEqual(0, reboot_return_code)
 
         with self.verify() as verify:
             verify.called('ssh').at_least_with_arguments(

@@ -18,6 +18,7 @@
 
 import yadtshell
 from yadtshell import reboot
+from yadtshell.actions import Action, TargetState
 from unittest_support import create_component_pool_for_one_host
 
 from mock import patch, Mock
@@ -68,8 +69,8 @@ class RebootActionsTest(TestCase):
         self.assertEqual(len(preconditions), 2)
         precondition_uri_attr_target = [(p.uri, p.attr, p.target_value) for p in preconditions]
         self.assertEqual(sorted(precondition_uri_attr_target), [
-                          ('service://service1', 'state', 'down'),
-                          ('service://service2', 'state', 'down')])
+            ('service://service1', 'state', 'down'),
+            ('service://service2', 'state', 'down')])
 
     def test_should_create_update_action_with_required_reboot_when_rebooting(self):
         self.assertEqual(self.reboot_action.cmd, 'update')
@@ -96,9 +97,9 @@ class StopPlanTests(TestCase):
         stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on("host://foobar42")
 
         self.assertEqual(stop_plan.dump(),
-                          'stop [2 items, workers *undefined*, 0 errors tolerated]:\n'
-                          '    stop the service://foobar42/barservice, set state to "down"\n'
-                          '    stop the service://foobar42/bazservice, set state to "down"\n')
+                         'stop [2 items, workers *undefined*, 0 errors tolerated]:\n'
+                         '    stop the service://foobar42/barservice, set state to "down"\n'
+                         '    stop the service://foobar42/bazservice, set state to "down"\n')
 
     @patch("yadtshell.metalogic.yadtshell.util.restore_current_state")
     def test_should_stop_all_services_without_preconditions(self, state):
@@ -121,11 +122,11 @@ class StartPlanTests(TestCase):
         start_plan = yadtshell._reboot.create_plan_to_start_all_services_on("host://foobar42", components)
 
         self.assertEqual(start_plan.dump(),
-                          'start [2 items, workers *undefined*, 0 errors tolerated]:\n'
-                          '    start the service://foobar42/barservice, set state to "up"\n'
-                          '        when state of host://foobar42 is "rebooted"\n'
-                          '    start the service://foobar42/bazservice, set state to "up"\n'
-                          '        when state of host://foobar42 is "rebooted"\n')
+                         'start [2 items, workers *undefined*, 0 errors tolerated]:\n'
+                         '    start the service://foobar42/barservice, set state to "up"\n'
+                         '        when state of host://foobar42 is "rebooted"\n'
+                         '    start the service://foobar42/bazservice, set state to "up"\n'
+                         '        when state of host://foobar42 is "rebooted"\n')
 
 
 class RebootTests(SilencedErrorLoggerTestCase):
@@ -155,15 +156,26 @@ class RebootTests(SilencedErrorLoggerTestCase):
         dump_plan_call_name, dump_plan_args = dump_plan_call[0]
         actual_reboot_plan = dump_plan_args
 
-        self.assertEqual(actual_reboot_plan.dump(),
-        'reboot [1 items, sequential, 0 errors tolerated]:\n'
-        '    chunk_0 [5 items, sequential, 0 errors tolerated]:\n'
-        '        update the host://foobar42, set state to "rebooted" (reboot_required)\n'
-        '            when state of service://foobar42/bazservice is "down"\n'
-        '            when state of service://foobar42/barservice is "down"\n'
-        '        stop the service://foobar42/barservice, set state to "down"\n'
-        '        start the service://foobar42/barservice, set state to "up"\n'
-        '            when state of host://foobar42 is "rebooted"\n'
-        '        stop the service://foobar42/bazservice, set state to "down"\n'
-        '        start the service://foobar42/bazservice, set state to "up"\n'
-        '            when state of host://foobar42 is "rebooted"\n')
+        actual_plan_actions = sorted(actual_reboot_plan.list_actions)
+        # Careful here, there's no missing comma here (string concatenation)
+        expected_plan_actions = [
+            'update the host://foobar42, set state to "rebooted" (reboot_required)\n'
+            '    when state of service://foobar42/barservice is "down"\n'
+            '    when state of service://foobar42/bazservice is "down"\n',
+            'start the service://foobar42/barservice, set state to "up"\n'
+            '    when state of host://foobar42 is "rebooted"\n',
+            'stop the service://foobar42/barservice, set state to "down"\n',
+            'stop the service://foobar42/bazservice, set state to "down"\n',
+            'start the service://foobar42/bazservice, set state to "up"\n'
+            '    when state of host://foobar42 is "rebooted"\n']
+        expected_plan_actions = sorted([
+            Action("update", "host://foobar42", "state", "rebooted", kwargs={"reboot_required": True}, preconditions=[TargetState("service://foobar42/bazservice", "state", "down"), TargetState("service://foobar42/barservice", "state", "down")]),
+            Action("start", "service://foobar42/barservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
+            Action("start", "service://foobar42/bazservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
+            Action("stop", "service://foobar42/barservice", "state", "down"),
+            Action("stop", "service://foobar42/bazservice", "state", "down")
+        ])
+
+        for position, actual_action in enumerate(actual_plan_actions):
+            expected_action = expected_plan_actions[position]
+            self.assertEqual(actual_action, expected_action)
