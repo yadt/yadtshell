@@ -21,12 +21,12 @@ import yadtshell
 
 from yadtshell.actions import ActionPlan, Action, TargetState
 from yadtshell.helper import expand_hosts, glob_hosts
+from yadtshell.update import get_all_adjacent_needed_hosts
 from yadtshell.metalogic import (metalogic,
                                  identity,
                                  apply_instructions,
                                  chop_minimal_related_chunks)
 from yadtshell.constants import REBOOT_REQUIRED
-from yadtshell.components import Service
 from yadtshell.settings import DOWN
 from yadtshell.util import restore_current_state, dump_action_plan
 
@@ -45,22 +45,22 @@ def reboot(protocol=None, uris=None, parallel=None, **kwargs):
         host_uris = expand_hosts(uris)
         host_uris = glob_hosts(components, host_uris)
 
-        start_actions = []
-        stop_actions = []
-        reboot_actions = []
-        for host_uri in host_uris:
-            host = components[host_uri]
-            reboot_host = create_reboot_action_for(host)
+        hosts_to_reboot = uris
+        stop_plan = create_plan_to_stop_all_services_on(hosts_to_reboot)
 
-            stop_all_services_on_host = create_plan_to_stop_all_services_on(host_uri)
+        all_stopped_services = set()
+        for action in stop_plan.actions:
+            all_stopped_services.add(action.uri)
 
-            start_after_reboot = create_plan_to_start_all_services_on(host_uri, components)
-            stop_actions.extend(stop_all_services_on_host.actions)
-            reboot_actions.append(reboot_host)
-            start_actions.extend(start_after_reboot.actions)
+        start_plan = create_plan_to_start_services_after_rebooting(all_stopped_services,
+                                                                   hosts_to_reboot,
+                                                                   components)
 
-        all_actions = set(start_actions) | set(stop_actions) | set(reboot_actions)
-        all_plan = yadtshell.actions.ActionPlan('all', all_actions)
+        reboot_actions = set([create_reboot_action_for(components[host_uri]) for host_uri in hosts_to_reboot])
+
+        all_actions = set(start_plan.actions) | set(
+            stop_plan.actions) | reboot_actions
+        all_plan = ActionPlan('all', all_actions)
         all_plan = chop_minimal_related_chunks(all_plan)
 
         reboot_chunks = set()
@@ -70,11 +70,20 @@ def reboot(protocol=None, uris=None, parallel=None, **kwargs):
                 reboot_chunks.add(chunk)
                 continue
 
-        plan = ActionPlan('reboot', reboot_chunks)
+        prestart_chunks = set()
+        for possible_prestart_chunk in all_plan.actions:
+            if possible_prestart_chunk in reboot_chunks:
+                continue
+            if possible_prestart_chunk.is_not_empty:
+                prestart_chunks.add(possible_prestart_chunk)
 
+        plan = ActionPlan(
+            'update', [ActionPlan('prestart', prestart_chunks),
+                       ActionPlan('stoprebootstart', reboot_chunks)
+                       ], nr_workers=1)
         plan = apply_instructions(plan, parallel)
-
         dump_action_plan('reboot', plan)
+
         return 'reboot'
     except BaseException as e:
         logger.error("Problem white creating plan for reboot: %s" % e)
@@ -94,24 +103,24 @@ def create_reboot_action_for(host):
     return reboot_host_action
 
 
-def create_plan_to_stop_all_services_on(host_uri):
-    return yadtshell.metalogic.metalogic(
+def create_plan_to_stop_all_services_on(host_uris):
+    return metalogic(
         yadtshell.settings.STOP,
-        [host_uri],
+        host_uris,
         plan_post_handler=identity)
 
 
-def create_plan_to_start_all_services_on(host_uri, components):
-    all_services_on_host = set(
-        [s.uri for s in components.values()
-         if isinstance(s, Service) and s.host_uri == host_uri])
-
-    start_after_reboot = metalogic(
+def create_plan_to_start_services_after_rebooting(services, rebooted_hosts, components):
+    start_plan = metalogic(
         yadtshell.settings.START,
-        all_services_on_host,
+        services,
         plan_post_handler=identity)
-    for start_action in start_after_reboot.actions:
-        start_action.preconditions.add(
-            TargetState(host_uri, 'state', 'rebooted'))
 
-    return start_after_reboot
+    for start_action in start_plan.actions:
+        if start_action.uri in services:
+            for host_uri in get_all_adjacent_needed_hosts(start_action.uri, components):
+                if host_uri in rebooted_hosts:
+                    start_action.preconditions.add(yadtshell.actions.TargetState(
+                        host_uri, 'state', 'rebooted'))
+
+    return start_plan

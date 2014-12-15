@@ -86,7 +86,7 @@ class StopPlanTests(TestCase):
     def test_should_stop_no_services_when_host_has_no_services(self, state):
         state.return_value = create_component_pool_for_one_host()
 
-        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on("host://foobar42")
+        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on(["host://foobar42"])
 
         self.assertEqual(stop_plan.actions, ())
 
@@ -94,7 +94,7 @@ class StopPlanTests(TestCase):
     def test_should_stop_all_services(self, state):
         state.return_value = create_component_pool_for_one_host(add_services=True)
 
-        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on("host://foobar42")
+        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on(["host://foobar42"])
 
         self.assertEqual(stop_plan.dump(),
                          'stop [2 items, workers *undefined*, 0 errors tolerated]:\n'
@@ -105,21 +105,22 @@ class StopPlanTests(TestCase):
     def test_should_stop_all_services_without_preconditions(self, state):
         state.return_value = create_component_pool_for_one_host(add_services=True)
 
-        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on("host://foobar42")
+        stop_plan = yadtshell._reboot.create_plan_to_stop_all_services_on(["host://foobar42"])
 
         for stop_action in stop_plan.list_actions:
             self.assertEqual(stop_action.cmd, "stop")
             self.assertEqual(stop_action.preconditions, set([]))
 
 
-class StartPlanTests(TestCase):
+class StartAfterRebootPlanTests(TestCase):
 
     @patch("yadtshell.metalogic.yadtshell.util.restore_current_state")
     def test_should_start_all_services_once_host_is_set_to_rebooted(self, state):
         components = create_component_pool_for_one_host(add_services=True)
         state.return_value = components
 
-        start_plan = yadtshell._reboot.create_plan_to_start_all_services_on("host://foobar42", components)
+        start_plan = yadtshell._reboot.create_plan_to_start_services_after_rebooting(["service://foobar42/barservice", "service://foobar42/bazservice"],
+                                                                                     ["host://foobar42"], components)
 
         self.assertEqual(start_plan.dump(),
                          'start [2 items, workers *undefined*, 0 errors tolerated]:\n'
@@ -127,6 +128,19 @@ class StartPlanTests(TestCase):
                          '        when state of host://foobar42 is "rebooted"\n'
                          '    start the service://foobar42/bazservice, set state to "up"\n'
                          '        when state of host://foobar42 is "rebooted"\n')
+
+    @patch("yadtshell.metalogic.yadtshell.util.restore_current_state")
+    def test_should_start_services_unconditionally_when_other_host_is_rebooted(self, state):
+        components = create_component_pool_for_one_host(add_services=True)
+        state.return_value = components
+
+        start_plan = yadtshell._reboot.create_plan_to_start_services_after_rebooting(["service://foobar42/barservice", "service://foobar42/bazservice"],
+                                                                                     ["host://foobar43"], components)
+
+        self.assertEqual(start_plan.dump(),
+                         'start [2 items, workers *undefined*, 0 errors tolerated]:\n'
+                         '    start the service://foobar42/barservice, set state to "up"\n'
+                         '    start the service://foobar42/bazservice, set state to "up"\n')
 
 
 class RebootActionPlanTests(SilencedErrorLoggerTestCase):
@@ -157,15 +171,32 @@ class RebootActionPlanTests(SilencedErrorLoggerTestCase):
         actual_reboot_plan = dump_plan_args
 
         # Careful, there's no missing comma here (string concatenation)
-        expected_plan_actions = [
-            Action("update", "host://foobar42", "state", "rebooted", kwargs={"reboot_required": True, "upgrade_packages": False}, preconditions=[TargetState("service://foobar42/bazservice", "state", "down"), TargetState("service://foobar42/barservice", "state", "down")]),
-            Action("start", "service://foobar42/barservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
-            Action("start", "service://foobar42/bazservice", "state", "up", preconditions=[TargetState("host://foobar42", "state", "rebooted")]),
+        expected_actions = [
+            Action("update", "host://foobar42", "state", "rebooted",
+                   kwargs={"reboot_required": True, "upgrade_packages": False},
+                   preconditions=[
+                       TargetState("service://foobar42/bazservice", "state", "down"),
+                       TargetState("service://foobar42/barservice", "state", "down")]),
+            Action("start", "service://foobar42/barservice", "state", "up",
+                   preconditions=[
+                       TargetState("host://foobar42", "state", "rebooted")]),
+            Action("start", "service://foobar42/bazservice", "state", "up",
+                   preconditions=[
+                       TargetState("host://foobar42", "state", "rebooted")]),
             Action("stop", "service://foobar42/barservice", "state", "down"),
             Action("stop", "service://foobar42/bazservice", "state", "down")
         ]
 
-        for position, expected_action in enumerate(expected_plan_actions):
-            self.assertTrue(expected_action in actual_reboot_plan.list_actions,
-                            "Expected %s, but not found in:\n%s" % (expected_action,
-                                                                    actual_reboot_plan.dump()))
+        assert_actual_plan_matches_expected_actions(self, expected_actions, actual_reboot_plan)
+
+
+def assert_actual_plan_matches_expected_actions(self, expected_actions, actual_plan):
+    self.assertEqual(len(expected_actions), greedy_len(actual_plan.list_actions))
+    for position, expected_action in enumerate(expected_actions):
+        self.assertTrue(expected_action in actual_plan.list_actions,
+                        "Expected %s, but not found in:\n%s" % (expected_action,
+                                                                actual_plan.dump()))
+
+
+def greedy_len(generator):
+    return len([item for item in generator])
