@@ -39,7 +39,8 @@ class TwistedTests(unittest.TestCase):
         mock_line_fun = Mock()
         failure = lambda: None
         failure.value = lambda: None
-        failure.getBriefTraceback = lambda: ''
+        failure.getBriefTraceback = lambda: 'This is the short traceback'
+        failure.getTraceback = lambda: 'This is the full traceback'
         failure.getErrorMessage = lambda: 'Something has gone wrong'
 
         report_error(failure, line_fun=mock_line_fun)

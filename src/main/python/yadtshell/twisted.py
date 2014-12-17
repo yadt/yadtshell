@@ -199,6 +199,7 @@ def report_error(failure, line_fun=None, include_stacktrace=False):
                                failure.getErrorMessage()))
     else:
         line_fun(failure.getErrorMessage())
+        logger.debug(failure.getTraceback())
         if include_stacktrace:
             for line in failure.getBriefTraceback().splitlines():
                 line_fun(line)
