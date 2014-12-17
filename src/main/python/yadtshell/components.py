@@ -342,7 +342,7 @@ class Host(AbstractHost):
         def handle_rebooting_machine(failure, ssh_poll_max_seconds):
             if failure.value.exitCode == 152:
                 raise yadtshell.actions.ActionException(
-                    'Timed out while waiting for %s to reboot' % self.uri)
+                    'Timed out while waiting for %s to reboot' % self.uri, 152)
             elif failure.value.exitCode == 255:
                 logger.info("%s: rebooting now" % self.uri)
                 return poll_rebooting_machine()
