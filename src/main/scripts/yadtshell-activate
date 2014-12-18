@@ -18,7 +18,7 @@
 
 export COMP_WORDBREAKS='"@><=;|&( '"'"  # ":" dropped
 
-YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact restart"
+YADTSHELL_CMDS="status start stop info dump lock unlock update ignore unignore updateartefact restart reboot"
 
 get_yadtshell_dir() {
     echo $HOME/.yadtshell/$(python -c "import socket, sys; sys.stdout.write(socket.gethostname())")/tmp$(pwd)
@@ -41,7 +41,7 @@ _yadtshellCompletion() {
     fi
     if [[ $NR_WORDS < 1 ]]; then
         COMPREPLY=( $(compgen -W "$YADTSHELL_CMDS" -- ${CURRENT}) )
-    elif [[ $CMD == "lock" || $CMD == "unlock" || $CMD == "update" ]]; then
+    elif [[ $CMD == "lock" || $CMD == "unlock" || $CMD == "update" || $CMD == "reboot" ]]; then
         COMPREPLY=( $(compgen -W "$(cat $HOSTS_FILE 2> /dev/null)" -- ${CURRENT}) )
     elif [[ $CMD == "updateartefact" ]]; then
         COMPREPLY=( $(compgen -W "$(cat $ARTEFACTS_FILE 2> /dev/null)" -- ${CURRENT}) )
