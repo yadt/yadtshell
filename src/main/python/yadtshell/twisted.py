@@ -107,6 +107,7 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.logger = logging.getLogger(log_prefix)
         self.out_log_level = out_log_level
         self.err_log_level = err_log_level
+        self.is_alive = True
 
     def connectionMade(self):
         self.logger.debug("starting query: %s" % self.cmd)
@@ -143,6 +144,7 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.logger.debug("%s@%s ended, exit code %s" % (self.cmd,
                                                          self.component,
                                                          str(reason.value.exitCode)))
+        self.is_alive = False
         if self.wait_for_io:
             self.finish(reason)
 

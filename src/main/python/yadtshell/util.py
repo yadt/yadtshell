@@ -187,26 +187,34 @@ def start_ssh_multiplexed(hosts=None):
         hosts = yadtshell.settings.TARGET_SETTINGS['hosts']
 
     def start_ssh(protocol, host):
-        logger.debug('start_ssh %s' % host)
+        logger.debug('Starting SSH multiplexing for %s' % host)
         start_multiplexing_call = shlex.split(
             '%s -fN -o ControlMaster=yes %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(
             host, 'start_ssh', wait_for_io=False)
-        logger.debug('cmd: %s' % start_multiplexing_call)
+
+        logger.debug('Multiplexing command: %s' % start_multiplexing_call)
         reactor.spawnProcess(
             p, start_multiplexing_call[0], start_multiplexing_call, None)
+        reactor.addSystemEventTrigger("before", "shutdown", kill_control_master_before_shutdown, p)
         return protocol
 
     def check_ssh(host):
         ssh_check_cmds = shlex.split(
             '%s -O check %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(host, 'check_ssh')
-        logger.debug('cmd: %s' % ssh_check_cmds)
+        logger.debug('Multiplexing SSH check command: %s' % ssh_check_cmds)
         reactor.spawnProcess(p, ssh_check_cmds[0], ssh_check_cmds, None)
         p.deferred.addErrback(start_ssh, host)
         return p.deferred
 
     return defer.DeferredList([check_ssh(host) for host in hosts])
+
+
+def kill_control_master_before_shutdown(control_master_process):
+    if control_master_process.is_alive:
+        logger.debug("Killing SSH control master which has somehow survived %s" % control_master_process.transport.pid)
+        control_master_process.transport.signalProcess("KILL")
 
 
 def stop_ssh_multiplexed(ignored, hosts=None):
@@ -215,7 +223,7 @@ def stop_ssh_multiplexed(ignored, hosts=None):
         ssh_stop_cmds = shlex.split(
             '%s -O exit %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(host, 'stop_ssh')
-        logger.debug('cmd: %s' % ssh_stop_cmds)
+        logger.debug('SSH multiplexing stop command: %s' % ssh_stop_cmds)
         reactor.spawnProcess(
             p, ssh_stop_cmds[0], ssh_stop_cmds, None, childFDs={2: 3})
         return p.deferred
