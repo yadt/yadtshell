@@ -135,6 +135,11 @@ def clean(project, logger):
         logger.info('Removing stubs directory {0}'.format(stubs_dir))
         shutil.rmtree(stubs_dir)
 
+    state_dir = os.path.expanduser("~/.yadtshell")
+    if os.path.exists(state_dir):
+        logger.info("Removing yadtshell state directory {0}".format(state_dir))
+        shutil.rmtree(state_dir)
+
 
 @task
 def generate_manpage_with_pandoc(project, logger):
