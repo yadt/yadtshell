@@ -14,6 +14,10 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import glob
+import os
+import shutil
+
 from pybuilder.core import use_plugin, init, Author, task
 from pybuilder.utils import assert_can_execute
 
@@ -128,10 +132,6 @@ def clean(project, logger):
 
 
 def clean_up(path_or_glob, name, logger):
-    import glob
-    import os
-    import shutil
-
     if "*" in path_or_glob:
         directories_to_clean = glob.glob(path_or_glob)
     else:
