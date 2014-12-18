@@ -118,27 +118,30 @@ def set_properties_for_teamcity_builds(project):
 
 @task
 def clean(project, logger):
+    clean_up("/tmp/logs/yadtshell/*", "yadtshell log", logger)
+
+    clean_up("/tmp/integration-test*", "yadtshell integration test", logger)
+
+    clean_up("/tmp/yadtshell-it", "yadtshell integration test stubs", logger)
+
+    clean_up("~/.yadtshell", "yadtshell state", logger)
+
+
+def clean_up(path_or_glob, name, logger):
     import glob
     import os
     import shutil
 
-    for yadtshell_log_dir in glob.glob('/tmp/logs/yadtshell/*'):
-        logger.info('Removing log directory {0}'.format(yadtshell_log_dir))
-        shutil.rmtree(yadtshell_log_dir)
+    if "*" in path_or_glob:
+        directories_to_clean = glob.glob(path_or_glob)
+    else:
+        directories_to_clean = [os.path.expanduser(path_or_glob)]
 
-    for integrationtest_dir in glob.glob('/tmp/integration-test*'):
-        logger.info('Removing IT directory {0}'.format(integrationtest_dir))
-        shutil.rmtree(integrationtest_dir)
-
-    stubs_dir = '/tmp/yadtshell-it'
-    if os.path.exists(stubs_dir):
-        logger.info('Removing stubs directory {0}'.format(stubs_dir))
-        shutil.rmtree(stubs_dir)
-
-    state_dir = os.path.expanduser("~/.yadtshell")
-    if os.path.exists(state_dir):
-        logger.info("Removing yadtshell state directory {0}".format(state_dir))
-        shutil.rmtree(state_dir)
+    for directory_to_clean in directories_to_clean:
+        if not os.path.exists(directory_to_clean):
+            continue
+        logger.info("Removing {0} directory: {1}".format(name, directory_to_clean))
+        shutil.rmtree(directory_to_clean)
 
 
 @task
