@@ -82,6 +82,8 @@ class Test (integrationtest_support.IntegrationTestSupport):
                 verify.called('ssh').at_least_with_arguments(
                     'host1.domain').and_input('/usr/bin/yadt-status')
                 verify.called('ssh').at_least_with_arguments(
+                    'host1.domain').and_input('/usr/bin/yadt-status')
+                verify.called('ssh').at_least_with_arguments(
                     'host1.domain', '-O', 'check')
                 verify.called('ssh').at_least_with_arguments(
                     'host1.domain', 'yadt-command yadt-service-stop host1service')
@@ -97,6 +99,8 @@ class Test (integrationtest_support.IntegrationTestSupport):
                     'host1.domain').and_input('/usr/bin/yadt-status')
 
             with outer_verify.filter_by_argument("host2.domain") as verify:
+                verify.called('ssh').at_least_with_arguments(
+                    'host2.domain').and_input('/usr/bin/yadt-status')
                 verify.called('ssh').at_least_with_arguments(
                     'host2.domain').and_input('/usr/bin/yadt-status')
                 verify.called('ssh').at_least_with_arguments(

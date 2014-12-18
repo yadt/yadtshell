@@ -40,6 +40,10 @@ class Test (integrationtest_support.IntegrationTestSupport):
         self.assertEqual(0, reboot_return_code)
 
         with self.verify() as verify:
+            # first status by yadtshell for uri expansion
+            verify.called('ssh').at_least_with_arguments(
+                'it01.domain').and_input('/usr/bin/yadt-status')
+            # second status by reboot
             verify.called('ssh').at_least_with_arguments(
                 'it01.domain').and_input('/usr/bin/yadt-status')
             verify.called('ssh').at_least_with_arguments(
