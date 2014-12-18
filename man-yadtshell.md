@@ -1,6 +1,6 @@
 % YADTshell(1) YADTshell User Manuals
 % The YADT project team
-% July 30th, 2014
+% December 18th, 2014
 
 # NAME
 
@@ -79,6 +79,10 @@ Requires a message option.
 
 * unlock *HOSTS* :
 Releases the host(s) from your lock. This command assumes you own the lock and will fail if you do not. If you do not own the lock on the hosts, use *lock --force* on it first.
+
+* reboot *HOSTS* :
+Reboots the host(s), stopping all services and starting them afterwards.
+This will always lead to a reboot of the host(s), ignoring whether the kernel is up to date or not. This command will never upgrade any outdated artefacts either.
 
 # OPTIONS
 * --reboot :
