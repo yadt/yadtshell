@@ -123,11 +123,8 @@ def set_properties_for_teamcity_builds(project):
 @task
 def clean(project, logger):
     clean_up("/tmp/logs/yadtshell/*", "yadtshell log", logger)
-
     clean_up("/tmp/integration-test*", "yadtshell integration test", logger)
-
     clean_up("/tmp/yadtshell-it", "yadtshell integration test stubs", logger)
-
     clean_up("~/.yadtshell", "yadtshell state", logger)
 
 
