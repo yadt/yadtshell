@@ -32,6 +32,7 @@ from yadtshell.util import restore_current_state, dump_action_plan, log_exceptio
 
 logger = logging.getLogger('reboot')
 
+
 @log_exceptions(logger)
 def reboot(protocol=None, uris=None, parallel=None, **kwargs):
     for uri in uris:
