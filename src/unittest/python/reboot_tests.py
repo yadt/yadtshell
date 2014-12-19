@@ -24,19 +24,21 @@ from unittest_support import create_component_pool_for_one_host
 from mock import patch, Mock
 
 from unittest import TestCase
+from logging import CRITICAL
 
 
-class SilencedErrorLoggerTestCase(TestCase):
+class SilencedLoggerTestCase(TestCase):
 
     def setUp(self):
-        self.logger_patcher = patch("yadtshell._reboot.logger")
-        self.logger_patcher.start()
+        self.reboot_logger = yadtshell._reboot.logger
+        self.reboot_logger_level = self.reboot_logger.level
+        self.reboot_logger.setLevel(CRITICAL)
 
     def tearDown(self):
-        self.logger_patcher.stop()
+        self.reboot_logger.setLevel(self.reboot_logger_level)
 
 
-class RebootValidationTests(SilencedErrorLoggerTestCase):
+class RebootValidationTests(SilencedLoggerTestCase):
 
     def test_should_raise_error_when_rebooting_service(self):
         try:
@@ -143,7 +145,7 @@ class StartAfterRebootPlanTests(TestCase):
                          '    start the service://foobar42/bazservice, set state to "up"\n')
 
 
-class RebootActionPlanTests(SilencedErrorLoggerTestCase):
+class RebootActionPlanTests(SilencedLoggerTestCase):
 
     def test_should_raise_exception_when_uri_is_a_service(self):
         self.assertRaises(ValueError, reboot, uris=["service://foobar42/barservice"])
