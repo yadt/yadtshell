@@ -20,15 +20,14 @@ from __future__ import absolute_import
 
 import logging
 import os.path
-import yaml
-import time
 import shlex
+import time
+import yaml
 
 from twisted.internet import defer, reactor
 
 import yadtshell.settings
 import yadtshell.components
-
 from yadtshell.constants import (STANDALONE_SERVICE_RANK,
                                  MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS)
 from yadtshell.validation import ServiceDefinitionValidator
