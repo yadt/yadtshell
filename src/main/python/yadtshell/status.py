@@ -69,7 +69,7 @@ def handle_failing_status(failure, components):
         logger.critical('No yadt-minion installed on remote host %s' % failure.value.component)
     if failure.value.exitCode == 255:
         logger.critical(
-            'ssh: cannot reach %s\n\t passwordless ssh not configured? network problems?' %
+            'ssh: cannot reach %s\n\t System down? Passwordless SSH not configured? Network problems?' %
             failure.value.component)
         unreachable_host = yadtshell.components.UnreachableHost(
             failure.value.component)
