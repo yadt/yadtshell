@@ -6,7 +6,7 @@ import yadtshell
 
 from yadtshell.actionmanager import (ActionManager,
                                      _user_should_acknowledge_plan,
-                                     filter_dangerous_actions)
+                                     remove_harmless_actions)
 
 
 class ActionManagerTestBase(TestCase):
@@ -56,13 +56,14 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         self.assertFalse(
             _user_should_acknowledge_plan(dryrun=True, flavor='update', forcedyes=False))
 
-    def test_dangerous_actions(self):
+    def test_dangerous_update_with_reboot_action(self):
         noop = Mock()
         noop.cmd = 'harmless'
         dangerous = Mock()
         dangerous.cmd = 'update'
+        dangerous.kwargs = {yadtshell.constants.REBOOT_REQUIRED: True}
         action_list = [noop, dangerous]
-        self.assertTrue(filter_dangerous_actions(action_list))
+        self.assertEqual(remove_harmless_actions(action_list), [dangerous])
 
     def test_harmless_actions(self):
         noop = Mock()
@@ -70,7 +71,7 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         dangerous = Mock()
         dangerous.cmd = 'status'
         action_list = [noop, dangerous]
-        self.assertFalse(filter_dangerous_actions(action_list))
+        self.assertEqual(remove_harmless_actions(action_list), [])
 
     def test_next_with_preconditions_actionplan(self):
         task1 = ActionManager.Task(None, Mock(yadtshell.actions.ActionPlan))
