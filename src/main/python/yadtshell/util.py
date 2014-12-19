@@ -300,7 +300,7 @@ def log_exceptions(logger):
             try:
                 return function(*args, **kwargs)
             except BaseException as e:
-                logger.error("Problem white running {0}: {1}".format(function.__name__, e))
+                logger.error("Problem while running {0}: {1}".format(function.__name__, e))
                 import traceback
                 logger.debug(traceback.format_exc(e))
                 raise

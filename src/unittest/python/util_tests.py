@@ -303,7 +303,7 @@ class LogExceptionsTests(unittest.TestCase):
         except ValueError:
             pass
 
-        mock_logger.error.assert_called_with("Problem white running boom: Any error message")
+        mock_logger.error.assert_called_with("Problem while running boom: Any error message")
 
     def test_should_preserve_docstring(self):
         @log_exceptions(Mock())
