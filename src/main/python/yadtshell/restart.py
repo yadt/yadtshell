@@ -22,11 +22,11 @@ from yadtshell.actions import ActionPlan
 from yadtshell.helper import expand_hosts, glob_hosts
 from yadtshell.metalogic import metalogic, identity, apply_instructions
 from yadtshell.settings import STOP, START, UP
-from yadtshell.util import restore_current_state, dump_action_plan
+from yadtshell.util import restore_current_state, dump_action_plan, log_exceptions
 
 logger = logging.getLogger('restart')
 
-
+@log_exceptions(logger)
 def restart(protocol=None, uris=None, parallel=None, **kwargs):
     logger.debug("uris: %s" % uris)
     logger.debug("parallel: %s" % parallel)
