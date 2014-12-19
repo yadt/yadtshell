@@ -31,7 +31,7 @@ import yadtshell.settings
 import yadtshell.components
 from yadtshell.constants import (STANDALONE_SERVICE_RANK,
                                  MAX_ALLOWED_AGE_OF_STATE_IN_SECONDS)
-from yadtshell.validation import ServiceDefinitionValidator
+from yadtshell.service_validation import ServiceDefinitionValidator
 
 logger = logging.getLogger('util')
 

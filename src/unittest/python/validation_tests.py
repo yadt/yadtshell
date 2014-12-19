@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import yadtshell
-from yadtshell.validation import tarjan_scc, ServiceDefinitionValidator
+from yadtshell.service_validation import tarjan_scc, ServiceDefinitionValidator
 from yadtshell.components import (Host, Service)
 
 
