@@ -485,4 +485,4 @@ def _user_should_acknowledge_plan(dryrun, flavor, forcedyes):
         return False
     if not sys.stdout.isatty():
         return False
-    return flavor in ('update')
+    return flavor in ('update', 'reboot')

@@ -41,12 +41,20 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
             _user_should_acknowledge_plan(dryrun=False, flavor='update', forcedyes=False))
 
     @patch('yadtshell.actionmanager.sys.stdout')
-    def test_should_prompt_when_terminal_is_a_tty(self,
-                                                  mock_sys):
+    def test_should_prompt_when_terminal_is_a_tty_and_flavor_is_update(self,
+                                                                       mock_sys):
         mock_sys.isatty.return_value = True
 
         self.assertTrue(
             _user_should_acknowledge_plan(dryrun=False, flavor='update', forcedyes=False))
+
+    @patch('yadtshell.actionmanager.sys.stdout')
+    def test_should_prompt_when_terminal_is_a_tty_and_flavor_is_reboot(self,
+                                                                       mock_sys):
+        mock_sys.isatty.return_value = True
+
+        self.assertTrue(
+            _user_should_acknowledge_plan(dryrun=False, flavor='reboot', forcedyes=False))
 
     @patch('yadtshell.actionmanager.sys.stdout')
     def test_should_not_prompt_when_terminal_is_a_tty_but_dryrun_is_true(self,
@@ -62,6 +70,23 @@ class ActionManagerHelperFunctionsTest(ActionManagerTestBase):
         dangerous = Mock()
         dangerous.cmd = 'update'
         dangerous.kwargs = {yadtshell.constants.REBOOT_REQUIRED: True}
+        action_list = [noop, dangerous]
+        self.assertEqual(remove_harmless_actions(action_list), [dangerous])
+
+    def test_harmless_update_without_reboot_action(self):
+        noop = Mock()
+        noop.cmd = 'harmless'
+        harmless = Mock()
+        harmless.cmd = 'update'
+        harmless.kwargs = {yadtshell.constants.REBOOT_REQUIRED: False}
+        action_list = [noop, harmless]
+        self.assertEqual(remove_harmless_actions(action_list), [])
+
+    def test_dangerous_reboot_action(self):
+        noop = Mock()
+        noop.cmd = 'harmless'
+        dangerous = Mock()
+        dangerous.cmd = 'reboot'
         action_list = [noop, dangerous]
         self.assertEqual(remove_harmless_actions(action_list), [dangerous])
 
