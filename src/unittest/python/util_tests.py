@@ -12,7 +12,8 @@ from yadtshell.util import (inbound_deps_on_same_host,
                             get_mtime_of_current_state,
                             get_age_of_current_state_in_seconds,
                             filter_missing_services,
-                            first_error_line)
+                            first_error_line,
+                            log_exceptions)
 from yadtshell.constants import STANDALONE_SERVICE_RANK
 from yadtshell.components import (Host,
                                   Service,
@@ -278,3 +279,56 @@ class CurrentStateTests(unittest.TestCase):
         time.return_value = 44
 
         self.assertEqual(get_age_of_current_state_in_seconds(), 42)
+
+
+class LogExceptionsTests(unittest.TestCase):
+
+    def test_should_passthrough_exceptions_when_decorated_with_unsafe(self):
+
+        @log_exceptions(Mock())
+        def boom():
+            raise ValueError("Any error message")
+
+        self.assertRaises(ValueError, boom)
+
+    def test_should_log_exceptions_when_decorated_with_unsafe(self):
+        mock_logger = Mock()
+
+        @log_exceptions(mock_logger)
+        def boom():
+            raise ValueError("Any error message")
+
+        try:
+            boom()
+        except ValueError:
+            pass
+
+        mock_logger.error.assert_called_with("Problem white running boom: Any error message")
+
+    def test_should_preserve_docstring(self):
+        @log_exceptions(Mock())
+        def function_with_docstring():
+            """ Any documentation
+                Write what you want here
+            """
+            pass
+
+        self.assertEqual(function_with_docstring.__doc__,
+                         ' Any documentation\n'
+                         '                Write what you want here\n'
+                         '            ')
+
+    def test_should_preserve_name(self):
+        @log_exceptions(Mock())
+        def any_function_name():
+            pass
+
+        self.assertEqual(any_function_name.__name__, "any_function_name")
+
+    def test_should_passthrough_args_and_kwargs(self):
+        function = Mock(__name__="function")
+        decorated_function = log_exceptions(Mock())(function)
+
+        decorated_function("any-positional-argument", any_keyword_argument="foo")
+
+        function.assert_called_with("any-positional-argument", any_keyword_argument="foo")

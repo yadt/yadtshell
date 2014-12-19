@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 
+from functools import wraps
 import logging
 import os.path
 import shlex
@@ -290,3 +291,18 @@ def first_error_line(logfile):
         for line in log.readlines():
             if "ERROR" in line or "CRITICAL" in line:
                 return line
+
+
+def log_exceptions(logger):
+    def log_exceptions_with_logger(function):
+        @wraps(function)
+        def log_exceptions_and_execute(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except BaseException as e:
+                logger.error("Problem white running {0}: {1}".format(function.__name__, e))
+                import traceback
+                logger.debug(traceback.format_exc(e))
+                raise
+        return log_exceptions_and_execute
+    return log_exceptions_with_logger
