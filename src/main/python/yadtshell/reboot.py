@@ -17,8 +17,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import yadtshell
 
+import yadtshell
 from yadtshell.actions import ActionPlan, Action, TargetState
 from yadtshell.helper import expand_hosts, glob_hosts
 from yadtshell.update import get_all_adjacent_needed_hosts
