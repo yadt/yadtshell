@@ -26,6 +26,7 @@ from yadtshell.util import restore_current_state, dump_action_plan, log_exceptio
 
 logger = logging.getLogger('restart')
 
+
 @log_exceptions(logger)
 def restart(protocol=None, uris=None, parallel=None, **kwargs):
     logger.debug("uris: %s" % uris)
