@@ -19,6 +19,7 @@
 import logging
 
 import yadtshell
+from yadtshell.util import log_exceptions
 
 logger = logging.getLogger('update')
 
@@ -36,6 +37,7 @@ def get_all_adjacent_needed_hosts(service_uri, components):
     return result
 
 
+@log_exceptions(logger)
 def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, parallel=None, **kwargs):
     components = yadtshell.util.restore_current_state()
     if not update_plan_post_handler:
