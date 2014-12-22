@@ -25,6 +25,7 @@ import shlex
 import time
 import yaml
 
+import twisted
 from twisted.internet import defer, reactor
 
 import yadtshell.settings
@@ -212,9 +213,11 @@ def start_ssh_multiplexed(hosts=None):
 
 
 def kill_control_master_before_shutdown(control_master_process):
-    if control_master_process.is_alive:
-        logger.debug("Killing SSH control master which has somehow survived %s" % control_master_process.transport.pid)
+    logger.debug("Killing SSH control master which has somehow survived (pid %s)" % control_master_process.transport.pid)
+    try:
         control_master_process.transport.signalProcess("KILL")
+    except twisted.internet.error.ProcessExitedAlready:
+        logger.debug("%s already exited" % str(control_master_process.transport))
 
 
 def stop_ssh_multiplexed(ignored, hosts=None):
