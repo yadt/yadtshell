@@ -109,7 +109,7 @@ class YadtProcessProtocol(protocol.ProcessProtocol):
         self.err_log_level = err_log_level
 
     def connectionMade(self):
-        self.logger.debug("starting query: %s" % self.cmd)
+        self.logger.debug("started query: %s (pid %s)" % (self.cmd, self.transport.pid))
         self.transport.write(self.cmd)
         self.transport.closeStdin()  # tell them we're done
         if self.pi:
