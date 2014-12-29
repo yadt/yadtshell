@@ -197,7 +197,6 @@ def start_ssh_multiplexed(hosts=None):
         logger.debug('Multiplexing command: %s' % start_multiplexing_call)
         reactor.spawnProcess(
             p, start_multiplexing_call[0], start_multiplexing_call, None)
-        reactor.addSystemEventTrigger("before", "shutdown", kill_control_master_before_shutdown, p)
         return protocol
 
     def check_ssh(host):
@@ -210,14 +209,6 @@ def start_ssh_multiplexed(hosts=None):
         return p.deferred
 
     return defer.DeferredList([check_ssh(host) for host in hosts])
-
-
-def kill_control_master_before_shutdown(control_master_process):
-    logger.debug("Killing SSH control master which has somehow survived (pid %s)" % control_master_process.transport.pid)
-    try:
-        control_master_process.transport.signalProcess("KILL")
-    except twisted.internet.error.ProcessExitedAlready:
-        logger.debug("%s already exited" % str(control_master_process.transport))
 
 
 def stop_ssh_multiplexed(ignored, hosts=None):
