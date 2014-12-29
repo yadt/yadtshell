@@ -448,7 +448,7 @@ class ActionManager(object):
 
         self.pi = yadtshell.twisted.ProgressIndicator()
         deferred = None
-        if not dryrun:
+        if not dryrun and "lock" not in flavor:
             deferred = yadtshell.util.start_ssh_multiplexed()
         try:
             if deferred:
@@ -463,7 +463,7 @@ class ActionManager(object):
         deferred.addCallback(remove_plan_file)
         deferred.addBoth(finish_progress_indicator, self.pi)
 
-        if not dryrun:
+        if not dryrun and "lock" not in flavor:
             deferred.addBoth(yadtshell.util.stop_ssh_multiplexed)
 
         return deferred
