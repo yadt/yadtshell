@@ -25,7 +25,6 @@ import shlex
 import time
 import yaml
 
-import twisted
 from twisted.internet import defer, reactor
 
 import yadtshell.settings
