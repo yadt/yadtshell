@@ -189,7 +189,7 @@ def start_ssh_multiplexed(hosts=None):
     def start_ssh(protocol, host):
         logger.debug('Starting SSH multiplexing for %s' % host)
         start_multiplexing_call = shlex.split(
-            '%s -fN -o ControlMaster=yes -o ControlPersist=5h %s' % (yadtshell.settings.SSH, host))
+            '%s -fN -o ControlMaster=yes -o ControlPersist=30m %s' % (yadtshell.settings.SSH, host))
         p = yadtshell.twisted.YadtProcessProtocol(
             host, 'start_ssh', wait_for_io=False)
 
