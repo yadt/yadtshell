@@ -48,10 +48,10 @@ def _show_host_locking_or_unreachable(host):
         reason = host.lockstate.get("message", "--- no message given ---")
         if host.is_locked_by_me:
             print(render_yellow('\n%10s is locked by me\n%10s %s\n' %
-                  (host.host, "reason", reason)))
+                (host.host, "Reason:", reason)))
         elif host.is_locked_by_other:
             print(render_red('\n%10s is locked by %s\n%10s %s\n' %
-                  (host.host, lock_owner, "reason", reason)))
+                (host.host, lock_owner, "Reason:", reason)))
 
 
 def _show_ignored_services(services):
