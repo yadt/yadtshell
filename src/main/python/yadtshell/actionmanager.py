@@ -380,8 +380,6 @@ class ActionManager(object):
             yadtshell.settings.OUT_DIR, flavor + '-action.plan')
         self.logger.debug('using action plan %s' % action_plan_file)
 
-        yadtshell.settings.ybc.connect()
-
         action_plan = None
         try:
             f = open(action_plan_file)

@@ -253,7 +253,6 @@ def handle_readonly_service_states(results, components):
 
 
 def status(hosts=None, include_artefacts=True, **kwargs):
-    yadtshell.settings.ybc.connect()
     if type(hosts) is str:
         hosts = [hosts]
 
