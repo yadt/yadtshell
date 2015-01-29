@@ -271,7 +271,7 @@ ${NORMAL}
         self.assert_in('''
 ${BG_RED}${WHITE}${BOLD}
   foobar42 is locked by foobar
-    reason yes we can (lock the host)
+   Reason: yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)
 
@@ -288,7 +288,7 @@ ${NORMAL}
         self.assert_in('''
 ${BG_YELLOW}${BOLD}
   foobar42 is locked by me
-    reason yes we can (lock the host)
+   Reason: yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)
 
