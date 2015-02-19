@@ -233,7 +233,7 @@ def apply_instructions(plan, instructions):
             if not sp.nr_workers:
                 sp.nr_workers = instructions
         return plan
-    except:
+    except Exception:
         pass
 
     for instruction in instructions.split():

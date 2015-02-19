@@ -251,7 +251,7 @@ def load_settings_and_create_dirs(log_to_file=True):
         view_file = open(VIEW_SETTINGS_FILE)
         VIEW_SETTINGS = yaml.load(view_file)
         view_file.close()
-    except:
+    except Exception:
         logger.debug(
             '"view" file not found, falling back to default values: %s' %
             VIEW_SETTINGS)

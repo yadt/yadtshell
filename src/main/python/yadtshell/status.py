@@ -172,7 +172,7 @@ def get_service_class_from_fallbacks(host, service_class_name):
     try:
         host.logger.debug('fallback 1: checking loaded modules')
         service_class = eval(service_class_name)
-    except:
+    except Exception:
         pass
 
     def get_class(service_class):

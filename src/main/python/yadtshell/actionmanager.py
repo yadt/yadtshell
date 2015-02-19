@@ -318,7 +318,7 @@ class ActionManager(object):
             return len(plan.actions)
         try:
             return int(self.parallel)
-        except:
+        except Exception:
             return 1
 
     def report_plan_finished(self, result, plan, plan_name):
@@ -420,7 +420,7 @@ class ActionManager(object):
                     'no problems so far, thus removing action plan %s' % action_plan_file)
                 try:
                     os.remove(action_plan_file)
-                except:
+                except Exception:
                     pass
             f = open(
                 os.path.join(yadtshell.settings.OUT_DIR, 'current_state.components'), "w")

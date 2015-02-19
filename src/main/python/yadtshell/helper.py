@@ -137,7 +137,7 @@ def condense_hosts2(words):
         try:
             prefix, rest = word.split('://', 1)
             prefix = prefix + '://'
-        except:
+        except Exception:
             prefix = ''
             rest = word
         var = rest[:3]

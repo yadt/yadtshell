@@ -161,7 +161,7 @@ def _render_updates_based_on_name_schema(components, host, full):
                         if current_version[i] == next_version[i]:
                             nd_display.append(next_version[i])
                             continue
-                    except:
+                    except Exception:
                         pass
                     nd_display.append(
                         '${REVERSE}%s${NORMAL}' % next_version[i])
@@ -217,7 +217,7 @@ def calculate_info_view_settings(nr_of_hosts=None):
         stty = Popen(
             ['stty', 'size'], stdout=PIPE, stderr=PIPE).communicate()[0]
         cols = int(stty.split()[1])
-    except:
+    except Exception:
         cols = 80
 
     RIGHT_MARGIN_WIDTH = 40
@@ -321,7 +321,7 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
         for servicedef in getattr(host, 'services', []):
             try:
                 service = servicedef.keys()[0]
-            except:
+            except Exception:
                 service = servicedef
             if service not in services:
                 rank = components[yadtshell.uri.create(

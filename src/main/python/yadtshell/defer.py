@@ -64,7 +64,7 @@ class DeferredPool(defer.Deferred):
         def __str__(self):
             try:
                 action = self.task.action
-            except:
+            except Exception:
                 action = "None"
             return "worker[%s], stopped: %s, idle: %s, action: %s" % (self.name, self.stopped, self.idle, action)
 

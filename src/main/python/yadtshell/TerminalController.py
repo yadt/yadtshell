@@ -95,21 +95,21 @@ class TerminalController:
         # Curses isn't available on all platforms
         try:
             import curses
-        except:
+        except Exception:
             return
 
         # If the stream isn't a tty, then assume it has no capabilities.
         try:
             if not term_stream.isatty():
                 return
-        except:
+        except Exception:
             return
 
         # Check the terminal type.  If we fail, then assume that the
         # terminal has no capabilities.
         try:
             curses.setupterm()
-        except:
+        except Exception:
             return
 
         # Look up numeric capabilities.
