@@ -469,10 +469,8 @@ class ActionManager(object):
 
 def remove_harmless_actions(actions):
     def is_a_dangerous_action(action):
-        return (
-            (action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False))
-            or action.cmd in ['reboot']
-        )
+        return (action.cmd in ['reboot'] or
+                (action.cmd in ['update'] and action.kwargs.get(yadtshell.constants.REBOOT_REQUIRED, False)))
     return filter(is_a_dangerous_action, actions)
 
 

@@ -42,10 +42,10 @@ class TargetState(object):
 
     def __eq__(self, other):
         return (
-            isinstance(other, TargetState)
-            and self.uri == other.uri
-            and self.attr == other.attr
-            and self.target_value == other.target_value
+            isinstance(other, TargetState) and
+            self.uri == other.uri and
+            self.attr == other.attr and
+            self.target_value == other.target_value
         )
 
     def dump(self, depth, prefix=''):
@@ -91,15 +91,15 @@ class Action(object):
                                       for own_precondition in self.preconditions],
                                      True)
         return (
-            isinstance(other, Action)
-            and self.cmd == other.cmd
-            and self.uri == other.uri
-            and self.attr == other.attr
-            and self.target_value == other.target_value
-            and self.kwargs == other.kwargs
-            and self.executed == other.executed
-            and len(self.preconditions) == len(other.preconditions)
-            and preconditions_match
+            isinstance(other, Action) and
+            self.cmd == other.cmd and
+            self.uri == other.uri and
+            self.attr == other.attr and
+            self.target_value == other.target_value and
+            self.kwargs == other.kwargs and
+            self.executed == other.executed and
+            len(self.preconditions) == len(other.preconditions) and
+            preconditions_match
         )
 
     def dump(self, depth=0, include_preconditions=True, include_target_value=True):

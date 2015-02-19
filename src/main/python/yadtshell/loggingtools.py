@@ -109,9 +109,6 @@ class ErrorFilter(logging.Filter):
 class InfoFilter(logging.Filter):
 
     def filter(self, record):
-        if (record.levelno == logging.WARN
-            or record.levelno == logging.ERROR
-            or record.levelno == logging.CRITICAL
-                or record.levelno == logging.FATAL):
-                    return DO_NOT_LOG
+        if record.levelno in (logging.WARN, logging.ERROR, logging.CRITICAL, logging.FATAL):
+            return DO_NOT_LOG
         return DO_LOG

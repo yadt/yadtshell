@@ -69,9 +69,9 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 
     next_artefacts = set([artefact.uri
                          for artefact in components.values()
-                         if artefact.type == yadtshell.settings.ARTEFACT
-                         and artefact.revision == yadtshell.settings.NEXT
-                         and artefact.host_uri in handled_hosts
+                         if artefact.type == yadtshell.settings.ARTEFACT and
+                         artefact.revision == yadtshell.settings.NEXT and
+                         artefact.host_uri in handled_hosts
                           ])
 
     if not yadtshell.settings.reboot_disabled:
