@@ -28,7 +28,6 @@ use_plugin('python.unittest')
 use_plugin('python.coverage')
 use_plugin('python.flake8')
 use_plugin('python.frosted')
-use_plugin('pypi:pybuilder_jedi_plugin')
 
 use_plugin('python.distutils')
 use_plugin('copy_resources')
