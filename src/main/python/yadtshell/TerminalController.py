@@ -95,7 +95,7 @@ class TerminalController:
         # Curses isn't available on all platforms
         try:
             import curses
-        except Exception:
+        except ImportError:
             return
 
         # If the stream isn't a tty, then assume it has no capabilities.
