@@ -66,15 +66,23 @@ def query_status(component_name, pi=None):
 
 def handle_failing_status(failure, components):
     if failure.value.exitCode == 127:
-        logger.critical('No yadt-minion installed on remote host %s' % failure.value.component)
+        logger.critical('No yadt-minion installed on remote host %s',
+                        failure.value.component)
     if failure.value.exitCode == 255:
+        if yadtshell.settings.ignore_unreachable_hosts:
+            logger.warning('Cannot reach host %s, but ignoring it as you'
+                           'requested.', failure.value.component)
+            unreachable_host = yadtshell.components.UnreachableHost(
+                failure.value.component)
+            components[unreachable_host.uri] = unreachable_host
+            return unreachable_host
+
         logger.critical(
-            'ssh: cannot reach %s\n\t System down? Passwordless SSH not configured? Network problems?' %
+            'ssh: cannot reach host %s\n\t System down? Passwordless SSH not '
+            'configured? Network problems? Use --ignore-unreachable-hosts'
+            'to ignore this error.',
             failure.value.component)
-        unreachable_host = yadtshell.components.UnreachableHost(
-            failure.value.component)
-        components[unreachable_host.uri] = unreachable_host
-        return unreachable_host
+
     return failure
 
 

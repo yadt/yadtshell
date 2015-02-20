@@ -32,20 +32,20 @@ yadtshell unignore SERVICE-URI ... [options]
 yadtshell dump [URI-PATTERN...] [--attribute --show-pending-updates --show-current-artefacts]
 
 Options:
--n --dryrun               do not alter the system
--v --verbose              be more verbose
---tracking-id STRING      lets user define a tracking id
---no-final-status         do not fetch status of target after action
-
--m --message MESSAGE      reason
--p --parallel PSPEC       how to execute actions in parallel [default: 1]
--y --forcedyes            say yes to all questions
---force                   force execution
---reboot                  reboot servers if needed during an update (no-op,
-                          enabled by default)
---no-reboot               do not reboot servers during an update, even if needed
---session-id SESSIONID    optional ID for session handling
---version                 show version
+-n --dryrun                  do not alter the system
+-v --verbose                 be more verbose
+--tracking-id STRING         lets user define a tracking id
+--no-final-status            do not fetch status of target after action
+-m --message MESSAGE         reason
+-p --parallel PSPEC          how to execute actions in parallel [default: 1]
+-y --forcedyes               say yes to all questions
+--force                      force execution
+--reboot                     reboot servers if needed during an update (no-op,
+                             enabled by default)
+--no-reboot                  do not reboot servers during an update, even if needed
+--ignore-unreachable-hosts   do not fail when hosts are unreachable
+--session-id SESSIONID       optional ID for session handling
+--version                    show version
 """
 
 from __future__ import print_function
@@ -105,6 +105,7 @@ if opts.get('dryrun'):
     yadtshell.settings.ybc = yadtshell.settings.DummyBroadcaster()
 
 yadtshell.settings.reboot_disabled = opts.get('no_reboot')
+yadtshell.settings.ignore_unreachable_hosts = opts.get('ignore_unreachable_hosts')
 
 if uris:
     try:
@@ -113,7 +114,10 @@ if uris:
         logger.debug("an exception occured during restore_current_state: %s" % str(e))
         logger.debug("no status found, calling 'yadtshell status' implicitly")
         import subprocess
-        subprocess.call(["yadtshell", "status"])
+        if yadtshell.settings.ignore_unreachable_hosts:
+            subprocess.call(["yadtshell", "status", "--ignore-unreachable-hosts"])
+        else:
+            subprocess.call(["yadtshell", "status"])
         components = yadtshell.util.restore_current_state()
 
     uris = yadtshell.helper.expand_hosts(uris)
@@ -130,7 +134,15 @@ if uris:
             return False
         if uri.startswith('host://'):
             component = components[uri]
-            return component.is_reachable()
+            reachable = component.is_reachable()
+            if reachable:
+                return True
+            if yadtshell.settings.ignore_unreachable_hosts:
+                return False
+            logger.error("%s is unreachable. Use --ignore-unreachable-hosts "
+                         "to ignore this error.", uri)
+            sys.exit(1)
+
         if isinstance(components[uri], yadtshell.components.ReadonlyService):
             logger.warning("Skipping read-only %s" % uri)
             return False

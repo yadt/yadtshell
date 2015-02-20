@@ -39,7 +39,7 @@ DEFAULT_LOG_DIR = '/tmp/logs/yadtshell'
 USER_INFO = get_user_info()
 OUTPUT_DIR = os.path.expanduser('~%s/.yadtshell/%s' % (USER_INFO['user'], socket.gethostname()))
 reboot_disabled = False
-
+ignore_unreachable_hosts = False
 
 OUT_DIR = os.path.join(OUTPUT_DIR, 'tmp', os.getcwd().lstrip('/'))
 TODAY = None
