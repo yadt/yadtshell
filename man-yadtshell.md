@@ -95,6 +95,9 @@ are eligible for a reboot.
 * --no-reboot :
 Prevents machines from being rebooted if necessary.
 
+* --ignore-unreachable-hosts :
+When a machine is not reachable, do not consider this an error and keep going.
+
 * -n :
 No operation: change nothing, just show what *would* be done (aka dryrun).
 
