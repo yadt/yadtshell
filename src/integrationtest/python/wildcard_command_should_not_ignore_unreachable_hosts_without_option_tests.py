@@ -35,20 +35,12 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
         status_return_code = self.execute_command('yadtshell status -v --ignore-unreachable-hosts')
         lock_return_code = self.execute_command(
-            'yadtshell lock host://* -m "locking the hosts" -v --no-final-status --ignore-unreachable-hosts')
+            'yadtshell lock host://* -m "locking the hosts" -v --no-final-status')
 
         self.assertEqual(0, status_return_code)
-        self.assertEqual(0, lock_return_code)
+        # --ignore-unreachable-hosts was not given, command must fail.
+        self.assertEqual(1, lock_return_code)
 
-        with self.verify() as verify:
-            with verify.filter_by_argument('it01.domain') as it01_verify:
-
-                it01_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
-
-                it01_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', "yadt-command yadt-host-lock 'locking the hosts'")
-            verify.finished()
 
 if __name__ == '__main__':
     unittest.main()

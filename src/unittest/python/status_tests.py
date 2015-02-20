@@ -86,9 +86,11 @@ class StatusTests(unittest.TestCase):
                                               }
         self.pi_patcher = patch('yadtshell.twisted.ProgressIndicator')
         self.pi_patcher.start()
+        self.old_ignore_unreachable_hosts = yadtshell.settings.ignore_unreachable_hosts
 
     def tearDown(self):
         self.pi_patcher.stop()
+        yadtshell.settings.ignore_unreachable_hosts = self.old_ignore_unreachable_hosts
 
     @patch("yadtshell._status.write_host_data_to_file")
     def test_should_persist_host_data_to_file_when_creating_host(self, write_host_data_to_file):
@@ -147,17 +149,32 @@ class StatusTests(unittest.TestCase):
             protocol.return_value, 'ssh', ['ssh', 'host://foobar42'], environment)
 
     @patch('yadtshell._status.logger')
-    def test_handle_unreachable_host(self, _):
+    def test_handle_unreachable_host_ignored(self, _):
         failure = Mock()
         failure.value.component = 'foobar42.domain.tld'
         failure.value.exitCode = 255
         components = {}
+        yadtshell.settings.ignore_unreachable_hosts = True
+
         result = yadtshell._status.handle_failing_status(failure, components)
+
         self.assertTrue(isinstance(result, yadtshell.components.UnreachableHost))
         self.assertEqual(result.fqdn, 'foobar42.domain.tld')
         # self.assertIn('host://foobar42', components)  # use this when we have Python >= 2.7
         self.assertTrue('host://foobar42' in components)
         self.assertEqual(components['host://foobar42'], result, "components.keys() = %s" % components.keys())
+
+    @patch('yadtshell._status.logger')
+    def test_handle_unreachable_host_not_ignored(self, _):
+        failure = Mock()
+        failure.value.component = 'foobar42.domain.tld'
+        failure.value.exitCode = 255
+        components = {}
+        yadtshell.settings.ignore_unreachable_hosts = False
+
+        result = yadtshell._status.handle_failing_status(failure, components)
+
+        self.assertTrue(result is failure)
 
     @patch("yadtshell._status.write_host_data_to_file")
     def test_should_create_host_from_json(self, _):

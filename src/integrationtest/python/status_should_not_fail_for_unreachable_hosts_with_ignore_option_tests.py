@@ -21,7 +21,7 @@ import integrationtest_support
 import yadt_status_answer
 
 
-class Test (integrationtest_support.IntegrationTestSupport):
+class Test(integrationtest_support.IntegrationTestSupport):
 
     def test(self):
         self.write_target_file('it01.domain', 'it02.domain')
@@ -32,15 +32,19 @@ class Test (integrationtest_support.IntegrationTestSupport):
             when.calling('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status') \
                 .then_write(yadt_status_answer.stdout('it02.domain'))
 
-        actual_return_code = self.execute_command('yadtshell status')
+        actual_return_code, _, stderr = self.execute_command_and_capture_output(
+            'yadtshell status --ignore-unreachable-hosts')
 
         self.assertEqual(0, actual_return_code)
+        self.assertTrue("cannot reach host it01.domain" in stderr.lower())
 
         with self.verify() as complete_verify:
             with complete_verify.filter_by_argument('it01.domain') as verify:
                 verify.called('ssh').at_least_with_arguments(
                     'it01.domain').and_input('/usr/bin/yadt-status')
-
+            with complete_verify.filter_by_argument('it02.domain') as verify:
+                verify.called('ssh').at_least_with_arguments(
+                    'it02.domain').and_input('/usr/bin/yadt-status')
             complete_verify.finished()
 
 if __name__ == '__main__':

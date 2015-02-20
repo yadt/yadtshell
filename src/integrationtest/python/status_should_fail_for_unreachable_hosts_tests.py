@@ -18,37 +18,25 @@ __author__ = 'Maximilien Riehl'
 
 import unittest
 import integrationtest_support
-
 import yadt_status_answer
 
 
 class Test (integrationtest_support.IntegrationTestSupport):
 
     def test(self):
-        self.write_target_file('it01.domain', 'unreachable.host.domain')
+        self.write_target_file('it01.domain', 'it02.domain')
 
         with self.fixture() as when:
             when.calling('ssh').at_least_with_arguments('it01.domain').and_input('/usr/bin/yadt-status') \
-                .then_write(yadt_status_answer.stdout('it01.domain'))
-            when.calling('ssh').at_least_with_arguments('it01.domain').then_return(0)
-            when.calling('ssh').at_least_with_arguments('unreachable.host.domain').then_return(255)
+                .then_return(255)
+            when.calling('ssh').at_least_with_arguments('it02.domain').and_input('/usr/bin/yadt-status') \
+                .then_write(yadt_status_answer.stdout('it02.domain'))
 
-        status_return_code = self.execute_command('yadtshell status -v --ignore-unreachable-hosts')
-        lock_return_code = self.execute_command(
-            'yadtshell lock host://* -m "locking the hosts" -v --no-final-status --ignore-unreachable-hosts')
+        actual_return_code, stdout, stderr = self.execute_command_and_capture_output('yadtshell status')
 
-        self.assertEqual(0, status_return_code)
-        self.assertEqual(0, lock_return_code)
+        self.assertEqual(1, actual_return_code)
+        self.assertTrue("cannot reach host it01.domain" in stderr.lower())
 
-        with self.verify() as verify:
-            with verify.filter_by_argument('it01.domain') as it01_verify:
-
-                it01_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain').and_input('/usr/bin/yadt-status')
-
-                it01_verify.called('ssh').at_least_with_arguments(
-                    'it01.domain', "yadt-command yadt-host-lock 'locking the hosts'")
-            verify.finished()
 
 if __name__ == '__main__':
     unittest.main()
