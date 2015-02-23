@@ -79,7 +79,7 @@ def handle_failing_status(failure, components):
 
         logger.critical(
             'ssh: cannot reach host %s\n\t System down? Passwordless SSH not '
-            'configured? Network problems? Use --ignore-unreachable-hosts'
+            'configured? Network problems? Use --ignore-unreachable-hosts '
             'to ignore this error.',
             failure.value.component)
 
