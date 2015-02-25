@@ -115,7 +115,7 @@ def set_properties_for_teamcity_builds(project):
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     # for sonar analysis
     project.build_depends_on("pylint")
-    project.default_task = ['clean', 'install_build_dependencies', 'publish', 'run_sonar_analysis']
+    project.default_task = ['clean', 'install_dependencies', 'publish', 'run_sonar_analysis']
     project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
     project.set_property('install_dependencies_use_mirrors', False)
     project.rpm_release = os.environ.get('RPM_RELEASE', 0)
