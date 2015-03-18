@@ -18,6 +18,7 @@
 
 from __future__ import (absolute_import, print_function)
 
+from exceptions import NotImplementedError
 import logging
 import os
 import subprocess
@@ -423,6 +424,17 @@ class Host(AbstractHost):
 
     def unlock(self, force=False, **kwargs):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
+
+    def ignore(self, message=None, **kwargs):
+        if not message:
+            raise ValueError('the "message" parameter is mandatory')
+        tag = "ignore_%s" % self.name
+        force = kwargs.get('force', False)
+        raise NotImplementedError
+
+    def unignore(self, **kwargs):
+        tag = "unignore_%s" % self.name
+        raise NotImplementedError
 
     def update_attributes_after_status(self):
         self.is_locked = self.lockstate is not None

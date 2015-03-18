@@ -27,7 +27,7 @@ yadtshell updateartefact ARTEFACT-URI ... [options]
 yadtshell lock -m MESSAGE HOST-URI ... [options] [--force]
 yadtshell reboot HOST-URI ... [options]
 yadtshell unlock HOST-URI ... [options]
-yadtshell ignore -m MESSAGE SERVICE-URI ... [options] [--force]
+yadtshell ignore -m MESSAGE URI ... [options] [--force]
 yadtshell unignore SERVICE-URI ... [options]
 yadtshell dump [URI-PATTERN...] [--attribute --show-pending-updates --show-current-artefacts]
 
@@ -71,7 +71,7 @@ reactor.return_code = 127
 
 cmd = determine_command_from_arguments(arguments)
 uris = (arguments['ARTEFACT-URI'] + arguments['HOST-URI'] +
-        arguments['SERVICE-URI'] + arguments['URI-PATTERN'])
+        arguments['SERVICE-URI'] + arguments['URI-PATTERN'] + arguments['URI'])
 opts = infer_options_from_arguments(arguments)
 
 warning_after_error = None
