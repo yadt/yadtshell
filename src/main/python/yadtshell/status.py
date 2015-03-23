@@ -26,8 +26,12 @@ import inspect
 import shlex
 import yaml
 import simplejson as json
+import re
 
 from twisted.internet import (defer, protocol, reactor)
+from twisted.internet.defer import succeed
+from twisted.python.failure import Failure
+from twisted.web.client import getPage
 
 from hostexpand.HostExpander import HostExpander
 import yadtshell
@@ -55,13 +59,35 @@ def status_cb(protocol=None):
     return status()
 
 
-def query_status(component_name, pi=None):
-    p = yadtshell.twisted.YadtProcessProtocol(
-        component_name, '/usr/bin/yadt-status', pi, out_log_level=logging.NOTSET)
-    p.deferred.name = component_name
-    cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
-    reactor.spawnProcess(p, cmd[0], cmd, os.environ)
-    return p.deferred
+def handle_ignored_status(result_or_failure, component_name, components, pi):
+    if isinstance(result_or_failure, Failure):
+        ignored = False
+    else:
+        ignored = (result_or_failure == "True")
+
+    if ignored:
+        ignored_host = yadtshell.components.IgnoredHost(component_name)
+        components[ignored_host.uri] = ignored_host
+        return succeed(ignored_host)
+    else:
+        p = yadtshell.twisted.YadtProcessProtocol(
+            component_name, '/usr/bin/yadt-status', pi, out_log_level=logging.NOTSET)
+        p.deferred.name = component_name
+        cmd = shlex.split(yadtshell.settings.SSH) + [component_name]
+        reactor.spawnProcess(p, cmd[0], cmd, os.environ)
+        return p.deferred
+
+
+def query_status(component_name, components, pi=None):
+    short_hostname = re.sub("\\..*", "", component_name)
+    d = getPage("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
+        yadtshell.settings.ybc.host,
+        yadtshell.settings.ybc.port,
+        short_hostname))
+
+    d.addCallbacks(callback=handle_ignored_status, callbackArgs=[component_name, components, pi],
+                   errback=handle_ignored_status, errbackArgs=[component_name, components, pi])
+    return d
 
 
 def handle_failing_status(failure, components):
@@ -95,6 +121,8 @@ def write_host_data_to_file(host, host_data):
 
 
 def create_host(protocol, components):
+    if isinstance(protocol, yadtshell.components.AbstractHost):
+        return protocol
     write_host_data_to_file(protocol.component, protocol.data)
 
     try:
@@ -468,8 +496,8 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     pi = yadtshell.twisted.ProgressIndicator()
 
-    def query_and_initialize_host(host):
-        deferred = query_status(host, pi)
+    def query_and_initialize_host(hostname):
+        deferred = query_status(hostname, components, pi)
         deferred.addCallbacks(callback=create_host, callbackArgs=[components],
                               errback=handle_failing_status, errbackArgs=[components])
 

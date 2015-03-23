@@ -280,6 +280,11 @@ class AbstractHost(Component):
         self.next_artefacts = []
         self.services = {}
 
+        self.is_ignored = False
+
+    def is_update_needed(self):
+        pass
+
 
 class Host(AbstractHost):
 
@@ -459,6 +464,34 @@ class UnreachableHost(AbstractHost):
 
     def is_unknown(self):
         return True
+
+    @property
+    def is_locked_by_other(self):
+        return False
+
+    @property
+    def is_locked_by_me(self):
+        return False
+
+
+class IgnoredHost(AbstractHost):
+
+    def __init__(self, fqdn):
+        AbstractHost.__init__(self, fqdn)
+        self.is_ignored = True
+
+    def is_reachable(self):
+        return False
+
+    def is_unknown(self):
+        return False
+
+    def is_uptodate(self):
+        return False
+
+    @property
+    def is_locked(self):
+        return False
 
     @property
     def is_locked_by_other(self):
