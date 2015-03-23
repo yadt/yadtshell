@@ -428,8 +428,8 @@ class Host(AbstractHost):
         # if not message:
         #     raise ValueError('the "message" parameter is mandatory')
 
-        yadtshell.settings.ybc.publish_request_for_target(yadtshell.settings.ybc.target, 'yadtbroadcaster', ['ignore', self.uri], tracking_id=yadtshell.settings.tracking_id)
-        return
+        reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
+        return defer.succeed(None)
 
     # def unignore(self, **kwargs):
     #     tag = "unignore_%s" % self.name
