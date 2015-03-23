@@ -106,7 +106,8 @@ class ActionManager(object):
                               (component.uri, component.state))
             self.orig_components[component.uri].state = component.state
             return
-        if isinstance(component, yadtshell.components.Service) or isinstance(component, yadtshell.components.ReadonlyService):
+        if isinstance(component, yadtshell.components.Service) or isinstance(
+                component, yadtshell.components.ReadonlyService):
             status_cmd = 'status'
             if hasattr(component, 'immediate_status'):
                 status_cmd = 'immediate_status'
@@ -237,7 +238,8 @@ class ActionManager(object):
                     return deferred
                 self.pi.update((cmd, component), 't')
                 raise yadtshell.actions.ActionException(
-                    '%s could not reach target state %s, is still %s' % (component.uri, target_state, component.state), 1)
+                    '%s could not reach target state %s, is still %s' % (
+                        component.uri, target_state, component.state), 1)
         return ignored
 
     def issue_command(self,
