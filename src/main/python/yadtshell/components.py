@@ -285,6 +285,10 @@ class AbstractHost(Component):
     def is_update_needed(self):
         pass
 
+    def unignore(self, **kwargs):
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
+        return defer.succeed(None)
+
 
 class Host(AbstractHost):
 
@@ -430,15 +434,11 @@ class Host(AbstractHost):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
 
     def ignore(self, message=None, **kwargs):
-        # if not message:
-        #     raise ValueError('the "message" parameter is mandatory')
+        if not message:
+            raise ValueError('the "message" parameter is mandatory')
 
-        reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
         return defer.succeed(None)
-
-    # def unignore(self, **kwargs):
-    #     tag = "unignore_%s" % self.name
-    #     raise NotImplementedError
 
     def update_attributes_after_status(self):
         self.is_locked = self.lockstate is not None
@@ -476,9 +476,10 @@ class UnreachableHost(AbstractHost):
 
 class IgnoredHost(AbstractHost):
 
-    def __init__(self, fqdn):
+    def __init__(self, fqdn, message):
         AbstractHost.__init__(self, fqdn)
         self.is_ignored = True
+        self.message = message
 
     def is_reachable(self):
         return False
