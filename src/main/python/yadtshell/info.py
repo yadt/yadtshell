@@ -41,7 +41,7 @@ def render_red(text):
 
 def _show_host_locking_or_unreachable(host):
     if host.is_ignored:
-        print(render_yellow('\n%10s is ignored!' % (host.host)))
+        print(render_yellow('\n%10s is ignored: %s' % (host.host, host.message)))
         return
     if not host.is_reachable():
         print(render_red('\n%10s is unreachable!\n' % (host.host)))
