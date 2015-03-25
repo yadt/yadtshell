@@ -280,6 +280,15 @@ class AbstractHost(Component):
         self.next_artefacts = []
         self.services = {}
 
+        self.is_ignored = False
+
+    def is_update_needed(self):
+        pass
+
+    def unignore(self, **kwargs):
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
+        return defer.succeed(None)
+
 
 class Host(AbstractHost):
 
@@ -425,17 +434,10 @@ class Host(AbstractHost):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
 
     def ignore(self, message=None, **kwargs):
-        # if not message:
-        #     raise ValueError('the "message" parameter is mandatory')
+        if not message:
+            raise ValueError('the "message" parameter is mandatory')
 
-        reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
-        return defer.succeed(None)
-
-    def unignore(self, message=None, **kwargs):
-        # if not message:
-        #     raise ValueError('the "message" parameter is mandatory')
-
-        reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
         return defer.succeed(None)
 
     def update_attributes_after_status(self):
@@ -462,6 +464,35 @@ class UnreachableHost(AbstractHost):
 
     def is_unknown(self):
         return True
+
+    @property
+    def is_locked_by_other(self):
+        return False
+
+    @property
+    def is_locked_by_me(self):
+        return False
+
+
+class IgnoredHost(AbstractHost):
+
+    def __init__(self, fqdn, message):
+        AbstractHost.__init__(self, fqdn)
+        self.is_ignored = True
+        self.message = message
+
+    def is_reachable(self):
+        return False
+
+    def is_unknown(self):
+        return False
+
+    def is_uptodate(self):
+        return False
+
+    @property
+    def is_locked(self):
+        return False
 
     @property
     def is_locked_by_other(self):

@@ -40,6 +40,9 @@ def render_red(text):
 
 
 def _show_host_locking_or_unreachable(host):
+    if host.is_ignored:
+        print(render_yellow('\n%10s is ignored: %s' % (host.host, host.message)))
+        return
     if not host.is_reachable():
         print(render_red('\n%10s is unreachable!\n' % (host.host)))
         return
@@ -310,6 +313,8 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
                     found = c
                     break
         if not found:
+            found = components.get("host://%s" % host)
+        if not found:
             print('ERROR: cannot find host %s' % host)
             continue
         host_components.add(found)
@@ -411,6 +416,8 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
             s.append(icons['LOCKED_BY_ME'])
         elif host.is_unknown():
             s.append(icons['UNKNOWN'])
+        elif host.is_ignored:
+            s.append(icons['UNKNOWN_IGNORED'])
         else:
             s.append(icons['NOT_LOCKED'])
     print('  %s  %s' % (separator.join(s), 'host access'))
