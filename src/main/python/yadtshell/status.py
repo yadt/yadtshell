@@ -63,10 +63,11 @@ def handle_ignored_status(result_or_failure, component_name, components, pi):
     if isinstance(result_or_failure, Failure):
         ignored = False
     else:
-        ignored = (result_or_failure == "True")
+        logger.debug("ignored message for %s: %s" % (component_name, result_or_failure))
+        ignored = True
 
     if ignored:
-        ignored_host = yadtshell.components.IgnoredHost(component_name)
+        ignored_host = yadtshell.components.IgnoredHost(component_name, result_or_failure)
         components[ignored_host.uri] = ignored_host
         return succeed(ignored_host)
     else:
