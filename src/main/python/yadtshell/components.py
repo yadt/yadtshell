@@ -431,9 +431,12 @@ class Host(AbstractHost):
         reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
         return defer.succeed(None)
 
-    # def unignore(self, **kwargs):
-    #     tag = "unignore_%s" % self.name
-    #     raise NotImplementedError
+    def unignore(self, message=None, **kwargs):
+        # if not message:
+        #     raise ValueError('the "message" parameter is mandatory')
+
+        reactor.callLater(1, yadtshell.settings.ybc.sendServiceChange, [{'uri': self.uri, 'state': self.state}], tracking_id=yadtshell.settings.tracking_id)
+        return defer.succeed(None)
 
     def update_attributes_after_status(self):
         self.is_locked = self.lockstate is not None
