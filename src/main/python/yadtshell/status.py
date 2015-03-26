@@ -97,8 +97,7 @@ def handle_failing_status(failure, components):
                         failure.value.component)
     if failure.value.exitCode == 255:
         if yadtshell.settings.ignore_unreachable_hosts:
-            logger.warning('Cannot reach host %s, but ignoring it as you '
-                           'requested.', failure.value.component)
+            logger.warning('Cannot reach host %s; ignoring it.', failure.value.component)
             unreachable_host = yadtshell.components.UnreachableHost(
                 failure.value.component)
             components[unreachable_host.uri] = unreachable_host

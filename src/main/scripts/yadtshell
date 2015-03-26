@@ -187,6 +187,7 @@ def createDeferredFromPlan(plan):
 deferred = None
 
 if cmd == 'status':
+    yadtshell.settings.ignore_unreachable_hosts = True
     deferred = yadtshell.status(hosts=uris, **opts)
 elif cmd == 'info':
     yadtshell.info(**opts)
