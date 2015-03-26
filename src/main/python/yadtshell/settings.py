@@ -86,6 +86,8 @@ def initialize_broadcast_client():  # pragma: no cover
 
         def __init__(self):
             self.target = 'dummy-target'
+            self.host = None
+            self.port = None
 
         def addOnSessionOpenHandler(self, *args, **kwargs):
             pass
