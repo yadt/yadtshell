@@ -95,6 +95,9 @@ def initialize_broadcast_client():  # pragma: no cover
         def sendServiceChange(self, data, **kwargs):
             pass
 
+        def send_host_change(self, **kwargs):
+            pass
+
         def sendFullUpdate(self, data, **kwargs):
             pass
 
