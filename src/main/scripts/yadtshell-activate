@@ -45,6 +45,8 @@ _yadtshellCompletion() {
         COMPREPLY=( $(compgen -W "$(cat $HOSTS_FILE 2> /dev/null)" -- ${CURRENT}) )
     elif [[ $CMD == "updateartefact" ]]; then
         COMPREPLY=( $(compgen -W "$(cat $ARTEFACTS_FILE 2> /dev/null)" -- ${CURRENT}) )
+    elif [[ $CMD == "ignore" || $CMD == "unignore" ]]; then
+        COMPREPLY=( $(compgen -W "$(cat $HOSTS_FILE $SERVICES_FILE 2> /dev/null)" -- ${CURRENT}) )
     else
         COMPREPLY=( $(compgen -W "$(cat $SERVICES_FILE 2> /dev/null)" -- ${CURRENT}) )
     fi
