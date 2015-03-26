@@ -126,6 +126,8 @@ if uris:
     def is_a_reachable_or_ignored_host_uri_or_known_uri(uri):
         if cmd == 'dump':  # in case of a dump we don't care about URI validity
             return True
+        if cmd == 'ignore' and uri.startswith('host://'):
+            return True
         if uri.startswith('artefact://'):
             return True  # Artefact uris have /current or /next at the end,
                          # so just accept everything starting with artefact.
@@ -137,10 +139,10 @@ if uris:
             reachable = component.is_reachable()
             if reachable:
                 return True
-            if yadtshell.settings.ignore_unreachable_hosts:
-                return False
             if component.is_ignored:
                 return True
+            if yadtshell.settings.ignore_unreachable_hosts:
+                return False
             logger.error("%s is unreachable. Use --ignore-unreachable-hosts "
                          "to ignore this error.", uri)
             sys.exit(1)
