@@ -285,6 +285,13 @@ class AbstractHost(Component):
     def is_update_needed(self):
         pass
 
+    def ignore(self, message=None, **kwargs):
+        if not message:
+            raise ValueError('the "message" parameter is mandatory')
+
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
+        return defer.succeed(None)
+
     def unignore(self, **kwargs):
         reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
         return defer.succeed(None)
@@ -432,13 +439,6 @@ class Host(AbstractHost):
 
     def unlock(self, force=False, **kwargs):
         return self.remote_call('yadt-host-unlock', "unlock_host", force)
-
-    def ignore(self, message=None, **kwargs):
-        if not message:
-            raise ValueError('the "message" parameter is mandatory')
-
-        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
-        return defer.succeed(None)
 
     def update_attributes_after_status(self):
         self.is_locked = self.lockstate is not None
