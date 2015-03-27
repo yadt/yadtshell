@@ -170,6 +170,7 @@ class ReadonlyService(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
         self.state = yadtshell.settings.UNKNOWN
+        self.is_ignored = (isinstance(host, IgnoredHost))
 
     def immediate_status(self):
         logger.debug("Immediate status of readonly %s (no-op)" % self.uri)
