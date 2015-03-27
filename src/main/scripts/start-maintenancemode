@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e -E -u
+
+echo "$(basename $0) - lock, stop, and ignore a whole target"
+echo
+
+MESSAGE=${1:-MAINTENANCE MODE: initiated by $(whoami) on $(date --rfc-3339=seconds)}
+
+echo "Going to execute the following commands:"
+echo
+sed -n "/^yadtshell/s/^/        /;T;s#\$MESSAGE#$MESSAGE#;p" $0
+echo
+echo "Hit Ctrl-C within the next 10 seconds to abort..."
+
+for i in $(seq 1 10); do
+    echo -n .
+    sleep 1
+done
+
+yadtshell lock host://* --force -m "$MESSAGE"
+yadtshell stop service://*/* -p 666
+yadtshell ignore host://* -m "$MESSAGE"
