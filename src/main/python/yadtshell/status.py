@@ -266,6 +266,21 @@ def add_artefact(components, host, name_version, revision):
     components[artefact.revision_uri] = artefact
 
 
+def fetch_missing_hosts(ignored, components):
+    missings = filter_missing_services(components)
+    missing_deferreds = []
+    for missing in missings:
+        host = components.get("host://%s" % missing.host)
+        if not host:
+            logger.warn("%s on unknown host referenced" % missing.uri)
+            d = query_status(missing.host, components)
+            d.addCallbacks(callback=create_host, callbackArgs=[components],
+                           errback=handle_failing_status, errbackArgs=[components])
+            d.addErrback(yadtshell.twisted.report_error, logger.error)
+            missing_deferreds.append(d)
+    return defer.DeferredList(missing_deferreds, consumeErrors=True)
+
+
 def fetch_missing_services_as_readonly(ignored, components):
     missings = filter_missing_services(components)
     missing_deferreds = []
@@ -514,6 +529,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     dl.addCallback(check_responses)
     dl.addCallback(notify_collector)
     dl.addCallback(build_unified_dependencies_tree)
+    dl.addCallback(fetch_missing_hosts, components)
     dl.addCallback(fetch_missing_services_as_readonly, components)
     dl.addCallback(handle_readonly_service_states, components)
     dl.addCallback(store_status_locally, components)
