@@ -256,7 +256,7 @@ def render_readonly_services(components):
 def calc_state_string(service, icons):
     if not service:
         return icons['NA']
-    if getattr(service, 'ignored', False):
+    if getattr(service, 'ignored', False) or getattr(service, 'is_ignored', False):
         if service.is_up():
             return icons['UP_IGNORED']
         elif service.is_unknown():
