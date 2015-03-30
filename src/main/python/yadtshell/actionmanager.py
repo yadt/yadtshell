@@ -268,7 +268,7 @@ class ActionManager(object):
             self.logger.exception(ve)
             raise ve
         except Exception, ae:
-            print(str(ae))
+            # print(str(ae))
             self.logger.exception(ae)
             raise yadtshell.actions.ActionException(
                 'problem during %s %s' % (cmd, component.uri), 1, ae)
