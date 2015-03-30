@@ -1,7 +1,6 @@
 # [YADTSHELL](http://yadt-project.org)
 
 [![Build Status](https://secure.travis-ci.org/yadt/yadtshell.png?branch=master)](http://travis-ci.org/yadt/yadtshell)
-[![Build Status](https://drone.io/github.com/yadt/yadtshell/status.png)](https://drone.io/github.com/yadt/yadtshell/latest)
 [![PyPI version](https://badge.fury.io/py/yadtshell.png)](https://badge.fury.io/py/yadtshell)
 
 # try it out
