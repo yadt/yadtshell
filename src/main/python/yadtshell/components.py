@@ -27,6 +27,7 @@ import shlex
 
 from twisted.internet import reactor, task
 import twisted.internet.defer as defer
+from twisted.web.client import getPage
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
@@ -290,11 +291,30 @@ class AbstractHost(Component):
         if not message:
             raise ValueError('the "message" parameter is mandatory')
 
-        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
-        return defer.succeed(None)
+        def wait_for_result(ignored):
+            d = getPage("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
+                yadtshell.settings.ybc.host,
+                yadtshell.settings.ybc.port,
+                self.name
+            ))
+            d.addCallbacks(callback=check_status, errback=check_error)
+
+        def check_error(failure):
+            logger.warn(failure)
+            raise Exception("could not ignore %s" % self.uri)
+
+        def check_status(result):
+            return defer.succeed(result)
+
+        d = task.deferLater(reactor, 1,
+                            yadtshell.settings.ybc.send_host_change,
+                            cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
+        d.addCallback(wait_for_result)
+        return d
 
     def unignore(self, **kwargs):
-        reactor.callLater(1, yadtshell.settings.ybc.send_host_change, cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
+        reactor.callLater(1, yadtshell.settings.ybc.send_host_change,
+                          cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
         return defer.succeed(None)
 
 
