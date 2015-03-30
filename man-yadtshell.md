@@ -67,8 +67,11 @@ starts all services that had been stopped before.
 Shows the last known state of the target, does not retrieve data from hosts.
 
 * ignore *SERVICES* :
-ignores the specified services all following actions will be skipped and
+Ignores the specified services all following actions will be skipped and
 its results are always successful.
+
+* ignore *HOSTS* :
+Ignores the specified hosts and its services so that update waves will not be broken. Service status will not be shown and cannot be changed.
 
 * updateartefact *ARTEFACTS* :
 updates the specified artefacts, but _disregarding any service dependencies_.
