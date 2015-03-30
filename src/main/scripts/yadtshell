@@ -129,8 +129,7 @@ if uris:
         if cmd == 'ignore' and uri.startswith('host://'):
             return True
         if uri.startswith('artefact://'):
-            return True  # Artefact uris have /current or /next at the end,
-                         # so just accept everything starting with artefact.
+            return True  # Artefact uris end with /current or /next, so just accept everything starting with artefact.
         if uri not in components:
             logger.warning("Skipping unknown %s" % uri)
             return False
@@ -208,7 +207,8 @@ elif cmd in ['ignore', 'unignore', 'lock', 'unlock', 'updateartefact']:
     plan = create_simple_plan(cmd, uris)
     deferred = createDeferredFromPlan(plan)
 elif cmd == 'restart':
-    warning_after_error = "Do _not_ simply retry this command; for further details, see https://github.com/yadt/yadtshell/wiki/Command-Restart"
+    warning_after_error = "Do _not_ simply retry this command; " + \
+        "for further details, see https://github.com/yadt/yadtshell/wiki/Command-Restart"
     deferred = yadtshell.status()
     deferred.addCallback(
         yadtshell.restart,
