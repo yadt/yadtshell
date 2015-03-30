@@ -113,8 +113,8 @@ class Component(object):
         log_file = self.create_remote_log_filename(tag=tag)
         owner = get_user_info()['owner']
         force_flag = {False: '', True: ' --force'}[force]
-        complete_cmd = '%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s"' + \
-                       ' "yadt-command %(cmd)s%(force_flag)s" ' % locals()
+        complete_cmd = ('%(ssh_cmd)s %(host)s WHO="%(owner)s" YADT_LOG_FILE="%(log_file)s"'
+                        ' "yadt-command %(cmd)s%(force_flag)s" ') % locals()
         return complete_cmd
 
     def local_call(self, cmd, tag=None, guard=True, force=False, no_subprocess=True):
