@@ -242,7 +242,7 @@ commands_that_change_state = ['stop', 'start', 'restart',
                               'ignore', 'lock', 'unignore', 'unlock',
                               'reboot']
 if cmd in commands_that_change_state and not opts.get('no_final_status'):
-    deferred.addCallback(yadtshell.status)
+    deferred.addCallback(yadtshell.status, ignore_unreachable_hosts=True)
 
 
 def publish_result():

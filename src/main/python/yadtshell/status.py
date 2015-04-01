@@ -91,13 +91,13 @@ def query_status(component_name, components, pi=None):
     return d
 
 
-def handle_failing_status(failure, components):
+def handle_failing_status(failure, components, ignore_unreachable_hosts=False):
     if failure.value.exitCode == 127:
         logger.critical('No yadt-minion installed on remote host %s',
                         failure.value.component)
     if failure.value.exitCode == 255:
-        if yadtshell.settings.ignore_unreachable_hosts:
-            logger.warning('Cannot reach host %s; ignoring it.', failure.value.component)
+        if yadtshell.settings.ignore_unreachable_hosts or ignore_unreachable_hosts:
+            logger.warning('Cannot reach host %s; temporarily ignoring it.', failure.value.component)
             unreachable_host = yadtshell.components.UnreachableHost(
                 failure.value.component)
             components[unreachable_host.uri] = unreachable_host
@@ -514,7 +514,7 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     def query_and_initialize_host(hostname):
         deferred = query_status(hostname, components, pi)
         deferred.addCallbacks(callback=create_host, callbackArgs=[components],
-                              errback=handle_failing_status, errbackArgs=[components])
+                              errback=handle_failing_status, errbackArgs=[components, kwargs.get("ignore_unreachable_hosts")])
 
         deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
