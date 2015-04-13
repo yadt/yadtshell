@@ -14,7 +14,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Michael Gruber, Maximilien Riehl'
+__author__ = 'Tobias Hoeynck'
 
 import unittest
 import integrationtest_support
@@ -24,8 +24,7 @@ class Test (integrationtest_support.IntegrationTestSupport):
 
     def test(self):
         actual_return_code = self.execute_command(
-            'yadtshell ignore service://hostname/spameggs')
-
+            'yadtshell ignore host://badhost')
         self.assertEqual(1, actual_return_code)
 
 

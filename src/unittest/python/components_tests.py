@@ -182,6 +182,18 @@ class HostTests(unittest.TestCase):
         mock_host.remote_call.assert_called_with(
             "yadt-host-lock 'lock me!'", 'lock_host', False)
 
+    # def test_should_ignore_host(self):
+    #     mock_host = Mock(yadtshell.components.Host)
+    #     mock_host.hostname = 'foobar42.domain'
+    #     mock_host.kwargs = {'reboot_required': False}
+    #     kwargs = mock_host.kwargs
+    #     yadtshell.settings.ybc = yadtshell.settings.initialize_broadcast_client()
+    #
+    #     yadtshell.components.Host.ignore(mock_host, message='ignore me!', kwargs="{'reboot_required': False}")
+    #
+    #     mock_host.remote_call.assert_called_with(
+    #         "yadt-host-ignore 'ignore me!'", 'ignore_host', False)
+
     @patch('yadtshell.components.get_user_info')
     def test_remote_call_should_create_wrapping_command_with_adequate_environment(self, mock_lockinfo):
         mock_lockinfo.return_value = {'owner': 'badass'}
