@@ -31,11 +31,13 @@ import re
 from twisted.internet import (defer, protocol, reactor)
 from twisted.internet.defer import succeed
 from twisted.python.failure import Failure
-from twisted.web.client import getPage
+
 
 from hostexpand.HostExpander import HostExpander
 import yadtshell
+from yadtshell.rest_simple import rest_call
 from yadtshell.util import compute_dependency_scores, filter_missing_services
+
 
 logger = logging.getLogger('status')
 
@@ -81,7 +83,8 @@ def handle_ignored_status(result_or_failure, component_name, components, pi):
 
 def query_status(component_name, components, pi=None):
     short_hostname = re.sub("\\..*", "", component_name)
-    d = getPage("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
+
+    d = rest_call("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
         yadtshell.settings.ybc.host,
         yadtshell.settings.ybc.port,
         short_hostname))

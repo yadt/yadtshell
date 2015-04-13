@@ -27,10 +27,10 @@ import shlex
 
 from twisted.internet import reactor, task
 import twisted.internet.defer as defer
-from twisted.web.client import getPage
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
+from yadtshell.rest_simple import rest_call
 from yadtshell.twisted import YadtProcessProtocol
 import yadtshell
 
@@ -293,11 +293,10 @@ class AbstractHost(Component):
             raise ValueError('the "message" parameter is mandatory')
 
         def wait_for_result(ignored):
-            d = getPage("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
+            d = rest_call("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
                 yadtshell.settings.ybc.host,
                 yadtshell.settings.ybc.port,
-                self.name
-            ))
+                self.name))
             d.addCallbacks(callback=check_status, errback=check_error)
 
         def check_error(failure):
