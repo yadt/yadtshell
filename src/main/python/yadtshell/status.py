@@ -516,8 +516,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
 
     def query_and_initialize_host(hostname):
         deferred = query_status(hostname, components, pi)
-        deferred.addCallbacks(callback=create_host, callbackArgs=[components],
-                              errback=handle_failing_status, errbackArgs=[components, kwargs.get("ignore_unreachable_hosts")])
+        deferred.addCallbacks(callback=create_host,
+                              callbackArgs=[components],
+                              errback=handle_failing_status,
+                              errbackArgs=[components, kwargs.get("ignore_unreachable_hosts")])
 
         deferred.addCallback(initialize_services, components)
         deferred.addCallback(add_local_state)
