@@ -72,7 +72,7 @@ def set_properties(project):
 
     project.set_property('flake8_verbose_output', True)
     project.set_property('flake8_include_test_sources', True)
-    project.set_property('flake8_ignore', 'E501,E402,E731') # TODO @mriehl fix these
+    project.set_property('flake8_ignore', 'E501,E402,E731')  # TODO @mriehl fix these
     project.set_property('flake8_break_build', True)
 
     FROSTED_BARE_EXCEPT_WARNING = 'W101'
