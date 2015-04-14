@@ -126,7 +126,7 @@ class InfoMatrixRenderingTests(unittest.TestCase):
 
         expected_matrix = '''
 ${BG_RED}${WHITE}${BOLD}
-  foobar42 is unreachable!
+       host://foobar42 is unreachable!
 ${NORMAL}
 
   f
@@ -270,7 +270,7 @@ ${NORMAL}
 
         self.assert_in('''
 ${BG_RED}${WHITE}${BOLD}
-  foobar42 is locked by foobar
+       host://foobar42 is locked by foobar
    Reason: yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)
@@ -287,7 +287,7 @@ ${NORMAL}
 
         self.assert_in('''
 ${BG_YELLOW}${BOLD}
-  foobar42 is locked by me
+       host://foobar42 is locked by me
    Reason: yes we can (lock the host)
 ${NORMAL}
 ''', info_matrix)

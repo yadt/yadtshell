@@ -41,20 +41,20 @@ def render_red(text):
 
 def _show_host_locking_or_unreachable(host):
     if host.is_ignored:
-        print(render_yellow('\n%10s is ignored: %s' % (host.host, host.message)))
+        print(render_yellow('\n  %20s is ignored: %s' % (host.uri, host.message)))
         return
     if not host.is_reachable():
-        print(render_red('\n%10s is unreachable!\n' % (host.host)))
+        print(render_red('\n  %20s is unreachable!\n' % (host.uri)))
         return
     if host.is_locked:
         lock_owner = host.lockstate.get("owner", "Unknown")
         reason = host.lockstate.get("message", "--- no message given ---")
         if host.is_locked_by_me:
-            print(render_yellow('\n%10s is locked by me\n%10s %s\n' %
-                  (host.host, "Reason:", reason)))
+            print(render_yellow('\n  %20s is locked by me\n%10s %s\n' %
+                  (host.uri, "Reason:", reason)))
         elif host.is_locked_by_other:
-            print(render_red('\n%10s is locked by %s\n%10s %s\n' %
-                  (host.host, lock_owner, "Reason:", reason)))
+            print(render_red('\n  %20s is locked by %s\n%10s %s\n' %
+                  (host.uri, lock_owner, "Reason:", reason)))
 
 
 def _show_ignored_services(services):
@@ -62,7 +62,7 @@ def _show_ignored_services(services):
     for service in services:
         if hasattr(service, 'ignored'):
             ignored_services = True
-            print(render_yellow('\n%20s is ignored\n%10s' %
+            print(render_yellow('\n  %20s is ignored\n%10s' %
                   (service, service.ignored.get('message', 'no message'))))
 
     if ignored_services:
