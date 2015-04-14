@@ -115,7 +115,8 @@ def info(logLevel=None, full=False, components=None, **kwargs):
     for service in services:
         if getattr(service, 'service_artefact_problem', None):
             print(
-                render_red('problem with %(uri)s\n\t%(service_artefact)s: %(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service)))
+                render_red('problem with %(uri)s\n\t%(service_artefact)s:'
+                           '%(service_artefact_problem)s\n\t-> no artefact dependencies available!\n' % vars(service)))
             print()
 
     render_services_matrix(components)
@@ -248,7 +249,8 @@ def render_readonly_services(components):
         print("  %s" % hostname)
         print()
         for s in hosts[hostname]:
-            print("  %s  readonly-service %s (needed by %s)" % (calc_state_string(s, icons), s.name, " ".join(s.needed_by)))
+            print("  %s  readonly-service %s (needed by %s)" % (
+                  calc_state_string(s, icons), s.name, " ".join(s.needed_by)))
         print()
     print()
 
@@ -305,7 +307,8 @@ def _render_services_matrix(components, hosts, info_view_settings, enable_legend
     for host in hosts:
         found = components.get(host)
         if not found:
-            for c in [h for h in components.values() if type(h) is yadtshell.components.Host or type(h) is yadtshell.components.UnreachableHost]:
+            for c in [h for h in components.values()
+                      if type(h) is yadtshell.components.Host or type(h) is yadtshell.components.UnreachableHost]:
                 if getattr(c, 'hostname', None) == host:
                     found = c
                     break
@@ -469,7 +472,8 @@ def render_legend(info_view_settings):
         icons = colorize(icons)
 
     print(
-        'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' %
+        'legend: %(UP)s up(todate),accessible  %(DOWN)s down  %(UNKNOWN)s unknown'
+        '  %(UP_IGNORED)s%(DOWN_IGNORED)s%(UNKNOWN_IGNORED)s ignored (up,down,unknown)' %
         icons)
     print(
         '        %(LOCKED_BY_ME)s%(LOCKED_BY_OTHER)s locked by me/other  %(UPDATE_NEEDED)s update pending' %
