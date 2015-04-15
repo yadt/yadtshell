@@ -172,7 +172,7 @@ class ReadonlyService(Component):
     def __init__(self, host, name, settings=None):
         Component.__init__(self, yadtshell.settings.SERVICE, host, name)
         self.state = yadtshell.settings.UNKNOWN
-        self.is_ignored = (isinstance(host, IgnoredHost))
+        self.is_ignored = (isinstance(host, IgnoredHost))  # TODO what about ignored services?
 
     def immediate_status(self):
         logger.debug("Immediate status of readonly %s (no-op)" % self.uri)
@@ -189,6 +189,9 @@ class ReadonlyService(Component):
         return status_protocol.deferred
 
     def start(self):
+        if self.is_ignored:
+            return defer.succeed(0)
+
         d = self.status()
 
         def handle_error(failure):
@@ -197,6 +200,9 @@ class ReadonlyService(Component):
         return d
 
     def stop(self):
+        if self.is_ignored:
+            return defer.succeed(0)
+
         return defer.fail(RuntimeError("Not allowed to stop readonly {0}".format(self.uri)))
 
     def _retrieve_service_call(self, action):
