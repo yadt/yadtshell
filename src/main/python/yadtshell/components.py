@@ -283,7 +283,11 @@ class AbstractHost(Component):
         self.next_artefacts = []
         self.services = {}
 
+        self.reboot_required_to_activate_latest_kernel = None
+        self.reboot_required_after_next_update = None
+
         self.is_ignored = False
+        self.is_readonly = False
 
     def is_update_needed(self):
         pass

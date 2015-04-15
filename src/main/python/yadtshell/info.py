@@ -103,7 +103,6 @@ def info(logLevel=None, full=False, components=None, **kwargs):
             _render_updates_based_on_key_value_schema(components, host, full)
         else:
             _render_updates_based_on_name_schema(components, host, full)
-
     print()
 
     many_spaces = " " * 70  # TODO needs smarter algorithm for colored box
@@ -176,6 +175,8 @@ def _render_updates_based_on_name_schema(components, host, full):
 
 
 def _render_updates_based_on_key_value_schema(components, host, *args, **kwargs):
+    if host.is_readonly:
+        return
     for next_artefact_uri, old_artefact_uri in host.next_artefacts.iteritems():
         # TODO better as helper method in Uri?
         next_artefact = components[

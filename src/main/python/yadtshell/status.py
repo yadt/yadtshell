@@ -293,6 +293,7 @@ def fetch_missing_services_as_readonly(ignored, components):
     for missing in missings:
         host = components.get("host://%s" % missing.host,
                               yadtshell.components.Host(missing.host))
+        host.is_readonly = True
         readonly_service = yadtshell.components.ReadonlyService(
             host, missing.name)
         readonly_service.needed_by = missing.needed_by
@@ -408,9 +409,6 @@ def status(hosts=None, include_artefacts=True, **kwargs):
     def build_unified_dependencies_tree(ignored):
         logger.debug('building unified dependencies tree')
 
-        for component in components.values():
-            component.logger = None
-
         components._add_when_missing_ = True
         logger.debug('wiring components')
         for component in components.values():
@@ -440,6 +438,10 @@ def status(hosts=None, include_artefacts=True, **kwargs):
         compute_dependency_scores(components)
 
     def store_status_locally(ignored, components):
+        for component in components.values():
+            if hasattr(component, "logger"):
+                component.logger = None
+
         def _open_component_file(component_type):
             return open(os.path.join(yadtshell.settings.OUT_DIR, component_type), 'w')
 
