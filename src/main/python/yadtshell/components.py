@@ -537,6 +537,12 @@ class IgnoredHost(AbstractHost):
     def is_locked_by_me(self):
         return False
 
+    def lock(self, message=None, force=False, **kwargs):
+        return defer.succeed(None)
+
+    def unlock(self, force=False, **kwargs):
+        return defer.succeed(None)
+
 
 class Artefact(Component):
 
