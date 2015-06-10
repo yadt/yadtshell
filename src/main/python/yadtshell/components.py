@@ -302,33 +302,20 @@ class AbstractHost(Component):
         if not message:
             raise ValueError('the "message" parameter is mandatory')
 
-        def wait_for_result(ignored, tries_left=1):
-            d = rest_call("http://%s:%s/api/v1/hosts/%s/status-ignored" % (
-                yadtshell.settings.ybc.host,
-                yadtshell.settings.ybc.port,
-                self.name))
-            d.addCallback(check_status)
-            d.addErrback(check_error, tries_left)
-
-        def check_error(failure, tries_left):
-            if tries_left > 0:
-                logger.debug("retrying to fetch ignored status on %s, %i tries left" % (self.uri, tries_left))
-                return task.deferLater(reactor, 1, wait_for_result, tries_left - 1)
-            logger.warn(failure)
-            raise Exception("could not ignore %s" % self.uri)
-
-        def check_status(result):
-            return defer.succeed(result)
-
-        d = task.deferLater(reactor, 0,
+        task.deferLater(reactor, 1,
                             yadtshell.settings.ybc.send_host_change,
                             cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
-        d.addCallback(wait_for_result, retry_count)
+        d = defer.Deferred()
+        yadtshell.settings.ybc.wait_for_ignore_host(d, self.name, "ignored", retry_count)
+        reactor.callLater(2, d.callback, None)
         return d
 
-    def unignore(self, **kwargs):
+    def unignore(self, retry_count=3, **kwargs):
         reactor.callLater(1, yadtshell.settings.ybc.send_host_change,
                           cmd='unignore', uri=self.uri, tracking_id=yadtshell.settings.tracking_id)
+        d = defer.Deferred()
+        yadtshell.settings.ybc.wait_for_ignore_host(d, self.name, "unignored", retry_count)
+        reactor.callLater(1, d.callback, None)
         return defer.succeed(None)
 
 
