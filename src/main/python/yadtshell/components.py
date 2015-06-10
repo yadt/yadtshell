@@ -30,7 +30,6 @@ import twisted.internet.defer as defer
 
 from yadtshell.util import calculate_max_tries_for_interval_and_delay
 from yadtshell.helper import get_user_info
-from yadtshell.rest_simple import rest_call
 from yadtshell.twisted import YadtProcessProtocol
 import yadtshell
 
@@ -303,8 +302,8 @@ class AbstractHost(Component):
             raise ValueError('the "message" parameter is mandatory')
 
         task.deferLater(reactor, 1,
-                            yadtshell.settings.ybc.send_host_change,
-                            cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
+                        yadtshell.settings.ybc.send_host_change,
+                        cmd='ignore', uri=self.uri, message=message, tracking_id=yadtshell.settings.tracking_id)
         d = defer.Deferred()
         yadtshell.settings.ybc.wait_for_ignore_host(d, self.name, "ignored", retry_count)
         reactor.callLater(2, d.callback, None)
