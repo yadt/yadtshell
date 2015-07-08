@@ -54,6 +54,9 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
         handled_hosts = [h.uri for h in all_hosts]
         logger.debug('User requested update for all hosts.')
 
+    # drop all readonly hosts
+    handled_hosts = filter(lambda h: not(components[h].is_readonly), handled_hosts)
+
     hosts_with_update = set(
         [h for h in all_hosts if h.state == yadtshell.settings.UPDATE_NEEDED])
     if hosts_with_update:
@@ -101,10 +104,13 @@ def compare_versions(protocol=None, hosts=None, update_plan_post_handler=None, p
 
     # create the base rules for starting all services
     def is_a_handled_service(service):
-        is_a_service = isinstance(service, yadtshell.components.Service)
+        if isinstance(service, yadtshell.components.ReadonlyService):
+            return False
+        if not isinstance(service, yadtshell.components.Service):
+            return False
         is_on_a_handled_host = service.host_uri in handled_hosts
         is_a_stopped_service = service.uri in stopped_services
-        return is_a_service and (is_on_a_handled_host or is_a_stopped_service)
+        return is_on_a_handled_host or is_a_stopped_service
 
     all_handled_services = set([s.uri for s in components.values() if is_a_handled_service(s)])
 
