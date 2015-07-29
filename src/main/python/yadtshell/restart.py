@@ -20,7 +20,7 @@ import logging
 
 from yadtshell.actions import ActionPlan
 from yadtshell.helper import expand_hosts, glob_hosts
-from yadtshell.metalogic import metalogic, identity, apply_instructions
+from yadtshell.metalogic import metalogic, identity, apply_instructions, chop_minimal_related_chunks
 from yadtshell.settings import STOP, START, UP
 from yadtshell.util import restore_current_state, dump_action_plan, log_exceptions
 
@@ -39,20 +39,26 @@ def restart(protocol=None, uris=None, parallel=None, **kwargs):
 
     logging.debug("service uris: %s" % service_uris)
 
+    plan_all = []
     stop_plan = metalogic(STOP, uris, plan_post_handler=identity)
+    stop_plan = chop_minimal_related_chunks(stop_plan)
+    for chunk in stop_plan.actions:
+        stops = ActionPlan("stop", chunk.actions)
 
-    service_states = {}
-    for action in stop_plan.actions:
-        service_states[action.uri] = components[action.uri].state
-    logging.debug("current states: %s" % service_states)
+        service_states = {}
+        for action in chunk.actions:
+            service_states[action.uri] = components[action.uri].state
+        logging.debug("current states: %s" % service_states)
 
-    start_uris = [uri for uri, state in service_states.iteritems()
-                  if state == UP] + uris
-    start_uris = set(start_uris)
-    logging.info("restarting %s" % ", ".join(start_uris))
-    start_plan = metalogic(START, start_uris, plan_post_handler=identity)
+        start_uris = [uri for uri, state in service_states.iteritems()
+                      if state == UP]
+        start_uris = set(start_uris)
+        logging.info("restarting %s" % ", ".join(start_uris))
+        starts = metalogic(START, start_uris, plan_post_handler=identity)
 
-    plan = ActionPlan('restart', [stop_plan, start_plan], nr_workers=1)
+        plan_all.append(ActionPlan("chunk", [stops, starts], nr_workers=1))
+
+    plan = ActionPlan('restart', plan_all)
 
     for line in plan.dump(include_preconditions=True).splitlines():
         logging.info(line)
