@@ -50,7 +50,7 @@ name = 'yadtshell'
 license = 'GNU GPL v3'
 summary = 'YADT - an Augmented Deployment Tool - The Shell Part'
 url = 'https://github.com/yadt/yadtshell'
-version = '1.9.2'
+version = '1.9.3'
 
 default_task = ['clean', 'analyze', 'publish']
 
