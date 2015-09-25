@@ -195,12 +195,10 @@ def _render_updates_based_on_key_value_schema(components, host, *args, **kwargs)
 
 def highlight_differences(reference, text):
     result = []
-    for i in range(max(len(text), len(reference))):
+    for i in range(len(text)):
         if min(len(reference), len(text)) - 1 < i or text[i] != reference[i]:
             result.append('${REVERSE}')
             result.extend(text[i:])
-            if len(reference) > len(text):
-                result.extend(' ' * (len(reference) - len(text)))
             result.append('${NORMAL}')
             break
         result.append(text[i])
