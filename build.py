@@ -95,7 +95,7 @@ def set_properties(project):
 
     project.set_property('dir_dist_scripts', 'scripts')
 
-    project.get_property('distutils_commands').append('bdist_egg')
+    project.set_property('distutils_commands', ['sdist'])
     project.set_property('distutils_classifiers', [
         'Development Status :: 4 - Beta',
         'Environment :: Console',
