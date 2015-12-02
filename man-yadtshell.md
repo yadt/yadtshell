@@ -123,6 +123,9 @@ Do not query and display the *status* of the target after an action that changed
 Set a unique identifier for running commands in a session. With this option,
 it is possible to use a lock acquired by locking on another host by using the same *ID* across all commands.
 
+* --force-initial-status :
+Force an initial status before calling the command.
+
 # EXAMPLES
 
 * yadtshell status:

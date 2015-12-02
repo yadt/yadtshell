@@ -44,6 +44,7 @@ Options:
                              enabled by default)
 --no-reboot                  do not reboot servers during an update, even if needed
 --ignore-unreachable-hosts   do not fail when hosts are unreachable
+--force-initial-status       start by fetching an initial status
 --session-id SESSIONID       optional ID for session handling
 --version                    show version
 """
@@ -91,6 +92,12 @@ except SettingsError, e:
     logger.critical(e)
     sys.exit(1)
 
+def call_status():
+    import subprocess
+    if yadtshell.settings.ignore_unreachable_hosts:
+        subprocess.call(["yadtshell", "status", "--ignore-unreachable-hosts"])
+    else:
+        subprocess.call(["yadtshell", "status"])
 
 if opts.get('tracking_id'):
     yadtshell.settings.tracking_id = opts.get('tracking_id')
@@ -107,17 +114,16 @@ if opts.get('dryrun'):
 yadtshell.settings.reboot_disabled = opts.get('no_reboot')
 yadtshell.settings.ignore_unreachable_hosts = opts.get('ignore_unreachable_hosts')
 
+if opts.get('force_initial_status'):
+    call_status()
+
 if uris:
     try:
         components = yadtshell.util.restore_current_state()
     except IOError, e:
         logger.debug("an exception occured during restore_current_state: %s" % str(e))
         logger.debug("no status found, calling 'yadtshell status' implicitly")
-        import subprocess
-        if yadtshell.settings.ignore_unreachable_hosts:
-            subprocess.call(["yadtshell", "status", "--ignore-unreachable-hosts"])
-        else:
-            subprocess.call(["yadtshell", "status"])
+        call_status()
         components = yadtshell.util.restore_current_state()
 
     uris = yadtshell.helper.expand_hosts(uris)
