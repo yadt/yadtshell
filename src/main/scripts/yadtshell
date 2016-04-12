@@ -52,7 +52,9 @@ Options:
 from __future__ import print_function
 import logging
 import sys
+from warnings import filterwarnings
 
+filterwarnings('ignore', 'twisted.internet')
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
@@ -67,6 +69,7 @@ from yadtshell.broadcast import broadcast_yadtshell_call_information
 
 from docopt import docopt
 arguments = docopt(__doc__, version='${version}')
+
 
 reactor.return_code = 127
 
