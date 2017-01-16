@@ -54,7 +54,7 @@ import logging
 import sys
 from warnings import filterwarnings
 
-filterwarnings('ignore', 'twisted.internet')
+filterwarnings('ignore', module='twisted.internet')
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.task import deferLater
