@@ -68,6 +68,7 @@ VIEW_SETTINGS = {'info-view': ['matrix', 'color', 'maxcols']}
 class SettingsError(BaseException):
     pass
 
+
 logger = logging.getLogger('settings')
 
 try:
